@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { Box, Text } from 'ink';
 import { MarkdownView } from './MarkdownView.js';
 import { renderGraphAscii } from '../reader/graph.js';
@@ -21,21 +21,25 @@ interface Props {
   terminalHeight: number;
 }
 
-export function RightPanel({ workspace, selectedItem, scrollOffset, focused, terminalHeight }: Props) {
-  const contentHeight = terminalHeight - 6; // account for status bar + borders
+export const RightPanel = memo(function RightPanel({ workspace, selectedItem, scrollOffset, focused, terminalHeight }: Props) {
+  const contentHeight = terminalHeight - 6;
+
+  const borderColor = focused ? 'cyan' : 'gray';
+  const boxProps = {
+    flexDirection: 'column' as const,
+    flexGrow: 1,
+    borderStyle: 'single' as const,
+    borderColor,
+    paddingX: 2,
+    paddingY: 1,
+    overflow: 'hidden' as const,
+  };
 
   // Nothing selected — show .startup.md
   if (!selectedItem) {
     const content = workspace.startupContent ?? '(No .mdd/.startup.md found — run /mdd status to generate)';
     return (
-      <Box
-        flexDirection="column"
-        flexGrow={1}
-        borderStyle="single"
-        borderColor={focused ? 'cyan' : 'gray'}
-        paddingX={2}
-        paddingY={1}
-      >
+      <Box {...boxProps}>
         <Text color="gray" dimColor>startup context</Text>
         <Box marginTop={1} flexGrow={1}>
           <MarkdownView content={content} scrollOffset={scrollOffset} maxLines={contentHeight} />
@@ -44,18 +48,11 @@ export function RightPanel({ workspace, selectedItem, scrollOffset, focused, ter
     );
   }
 
-  // Dependency graph selected
+  // Dependency graph
   if (selectedItem.type === 'graph') {
     const ascii = renderGraphAscii(workspace.graph);
     return (
-      <Box
-        flexDirection="column"
-        flexGrow={1}
-        borderStyle="single"
-        borderColor={focused ? 'cyan' : 'gray'}
-        paddingX={2}
-        paddingY={1}
-      >
+      <Box {...boxProps}>
         <Text bold color="cyan">Dependency Graph</Text>
         {workspace.graph.brokenEdges.length > 0 && (
           <Text color="red">❌ {workspace.graph.brokenEdges.length} broken edge(s)</Text>
@@ -63,25 +60,18 @@ export function RightPanel({ workspace, selectedItem, scrollOffset, focused, ter
         {workspace.graph.riskyEdges.length > 0 && (
           <Text color="yellow">⚠️  {workspace.graph.riskyEdges.length} risky edge(s)</Text>
         )}
-        <Box marginTop={1}>
+        <Box marginTop={1} flexGrow={1}>
           <MarkdownView content={ascii} scrollOffset={scrollOffset} maxLines={contentHeight - 3} />
         </Box>
       </Box>
     );
   }
 
-  // Audit file selected
+  // Audit file
   if (selectedItem.type === 'audit' && selectedItem.audit) {
     const audit = selectedItem.audit;
     return (
-      <Box
-        flexDirection="column"
-        flexGrow={1}
-        borderStyle="single"
-        borderColor={focused ? 'cyan' : 'gray'}
-        paddingX={2}
-        paddingY={1}
-      >
+      <Box {...boxProps}>
         <Text bold color="white">{audit.filename}</Text>
         <Text color="gray">{audit.date}</Text>
         <Box marginTop={1} flexGrow={1}>
@@ -91,59 +81,42 @@ export function RightPanel({ workspace, selectedItem, scrollOffset, focused, ter
     );
   }
 
-  // Feature doc selected
+  // Feature doc
   if (selectedItem.type === 'doc' && selectedItem.doc) {
     const doc = selectedItem.doc;
     const statusColor = (STATUS_COLOR[doc.status] ?? 'gray') as any;
     const icon = driftIcon(doc);
 
     return (
-      <Box
-        flexDirection="column"
-        flexGrow={1}
-        borderStyle="single"
-        borderColor={focused ? 'cyan' : 'gray'}
-        paddingX={2}
-        paddingY={1}
-      >
-        {/* Title */}
-        <Text bold color="white">{doc.id.replace(/-/g, ' — ').replace(/(\d+) — /, '$1 — ')}</Text>
+      <Box {...boxProps}>
+        <Text bold color="white">{doc.title || doc.id}</Text>
 
-        {/* Frontmatter chips row */}
-        <Box marginTop={1} flexWrap="wrap" gap={1}>
+        <Box marginTop={1}>
           <Text color={statusColor} bold>{icon} {doc.status.toUpperCase()}</Text>
-          {doc.phase && <Text color="gray">  phase: {doc.phase}</Text>}
-          {doc.lastSynced && <Text color="gray">  synced: {doc.lastSynced}</Text>}
+          {doc.phase ? <Text color="gray">  phase: {doc.phase}</Text> : null}
+          {doc.lastSynced ? <Text color="gray">  synced: {doc.lastSynced}</Text> : null}
         </Box>
 
-        {/* Source files */}
-        {doc.sourceFiles.length > 0 && !doc.sourceFiles[0].startsWith('NOTE:') && (
-          <Box marginTop={1} flexWrap="wrap">
+        {doc.sourceFiles.length > 0 && (
+          <Box marginTop={1}>
             <Text color="gray">SOURCE  </Text>
-            {doc.sourceFiles.map(f => (
-              <Text key={f} color="cyan">  {f}</Text>
-            ))}
+            <Text color="cyan">{doc.sourceFiles.slice(0, 3).join('  ')}</Text>
           </Box>
         )}
 
-        {/* Depends on */}
         {doc.dependsOn.length > 0 && (
-          <Box marginTop={1} flexWrap="wrap">
+          <Box marginTop={1}>
             <Text color="gray">DEPENDS ON  </Text>
-            {doc.dependsOn.map(d => (
-              <Text key={d} color="yellow">  {d}</Text>
-            ))}
+            <Text color="yellow">{doc.dependsOn.join('  ')}</Text>
           </Box>
         )}
 
-        {/* Known issues */}
         {doc.knownIssues.length > 0 && (
           <Box marginTop={1}>
-            <Text color="red">KNOWN ISSUES  {doc.knownIssues.length}</Text>
+            <Text color="red">⚠  {doc.knownIssues.length} known issue{doc.knownIssues.length !== 1 ? 's' : ''}</Text>
           </Box>
         )}
 
-        {/* Drift info */}
         {doc.driftStatus === 'drifted' && doc.driftCommits.length > 0 && (
           <Box marginTop={1} flexDirection="column">
             <Text color="yellow">⚠️  Drifted — commits since last sync:</Text>
@@ -153,10 +126,7 @@ export function RightPanel({ workspace, selectedItem, scrollOffset, focused, ter
           </Box>
         )}
 
-        <Box marginTop={1} borderStyle="single" borderColor="gray" />
-
-        {/* Markdown body */}
-        <Box flexGrow={1}>
+        <Box marginTop={1} flexDirection="column" flexGrow={1}>
           <MarkdownView content={doc.body} scrollOffset={scrollOffset} maxLines={contentHeight - 8} />
         </Box>
       </Box>
@@ -164,4 +134,4 @@ export function RightPanel({ workspace, selectedItem, scrollOffset, focused, ter
   }
 
   return null;
-}
+});
