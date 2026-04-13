@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { Box, Text } from 'ink';
 import { DocItem } from './DocItem.js';
 import type { MddWorkspace, MddDoc, AuditFile } from '../types/index.js';
@@ -19,30 +19,28 @@ interface Props {
 }
 
 export function buildLeftItems(workspace: MddWorkspace): LeftPanelItem[] {
-  const items: LeftPanelItem[] = [
+  return [
     ...workspace.docs.map(doc => ({ type: 'doc' as const, doc })),
     ...workspace.audits.map(audit => ({ type: 'audit' as const, audit })),
     { type: 'graph' as const },
   ];
-  return items;
 }
 
 const AUDIT_TYPE_LABEL: Record<string, string> = {
-  'audit-report': 'AUDIT REPORT',
+  'audit-report': 'AUDIT',
   scan: 'SCAN',
-  flow: 'DATA FLOW',
+  flow: 'FLOW',
   notes: 'NOTES',
-  results: 'FIX RESULTS',
-  graph: 'DEP GRAPH',
+  results: 'RESULTS',
+  graph: 'GRAPH',
   other: 'REPORT',
 };
 
-export function LeftPanel({ workspace, selectedIndex, focused }: Props) {
+export const LeftPanel = memo(function LeftPanel({ workspace, selectedIndex, focused }: Props) {
   const items = buildLeftItems(workspace);
   const activeDocs = workspace.docs.filter(d => !d.archived);
   const archivedDocs = workspace.docs.filter(d => d.archived);
 
-  // Section header rendering
   let docHeaderShown = false;
   let auditHeaderShown = false;
   let graphHeaderShown = false;
@@ -50,10 +48,10 @@ export function LeftPanel({ workspace, selectedIndex, focused }: Props) {
   return (
     <Box
       flexDirection="column"
-      width={34}
+      width={32}
+      flexShrink={0}
       borderStyle="single"
       borderColor={focused ? 'cyan' : 'gray'}
-      flexShrink={0}
     >
       {items.map((item, i) => {
         const isSelected = i === selectedIndex;
@@ -92,12 +90,10 @@ export function LeftPanel({ workspace, selectedIndex, focused }: Props) {
                 </Box>
               )}
               <Box paddingX={1}>
-                <Text
-                  color={isSelected ? 'cyan' : 'white'}
-                  bold={isSelected}
-                >
-                  {label.padEnd(12)} <Text color="gray">{item.audit.date}</Text>
+                <Text color={isSelected ? 'cyan' : 'white'} bold={isSelected}>
+                  {label.padEnd(8)}
                 </Text>
+                <Text color="gray"> {item.audit.date}</Text>
               </Box>
             </React.Fragment>
           );
@@ -108,7 +104,7 @@ export function LeftPanel({ workspace, selectedIndex, focused }: Props) {
           return (
             <Box key="graph" paddingX={1} paddingTop={1}>
               <Text color={isSelected ? 'cyan' : 'white'} bold={isSelected}>
-                DEPENDENCY GRAPH {isSelected ? '▸' : '▸'}
+                DEP GRAPH ▸
               </Text>
             </Box>
           );
@@ -118,4 +114,4 @@ export function LeftPanel({ workspace, selectedIndex, focused }: Props) {
       })}
     </Box>
   );
-}
+});

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { Box, Text } from 'ink';
 import type { MddWorkspace } from '../types/index.js';
 
@@ -6,7 +6,20 @@ interface Props {
   workspace: MddWorkspace;
 }
 
-export function StatusBar({ workspace }: Props) {
+const Stat = memo(function Stat({ label, value, color }: { label: string; value: number; color: string }) {
+  return (
+    <Box>
+      <Text color="gray">{label} </Text>
+      <Text color={color as any} bold={value > 0}>{value}</Text>
+    </Box>
+  );
+});
+
+const Sep = memo(function Sep() {
+  return <Text color="gray">  │  </Text>;
+});
+
+export const StatusBar = memo(function StatusBar({ workspace }: Props) {
   const { docs, audits, scan, issuesTotal, gitAvailable } = workspace;
   const activeDocs = docs.filter(d => !d.archived);
 
@@ -32,20 +45,7 @@ export function StatusBar({ workspace }: Props) {
         </>
       )}
       <Box flexGrow={1} />
-      <Text color="gray"> ↑↓ navigate  ← back  r refresh  q quit</Text>
+      <Text color="gray"> ↑↓ nav  ← back  r refresh  q quit</Text>
     </Box>
   );
-}
-
-function Stat({ label, value, color }: { label: string; value: number; color: string }) {
-  return (
-    <Box>
-      <Text color="gray">{label} </Text>
-      <Text color={color as any} bold={value > 0}>{value}</Text>
-    </Box>
-  );
-}
-
-function Sep() {
-  return <Text color="gray">  │  </Text>;
-}
+});
