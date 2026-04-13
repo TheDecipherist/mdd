@@ -1,0 +1,46 @@
+{
+  "name": "mdd",
+  "version": "0.1.0",
+  "description": "Terminal dashboard for MDD (Manual-First Development) projects",
+  "type": "module",
+  "bin": {
+    "mdd": "./dist/cli.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "start": "node dist/cli.js"
+  },
+  "keywords": [
+    "mdd",
+    "manual-first-development",
+    "claude-code",
+    "terminal",
+    "dashboard",
+    "tui",
+    "developer-tools"
+  ],
+  "author": "TheDecipherist",
+  "license": "MIT",
+  "dependencies": {
+    "chalk": "^5.3.0",
+    "commander": "^12.0.0",
+    "gray-matter": "^4.0.3",
+    "ink": "^5.0.1",
+    "ink-text-input": "^6.0.0",
+    "marked": "^12.0.0",
+    "react": "^18.3.1"
+  },
+  "devDependencies": {
+    "@types/node": "^25.6.0",
+    "@types/react": "^18.3.1",
+    "typescript": "^5.4.5"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/TheDecipherist/mdd.git"
+  }
+}
