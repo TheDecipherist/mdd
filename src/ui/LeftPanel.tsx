@@ -2,7 +2,6 @@ import React, { memo } from 'react';
 import { Box, Text } from 'ink';
 import { DocItem } from './DocItem.js';
 import type { MddWorkspace, MddDoc, AuditFile } from '../types/index.js';
-import { renderGraphAscii } from '../reader/graph.js';
 
 export type LeftPanelSection = 'docs' | 'audits' | 'graph';
 
@@ -16,6 +15,7 @@ interface Props {
   workspace: MddWorkspace;
   selectedIndex: number;
   focused: boolean;
+  panelHeight: number;
 }
 
 export function buildLeftItems(workspace: MddWorkspace): LeftPanelItem[] {
@@ -36,22 +36,24 @@ const AUDIT_TYPE_LABEL: Record<string, string> = {
   other: 'REPORT',
 };
 
-export const LeftPanel = memo(function LeftPanel({ workspace, selectedIndex, focused }: Props) {
+export const LeftPanel = memo(function LeftPanel({ workspace, selectedIndex, focused, panelHeight }: Props) {
   const items = buildLeftItems(workspace);
   const activeDocs = workspace.docs.filter(d => !d.archived);
   const archivedDocs = workspace.docs.filter(d => d.archived);
 
   let docHeaderShown = false;
   let auditHeaderShown = false;
-  let graphHeaderShown = false;
 
   return (
     <Box
       flexDirection="column"
       width={32}
+      height={panelHeight}
       flexShrink={0}
+      overflow="hidden"
       borderStyle="single"
       borderColor={focused ? 'cyan' : 'gray'}
+      borderRight={false}
     >
       {items.map((item, i) => {
         const isSelected = i === selectedIndex;
@@ -100,7 +102,6 @@ export const LeftPanel = memo(function LeftPanel({ workspace, selectedIndex, foc
         }
 
         if (item.type === 'graph') {
-          if (!graphHeaderShown) graphHeaderShown = true;
           return (
             <Box key="graph" paddingX={1} paddingTop={1}>
               <Text color={isSelected ? 'cyan' : 'white'} bold={isSelected}>

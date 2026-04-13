@@ -10,9 +10,13 @@ interface Props {
   mddDir: string;
 }
 
+// Status bar: 1 content row + 2 border rows = 3 rows total
+const STATUS_BAR_ROWS = 3;
+
 export function App({ mddDir }: Props) {
   const { stdout } = useStdout();
   const terminalHeight = stdout.rows ?? 40;
+  const panelHeight = terminalHeight - STATUS_BAR_ROWS;
 
   const [workspace, setWorkspace] = useState<MddWorkspace | null>(null);
   const [selectedIndex, setSelectedIndex] = useState(0);
@@ -86,20 +90,21 @@ export function App({ mddDir }: Props) {
   const selectedItem = items[selectedIndex] ?? null;
 
   return (
-    <Box flexDirection="column" height={terminalHeight}>
+    <Box flexDirection="column" height={terminalHeight} overflow="hidden">
       <StatusBar workspace={workspace} />
-      <Box flexGrow={1}>
+      <Box flexGrow={1} height={panelHeight} overflow="hidden">
         <LeftPanel
           workspace={workspace}
           selectedIndex={selectedIndex}
           focused={leftFocused}
+          panelHeight={panelHeight}
         />
         <RightPanel
           workspace={workspace}
           selectedItem={selectedItem}
           scrollOffset={scrollOffset}
           focused={!leftFocused}
-          terminalHeight={terminalHeight}
+          panelHeight={panelHeight}
         />
       </Box>
     </Box>
