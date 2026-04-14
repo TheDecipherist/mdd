@@ -1,11 +1,14 @@
 {
-  "name": "mdd",
-  "version": "0.1.0",
+  "name": "mdd-tui",
+  "version": "0.2.0",
   "description": "Terminal dashboard for MDD (Manual-First Development) projects",
   "type": "module",
   "bin": {
     "mdd": "./dist/cli.js"
   },
+  "files": [
+    "dist/"
+  ],
   "scripts": {
     "build": "tsc",
     "dev": "tsc --watch",

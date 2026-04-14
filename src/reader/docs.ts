@@ -64,7 +64,15 @@ function parseDocFile(filepath: string, filename: string, archived: boolean): Md
 
 function toStringArray(value: unknown): string[] {
   if (!value) return [];
-  if (Array.isArray(value)) return value.map(String).filter(Boolean);
+  if (Array.isArray(value)) {
+    return value.map(item => {
+      if (item == null) return '';
+      if (typeof item !== 'object') return String(item);
+      // YAML parsed an object instead of a string — extract the first key as the ID
+      const keys = Object.keys(item as object);
+      return keys.length > 0 ? keys[0] : JSON.stringify(item);
+    }).filter(Boolean);
+  }
   if (typeof value === 'string') return [value].filter(Boolean);
   return [];
 }

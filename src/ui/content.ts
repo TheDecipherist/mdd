@@ -3,8 +3,84 @@ import { renderGraphAscii } from '../reader/graph.js';
 
 // ── Blessed tag escaping ────────────────────────────────────────────────────
 
+// Wraps arbitrary text so blessed never interprets {} as tags
 function escapeContent(text: string): string {
-  return text.replace(/\{/g, '\\{').replace(/\}/g, '\\}');
+  if (!text) return '';
+  return `{escape}${text}{/escape}`;
+}
+
+// ── Markdown table renderer ─────────────────────────────────────────────────
+
+function parseTableRow(line: string): string[] {
+  const parts = line.split('|');
+  const start = parts[0].trim() === '' ? 1 : 0;
+  const end = parts[parts.length - 1].trim() === '' ? parts.length - 1 : parts.length;
+  return parts.slice(start, end).map(c => c.trim());
+}
+
+// Visual width of a cell: strip markdown span markers (**bold**, `code`)
+// so padding calculations match what actually renders on screen
+function cellVisualWidth(cell: string): number {
+  return cell
+    .replace(/\*\*([^*]+)\*\*/g, '$1')
+    .replace(/`([^`]+)`/g, '$1')
+    .length;
+}
+
+function renderTable(tableLines: string[]): string {
+  if (tableLines.length === 0) return '';
+
+  const allRows = tableLines.map(parseTableRow);
+  const sepIdx = allRows.findIndex(row =>
+    row.length > 0 && row.every(cell => /^[-: ]+$/.test(cell) && cell.includes('-'))
+  );
+  const contentRows = allRows
+    .filter((_, i) => i !== sepIdx)
+    .filter(row => row.some(cell => cell.length > 0));  // drop blank spacer rows
+  if (contentRows.length === 0) {
+    return tableLines.map(l => `{gray-fg}${escapeContent(l)}{/gray-fg}`).join('\n');
+  }
+
+  const colCount = Math.max(...contentRows.map(r => r.length));
+  const norm = contentRows.map(row => {
+    const r = [...row];
+    while (r.length < colCount) r.push('');
+    return r;
+  });
+
+  // Use visual width so backtick/bold markers don't inflate column widths
+  const colWidths = Array.from({ length: colCount }, (_, i) =>
+    Math.max(1, ...norm.map(row => cellVisualWidth(row[i] || '')))
+  );
+
+  const hLine = (l: string, sep: string, r: string): string =>
+    `{gray-fg}${l + colWidths.map(w => '─'.repeat(w + 2)).join(sep) + r}{/gray-fg}`;
+
+  const buildRow = (cells: string[], isHeader: boolean): string => {
+    const parts = cells.map((cell, i) => {
+      const vis = cellVisualWidth(cell);
+      const pad = colWidths[i] - vis;
+      const content = renderInline(cell) + (pad > 0 ? escapeContent(' '.repeat(pad)) : '');
+      return isHeader
+        ? `{bold}{white-fg} ${content} {/white-fg}{/bold}`
+        : `{white-fg} ${content} {/white-fg}`;
+    });
+    return `{gray-fg}│{/gray-fg}` + parts.join(`{gray-fg}│{/gray-fg}`) + `{gray-fg}│{/gray-fg}`;
+  };
+
+  const hasHeader = sepIdx !== -1;
+  const out: string[] = [];
+  out.push(hLine('┌', '┬', '┐'));
+
+  norm.forEach((row, idx) => {
+    out.push(buildRow(row, hasHeader && idx === 0));
+    if (hasHeader && idx === 0 && norm.length > 1) {
+      out.push(hLine('├', '┼', '┤'));
+    }
+  });
+
+  out.push(hLine('└', '┴', '┘'));
+  return out.join('\n');
 }
 
 // ── Markdown → blessed tags ─────────────────────────────────────────────────
@@ -13,9 +89,18 @@ export function renderMarkdown(raw: string): string {
   const lines = raw.split('\n');
   const result: string[] = [];
   let inFence = false;
+  let tableBuffer: string[] = [];
+
+  function flushTable(): void {
+    if (tableBuffer.length > 0) {
+      result.push(renderTable(tableBuffer));
+      tableBuffer = [];
+    }
+  }
 
   for (const line of lines) {
     if (line.trimStart().startsWith('```')) {
+      flushTable();
       inFence = !inFence;
       result.push(`{gray-fg}${escapeContent(line)}{/gray-fg}`);
       continue;
@@ -26,40 +111,50 @@ export function renderMarkdown(raw: string): string {
       continue;
     }
 
+    if (line.startsWith('|')) {
+      tableBuffer.push(line);
+      continue;
+    }
+
+    flushTable();
+
     if (line.startsWith('# ')) {
-      const text = escapeContent(line.slice(2));
-      result.push(`{bold}{white-fg}${text}{/white-fg}{/bold}`);
+      result.push(`{bold}{white-fg}${renderInline(line.slice(2))}{/white-fg}{/bold}`);
     } else if (line.startsWith('## ')) {
-      const text = escapeContent(line.slice(3));
-      result.push(`{bold}{cyan-fg}${text}{/cyan-fg}{/bold}`);
+      result.push(`{bold}{cyan-fg}${renderInline(line.slice(3))}{/cyan-fg}{/bold}`);
     } else if (line.startsWith('### ')) {
-      const text = escapeContent(line.slice(4));
-      result.push(`{bold}{yellow-fg}${text}{/yellow-fg}{/bold}`);
+      result.push(`{bold}{yellow-fg}${renderInline(line.slice(4))}{/yellow-fg}{/bold}`);
+    } else if (line.startsWith('#### ')) {
+      result.push(`{bold}{green-fg}${renderInline(line.slice(5))}{/green-fg}{/bold}`);
     } else if (/^[-*] /.test(line)) {
-      const text = escapeContent(line.slice(2));
-      // Apply inline backtick handling to bullets
-      result.push(`{white-fg}• ${renderInline(text)}{/white-fg}`);
+      result.push(`{white-fg}• ${renderInline(line.slice(2))}{/white-fg}`);
     } else if (/^\d+\. /.test(line)) {
-      const text = escapeContent(line.replace(/^\d+\. /, ''));
-      result.push(`{white-fg}${renderInline(text)}{/white-fg}`);
-    } else if (line.startsWith('|')) {
-      result.push(`{gray-fg}${escapeContent(line)}{/gray-fg}`);
+      result.push(`{white-fg}${renderInline(line.replace(/^\d+\. /, ''))}{/white-fg}`);
     } else if (line.trim() === '') {
       result.push('');
     } else {
-      result.push(`{white-fg}${renderInline(escapeContent(line))}{/white-fg}`);
+      result.push(`{white-fg}${renderInline(line)}{/white-fg}`);
     }
   }
 
+  flushTable();
   return result.join('\n');
 }
 
-function renderInline(text: string): string {
-  // Replace inline backtick content with cyan (text already escaped)
-  // We need to handle the escaped braces carefully here
-  return text.replace(/`([^`]+)`/g, (_match, code) => {
-    return `{cyan-fg}${code}{/cyan-fg}`;
-  });
+// Parses raw (unescaped) text for **bold** and `code`, escaping plain segments
+function renderInline(raw: string): string {
+  const out: string[] = [];
+  const re = /\*\*([^*]+)\*\*|`([^`]+)`/g;
+  let last = 0;
+  let m: RegExpExecArray | null;
+  while ((m = re.exec(raw)) !== null) {
+    if (m.index > last) out.push(escapeContent(raw.slice(last, m.index)));
+    if (m[1] !== undefined) out.push(`{bold}${escapeContent(m[1])}{/bold}`);
+    else                    out.push(`{cyan-fg}${escapeContent(m[2])}{/cyan-fg}`);
+    last = m.index + m[0].length;
+  }
+  if (last < raw.length) out.push(escapeContent(raw.slice(last)));
+  return out.join('');
 }
 
 // ── Left panel list items ────────────────────────────────────────────────────

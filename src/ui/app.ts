@@ -131,10 +131,6 @@ export function runApp(
       border: { fg: 'cyan' },
       selected: { bg: 'blue', fg: 'white' },
     },
-    scrollbar: {
-      ch: '│',
-      style: { fg: 'gray' },
-    },
   });
 
   // ── Right panel ─────────────────────────────────────────────────────────────
@@ -154,8 +150,8 @@ export function runApp(
     padding: { left: 1, right: 1, top: 0, bottom: 0 },
     content: buildStartupContent(ws),
     scrollbar: {
-      ch: '│',
-      style: { fg: 'gray' },
+      ch: ' ',
+      style: { bg: 'gray' },
     },
   });
 
@@ -202,6 +198,7 @@ export function runApp(
       rightBox.setContent(contentForEntry(entry, ws));
       rightBox.scrollTo(0);
     }
+    screen.realloc();
     screen.render();
   }
 
@@ -223,6 +220,7 @@ export function runApp(
   screen.key(['up', 'k'], () => {
     if (focusRight) {
       rightBox.scroll(-3);
+      screen.realloc();
       screen.render();
     } else {
       moveSelection(-1);
@@ -233,10 +231,43 @@ export function runApp(
   screen.key(['down', 'j'], () => {
     if (focusRight) {
       rightBox.scroll(3);
+      screen.realloc();
       screen.render();
     } else {
       moveSelection(1);
       updateSelection();
+    }
+  });
+
+  screen.key(['pageup'], () => {
+    if (focusRight) {
+      rightBox.scroll(-(rightBox.height as number - 2));
+      screen.realloc();
+      screen.render();
+    }
+  });
+
+  screen.key(['pagedown'], () => {
+    if (focusRight) {
+      rightBox.scroll(rightBox.height as number - 2);
+      screen.realloc();
+      screen.render();
+    }
+  });
+
+  screen.key(['home'], () => {
+    if (focusRight) {
+      rightBox.scrollTo(0);
+      screen.realloc();
+      screen.render();
+    }
+  });
+
+  screen.key(['end'], () => {
+    if (focusRight) {
+      rightBox.scrollTo(rightBox.getScrollHeight());
+      screen.realloc();
+      screen.render();
     }
   });
 
