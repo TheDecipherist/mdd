@@ -119,7 +119,7 @@ export function runApp(
   const leftBox = blessed.list({
     top: 3,
     left: 0,
-    width: 34,
+    width: 33,
     bottom: 0,
     tags: true,
     keys: false,
@@ -206,6 +206,7 @@ export function runApp(
     focusRight = false;
     leftBox.style.border.fg = 'cyan';
     rightBox.style.border.fg = 'gray';
+    screen.realloc();
     screen.render();
   }
 
@@ -213,6 +214,7 @@ export function runApp(
     focusRight = true;
     leftBox.style.border.fg = 'gray';
     rightBox.style.border.fg = 'cyan';
+    screen.realloc();
     screen.render();
   }
 
