@@ -1,6 +1,6 @@
 {
   "name": "mdd-tui",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "Terminal dashboard for MDD (Manual-First Development) projects",
   "type": "module",
   "bin": {

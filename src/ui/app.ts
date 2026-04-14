@@ -119,7 +119,7 @@ export function runApp(
   const leftBox = blessed.list({
     top: 3,
     left: 0,
-    width: 33,
+    width: 34,
     bottom: 0,
     tags: true,
     keys: false,
