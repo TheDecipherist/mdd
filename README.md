@@ -1,6 +1,6 @@
 # mdd-tui
 
-A terminal dashboard for [MDD (Manual-First Development)](https://github.com/TheDecipherist/mdd) projects.
+A terminal dashboard for [MDD (Manual-First Development)](https://github.com/TheDecipherist/claude-code-mastery-project-starter-kit) projects created by the starter kit.
 
 Reads your `.mdd/` directory and renders a live, navigable TUI showing doc health, drift status, audit reports, and full markdown content — without leaving the terminal.
 
