@@ -123,7 +123,6 @@ describe('readInitiatives', () => {
       expect(result[0].id).toBe('auth-system');
       expect(result[0].title).toBe('Auth System');
       expect(result[0].status).toBe('active');
-      expect.fail('Not implemented — MDD skeleton');
     });
 
     it('should parse version and hash from frontmatter', () => {
@@ -137,7 +136,6 @@ describe('readInitiatives', () => {
       expect(result[0].version).toBe(1);
       expect(result[0].hash).toBe('abc123');
       expect(result[0].created).toBe('2026-04-16');
-      expect.fail('Not implemented — MDD skeleton');
     });
 
     it('should extract open product questions preserving checkbox state', () => {
@@ -151,7 +149,6 @@ describe('readInitiatives', () => {
       expect(result[0].openProductQuestions).toHaveLength(2);
       expect(result[0].openProductQuestions[0]).toContain('[x]');
       expect(result[0].openProductQuestions[1]).toContain('[ ]');
-      expect.fail('Not implemented — MDD skeleton');
     });
   });
 
@@ -168,7 +165,6 @@ describe('readInitiatives', () => {
       expect(result[0].waves).toHaveLength(1);
       expect(result[0].waves[0].id).toBe('auth-system-wave-1');
       expect(result[0].waves[0].initiative).toBe('auth-system');
-      expect.fail('Not implemented — MDD skeleton');
     });
 
     it('should parse wave features from the feature table', () => {
@@ -185,7 +181,6 @@ describe('readInitiatives', () => {
       expect(wave.features[0].slug).toBe('auth-signup');
       expect(wave.features[1].slug).toBe('auth-login');
       expect(wave.features[1].dependsOn).toContain('auth-signup');
-      expect.fail('Not implemented — MDD skeleton');
     });
 
     it('should parse wave demo state', () => {
@@ -198,7 +193,6 @@ describe('readInitiatives', () => {
 
       // Assert
       expect(result[0].waves[0].demoState).toBe('User signs up and logs in.');
-      expect.fail('Not implemented — MDD skeleton');
     });
   });
 
@@ -212,7 +206,6 @@ describe('readInitiatives', () => {
 
       // Assert — no initiatives returned, orphan wave is silently skipped
       expect(result).toHaveLength(0);
-      expect.fail('Not implemented — MDD skeleton');
     });
   });
 
@@ -229,7 +222,6 @@ describe('readInitiatives', () => {
       expect(result).toHaveLength(2);
       expect(result.map((i: Initiative) => i.id)).toContain('auth-system');
       expect(result.map((i: Initiative) => i.id)).toContain('old-system');
-      expect.fail('Not implemented — MDD skeleton');
     });
 
     it('should include cancelled initiatives in results', () => {
@@ -242,7 +234,6 @@ describe('readInitiatives', () => {
       // Assert
       expect(result).toHaveLength(1);
       expect(result[0].status).toBe('cancelled');
-      expect.fail('Not implemented — MDD skeleton');
     });
   });
 
@@ -258,7 +249,6 @@ describe('readInitiatives', () => {
       // Assert — broken file skipped, valid file returned
       expect(result).toHaveLength(1);
       expect(result[0].id).toBe('auth-system');
-      expect.fail('Not implemented — MDD skeleton');
     });
   });
 });
