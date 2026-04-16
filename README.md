@@ -30,8 +30,9 @@ mdd dashboard
 |-----|--------|
 | `↑` / `k` | Move up in left panel / scroll up in right panel |
 | `↓` / `j` | Move down in left panel / scroll down in right panel |
-| `→` / `Enter` | Focus right panel |
-| `←` / `Esc` | Focus left panel |
+| `→` / `l` / `Enter` | Focus right panel (or expand initiative) |
+| `←` / `h` / `Esc` | Focus left panel |
+| `i` | Jump to first initiative in the list |
 | `Page Up` | Scroll right panel up one page |
 | `Page Down` | Scroll right panel down one page |
 | `Home` | Jump to top of right panel |
@@ -39,26 +40,39 @@ mdd dashboard
 | `r` | Refresh workspace |
 | `q` / `Ctrl+C` | Quit |
 
+**Initiative expand/collapse** — pressing `Enter` or `→` on an initiative row toggles its waves open or closed. When expanded, each wave appears as an indented sub-row showing status icon and feature progress (e.g. `2/3`).
+
 ---
 
 ## What it shows
 
-**Left panel** — scrollable list of all feature docs and audit reports with drift status icons:
+**Left panel** — scrollable list with three sections (shown in order):
 
-| Icon | Meaning |
-|------|---------|
-| ✅ | In sync with source files |
-| ⚠️ | Drifted — commits since last sync |
-| ❌ | Broken — source files missing |
-| ❓ | Untracked — no source files defined |
+1. **INITIATIVES** *(shown only if `.mdd/initiatives/` exists)* — collapsible tree of initiatives and their waves:
+   - `▸ Initiative Title  active` — collapsed; press Enter to expand
+   - `▾ Initiative Title  active` — expanded; child waves shown below with progress
+   - Wave rows: `● Wave Title 1/3` (active), `✓ Wave Title 3/3` (complete), `○ Wave Title 0/2` (planned)
+
+2. **FEATURE DOCS** — all feature docs with drift status icons:
+
+   | Icon | Meaning |
+   |------|---------|
+   | ✅ | In sync with source files |
+   | ⚠️ | Drifted — commits since last sync |
+   | ❌ | Broken — source files missing |
+   | ❓ | Untracked — no source files defined |
+
+3. **AUDIT REPORTS** *(shown only if audits exist)*
+
+4. **DEP GRAPH** — click to view the dependency graph
 
 **Right panel** — full detail view for the selected item:
-- Status chips (draft / in_progress / complete)
-- Source files, dependencies, known issues
-- Drift commits since last sync
-- Full markdown body with rendered headings, tables, code, and bold
+- **Initiative**: status, overview, open product questions (unchecked ones highlighted), wave list with progress
+- **Wave**: demo state, feature table with status and dependencies, open research items, next-action hint
+- **Feature doc**: status chips, source files, dependencies, known issues, drift commits, full markdown body
+- **Audit report**: full markdown content
 
-**Status bar** — live counts: DOCS · IN SYNC · DRIFTED · BROKEN · UNTRACKED · ISSUES · AUDITS
+**Status bar** — live counts: DOCS · IN SYNC · DRIFTED · BROKEN · UNTRACKED · ISSUES · AUDITS · INITIATIVES · WAVES (active)
 
 ---
 
