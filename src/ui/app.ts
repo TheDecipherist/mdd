@@ -1,5 +1,5 @@
 import blessed from 'blessed';
-import type { MddWorkspace, MddDoc, AuditFile } from '../types/index.js';
+import type { MddWorkspace, MddDoc, AuditFile, Initiative, Wave } from '../types/index.js';
 import {
   buildDocListItem,
   buildSectionHeader,
@@ -9,6 +9,8 @@ import {
   buildAuditContent,
   buildGraphContent,
   buildStatusBar,
+  buildInitiativeContent,
+  buildWaveContent,
 } from './content.js';
 
 // ── List item descriptor ──────────────────────────────────────────────────────
@@ -17,7 +19,9 @@ type ListItemKind =
   | { kind: 'header' }
   | { kind: 'doc'; doc: MddDoc }
   | { kind: 'audit'; audit: AuditFile }
-  | { kind: 'graph' };
+  | { kind: 'graph' }
+  | { kind: 'initiative'; initiative: Initiative; expanded: boolean }
+  | { kind: 'wave'; wave: Wave };
 
 interface ListEntry {
   label: string;
@@ -26,8 +30,47 @@ interface ListEntry {
 
 // ── Build left panel entries ──────────────────────────────────────────────────
 
+// Track which initiatives are expanded — keyed by initiative id
+const expandedInitiatives = new Set<string>();
+
 function buildEntries(ws: MddWorkspace): ListEntry[] {
   const entries: ListEntry[] = [];
+
+  // Initiatives section (shown first if any exist)
+  const initiatives = ws.initiatives ?? [];
+  if (initiatives.length > 0) {
+    entries.push({
+      label: buildSectionHeader('INITIATIVES', initiatives.length),
+      item: { kind: 'header' },
+    });
+    for (const initiative of initiatives) {
+      const expanded = expandedInitiatives.has(initiative.id);
+      const icon = expanded ? '▾' : '▸';
+      const statusColor = initiative.status === 'active' ? 'green-fg'
+        : initiative.status === 'complete' ? 'gray-fg'
+        : initiative.status === 'cancelled' ? 'red-fg'
+        : 'yellow-fg';
+      entries.push({
+        label: ` {white-fg}${icon} ${initiative.title}{/white-fg}  {${statusColor}}${initiative.status}{/${statusColor}}`,
+        item: { kind: 'initiative', initiative, expanded },
+      });
+      if (expanded) {
+        for (const wave of initiative.waves) {
+          const wColor = wave.status === 'active' ? 'green-fg'
+            : wave.status === 'complete' ? 'gray-fg'
+            : 'yellow-fg';
+          const wIcon = wave.status === 'complete' ? '✓' : wave.status === 'active' ? '●' : '○';
+          const done = wave.features.filter(f => f.waveStatus === 'complete').length;
+          const total = wave.features.length;
+          const progress = total > 0 ? ` ${done}/${total}` : '';
+          entries.push({
+            label: `   {${wColor}}${wIcon} ${wave.title}${progress}{/${wColor}}`,
+            item: { kind: 'wave', wave },
+          });
+        }
+      }
+    }
+  }
 
   const activeDocs = ws.docs.filter(d => !d.archived);
   const archivedDocs = ws.docs.filter(d => d.archived);
@@ -84,6 +127,12 @@ function contentForEntry(entry: ListEntry, ws: MddWorkspace): string {
   }
   if (item.kind === 'graph') {
     return buildGraphContent(ws.graph);
+  }
+  if (item.kind === 'initiative') {
+    return buildInitiativeContent(item.initiative);
+  }
+  if (item.kind === 'wave') {
+    return buildWaveContent(item.wave);
   }
   return buildStartupContent(ws);
 }
@@ -274,7 +323,31 @@ export function runApp(
   });
 
   screen.key(['right', 'l', 'enter'], () => {
+    // If selected item is an initiative, toggle expand/collapse instead of focusing right
+    const entry = entries[selectedIndex];
+    if (entry?.item.kind === 'initiative') {
+      const id = entry.item.initiative.id;
+      if (expandedInitiatives.has(id)) {
+        expandedInitiatives.delete(id);
+      } else {
+        expandedInitiatives.add(id);
+      }
+      entries = buildEntries(ws);
+      populateList();
+      updateSelection();
+      return;
+    }
     setFocusRight();
+  });
+
+  // i — jump to first initiative in the list
+  screen.key(['i'], () => {
+    const idx = entries.findIndex(e => e.item.kind === 'initiative');
+    if (idx >= 0) {
+      selectedIndex = idx;
+      updateSelection();
+      setFocusLeft();
+    }
   });
 
   screen.key(['left', 'h', 'escape'], () => {
