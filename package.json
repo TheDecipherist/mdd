@@ -12,7 +12,9 @@
   "scripts": {
     "build": "tsc",
     "dev": "tsc --watch",
-    "start": "node dist/cli.js"
+    "start": "node dist/cli.js",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "keywords": [
     "mdd",
@@ -35,7 +37,8 @@
   "devDependencies": {
     "@types/blessed": "^0.1.27",
     "@types/node": "^25.6.0",
-    "typescript": "^5.4.5"
+    "typescript": "^5.4.5",
+    "vitest": "^4.1.4"
   },
   "engines": {
     "node": ">=18.0.0"
