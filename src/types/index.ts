@@ -1,4 +1,42 @@
 export type DriftStatus = 'in-sync' | 'drifted' | 'broken' | 'untracked';
+export type WaveStatus = 'planned' | 'active' | 'complete';
+export type InitiativeStatus = 'planned' | 'active' | 'complete' | 'cancelled';
+
+export interface WaveFeature {
+  number: number;
+  slug: string;
+  docPath: string | null;    // null if doc not yet created
+  waveStatus: WaveStatus;
+  dependsOn: string[];       // feature slugs
+}
+
+export interface Wave {
+  filename: string;
+  id: string;
+  title: string;
+  initiative: string;
+  initiativeVersion: number;
+  status: WaveStatus;
+  dependsOn: string | null;  // wave id or null
+  demoState: string;
+  created: string;
+  hash: string;
+  features: WaveFeature[];
+  openResearch: string[];
+}
+
+export interface Initiative {
+  filename: string;
+  id: string;
+  title: string;
+  status: InitiativeStatus;
+  version: number;
+  hash: string;
+  created: string;
+  overview: string;
+  openProductQuestions: string[];  // raw checkbox lines
+  waves: Wave[];
+}
 export type DocStatus = 'draft' | 'in_progress' | 'complete' | 'deprecated';
 
 export interface MddDoc {
@@ -57,4 +95,5 @@ export interface MddWorkspace {
   scan: ScanSummary;
   issuesTotal: number;
   gitAvailable: boolean;
+  initiatives: Initiative[];
 }

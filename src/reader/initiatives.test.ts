@@ -2,6 +2,7 @@ import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { mkdirSync, writeFileSync, rmSync } from 'fs';
 import { join } from 'path';
 import { tmpdir } from 'os';
+import type { Initiative } from '../types/index.js';
 import { readInitiatives } from './initiatives.js';
 
 // ── Test fixtures ──────────────────────────────────────────────────────────────
@@ -226,8 +227,8 @@ describe('readInitiatives', () => {
 
       // Assert
       expect(result).toHaveLength(2);
-      expect(result.map(i => i.id)).toContain('auth-system');
-      expect(result.map(i => i.id)).toContain('old-system');
+      expect(result.map((i: Initiative) => i.id)).toContain('auth-system');
+      expect(result.map((i: Initiative) => i.id)).toContain('old-system');
       expect.fail('Not implemented — MDD skeleton');
     });
 
