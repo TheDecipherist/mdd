@@ -61,7 +61,6 @@ describe('buildInitiativeContent', () => {
     // Assert
     expect(result).toContain('Auth System');
     expect(result).toContain('active');
-    expect.fail('Not implemented — MDD skeleton');
   });
 
   it('should display wave count and progress', () => {
@@ -71,7 +70,6 @@ describe('buildInitiativeContent', () => {
     // Assert — "1 wave" visible, wave title shown
     expect(result).toContain('Wave 1');
     expect(result).toContain('Auth Foundation');
-    expect.fail('Not implemented — MDD skeleton');
   });
 
   it('should highlight unchecked product questions in red', () => {
@@ -81,7 +79,6 @@ describe('buildInitiativeContent', () => {
     // Assert — unchecked question highlighted, checked one not
     expect(result).toContain('Session storage');
     expect(result).toContain('red-fg');
-    expect.fail('Not implemented — MDD skeleton');
   });
 
   it('should show overview text', () => {
@@ -90,7 +87,6 @@ describe('buildInitiativeContent', () => {
 
     // Assert
     expect(result).toContain('Handles user authentication');
-    expect.fail('Not implemented — MDD skeleton');
   });
 });
 
@@ -104,7 +100,6 @@ describe('buildWaveContent', () => {
     // Assert
     expect(result).toContain('Wave 1: Auth Foundation');
     expect(result).toContain('User signs up and logs in.');
-    expect.fail('Not implemented — MDD skeleton');
   });
 
   it('should display each feature with its status', () => {
@@ -116,7 +111,6 @@ describe('buildWaveContent', () => {
     expect(result).toContain('auth-login');
     expect(result).toContain('planned');
     expect(result).toContain('active');
-    expect.fail('Not implemented — MDD skeleton');
   });
 
   it('should show feature progress fraction', () => {
@@ -125,7 +119,6 @@ describe('buildWaveContent', () => {
 
     // Assert
     expect(result).toMatch(/0.*\/.*2|0 of 2/);
-    expect.fail('Not implemented — MDD skeleton');
   });
 
   it('should show open research items', () => {
@@ -134,7 +127,6 @@ describe('buildWaveContent', () => {
 
     // Assert
     expect(result).toContain('Which JWT library');
-    expect.fail('Not implemented — MDD skeleton');
   });
 
   it('should suggest next action for active wave', () => {
@@ -144,7 +136,6 @@ describe('buildWaveContent', () => {
     // Assert — next action hint visible
     expect(result).toContain('plan-execute');
     expect(result).toContain('auth-system-wave-1');
-    expect.fail('Not implemented — MDD skeleton');
   });
 });
 
@@ -158,7 +149,6 @@ describe('buildStatusBar — initiatives', () => {
     // Assert
     expect(result).toContain('INITIATIVES');
     expect(result).toContain('1');
-    expect.fail('Not implemented — MDD skeleton');
   });
 
   it('should show active wave count in status bar', () => {
@@ -167,7 +157,6 @@ describe('buildStatusBar — initiatives', () => {
 
     // Assert — 1 active wave visible
     expect(result).toContain('WAVES');
-    expect.fail('Not implemented — MDD skeleton');
   });
 
   it('should show "No active initiatives" when none exist', () => {
@@ -176,7 +165,6 @@ describe('buildStatusBar — initiatives', () => {
 
     // Assert
     expect(result).toContain('No active initiatives');
-    expect.fail('Not implemented — MDD skeleton');
   });
 
   it('should not show initiative segment when initiatives array is absent', () => {
@@ -188,6 +176,5 @@ describe('buildStatusBar — initiatives', () => {
 
     // Assert — no crash, no initiative segment
     expect(result).not.toContain('INITIATIVES');
-    expect.fail('Not implemented — MDD skeleton');
   });
 });

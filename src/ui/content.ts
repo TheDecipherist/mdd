@@ -1,4 +1,4 @@
-import type { MddDoc, AuditFile, MddWorkspace, DependencyGraph } from '../types/index.js';
+import type { MddDoc, AuditFile, MddWorkspace, DependencyGraph, Initiative, Wave } from '../types/index.js';
 import { renderGraphAscii } from '../reader/graph.js';
 
 // ── Blessed tag escaping ────────────────────────────────────────────────────
@@ -337,13 +337,14 @@ export function buildGraphContent(graph: DependencyGraph): string {
 export function buildStatusBar(ws: MddWorkspace): string {
   const { scan, docs, audits, issuesTotal } = ws;
   const total = docs.length;
+  const initiatives = ws.initiatives ?? [];
 
   const driftedColor = scan.drifted > 0 ? 'yellow-fg' : 'gray-fg';
   const brokenColor = scan.broken > 0 ? 'red-fg' : 'gray-fg';
   const untrackedColor = scan.untracked > 0 ? 'yellow-fg' : 'gray-fg';
   const issuesColor = issuesTotal > 0 ? 'yellow-fg' : 'gray-fg';
 
-  return [
+  const segments = [
     `{white-fg}DOCS {bold}${total}{/bold}{/white-fg}`,
     `{gray-fg}IN SYNC {bold}${scan.inSync}{/bold}{/gray-fg}`,
     `{${driftedColor}}DRIFTED {bold}${scan.drifted}{/bold}{/${driftedColor}}`,
@@ -351,5 +352,118 @@ export function buildStatusBar(ws: MddWorkspace): string {
     `{${untrackedColor}}UNTRACKED {bold}${scan.untracked}{/bold}{/${untrackedColor}}`,
     `{${issuesColor}}ISSUES {bold}${issuesTotal}{/bold}{/${issuesColor}}`,
     `{gray-fg}AUDITS {bold}${audits.length}{/bold}{/gray-fg}`,
-  ].join('  {gray-fg}│{/gray-fg}  ');
+  ];
+
+  if (initiatives.length > 0) {
+    const activeCount = initiatives.filter(i => i.status === 'active').length;
+    const activeWaves = initiatives
+      .flatMap(i => i.waves)
+      .filter(w => w.status === 'active').length;
+    segments.push(`{cyan-fg}INITIATIVES {bold}${activeCount}{/bold}{/cyan-fg}`);
+    if (activeWaves > 0) {
+      segments.push(`{cyan-fg}WAVES {bold}${activeWaves}{/bold} active{/cyan-fg}`);
+    }
+  } else {
+    segments.push(`{gray-fg}No active initiatives{/gray-fg}`);
+  }
+
+  return segments.join('  {gray-fg}│{/gray-fg}  ');
+}
+
+// ── Initiative content ────────────────────────────────────────────────────────
+
+export function buildInitiativeContent(initiative: Initiative): string {
+  const lines: string[] = [];
+  const statusColor = initiative.status === 'active' ? 'green-fg'
+    : initiative.status === 'complete' ? 'gray-fg'
+    : initiative.status === 'cancelled' ? 'red-fg'
+    : 'yellow-fg';
+
+  lines.push(`{bold}{white-fg}${escapeContent(initiative.title)}{/white-fg}{/bold}  {${statusColor}}${initiative.status}{/${statusColor}}  {gray-fg}v${initiative.version}{/gray-fg}`);
+  lines.push('');
+
+  if (initiative.overview) {
+    lines.push(`{gray-fg}${escapeContent(initiative.overview)}{/gray-fg}`);
+    lines.push('');
+  }
+
+  // Open product questions
+  const unchecked = initiative.openProductQuestions.filter(q => /\[ \]/.test(q));
+  const checked = initiative.openProductQuestions.filter(q => /\[x\]/i.test(q));
+  if (initiative.openProductQuestions.length > 0) {
+    lines.push(`{white-fg}Open Product Questions{/white-fg}`);
+    for (const q of checked) {
+      lines.push(`  {gray-fg}${escapeContent(q)}{/gray-fg}`);
+    }
+    for (const q of unchecked) {
+      lines.push(`  {red-fg}${escapeContent(q)}{/red-fg}`);
+    }
+    if (unchecked.length > 0) {
+      lines.push(`  {red-fg}⚠ ${unchecked.length} unanswered — required before plan-wave{/red-fg}`);
+    }
+    lines.push('');
+  }
+
+  // Waves
+  const waveCount = initiative.waves.length;
+  const doneCount = initiative.waves.filter(w => w.status === 'complete').length;
+  lines.push(`{white-fg}Waves  {bold}${doneCount}/${waveCount}{/bold} complete{/white-fg}`);
+  for (const wave of initiative.waves) {
+    const wColor = wave.status === 'complete' ? 'gray-fg'
+      : wave.status === 'active' ? 'green-fg'
+      : 'yellow-fg';
+    const icon = wave.status === 'complete' ? '✓' : wave.status === 'active' ? '●' : '○';
+    const featDone = wave.features.filter(f => f.waveStatus === 'complete').length;
+    const featTotal = wave.features.length;
+    const progress = featTotal > 0 ? ` ${featDone}/${featTotal}` : '';
+    lines.push(`  {${wColor}}${icon} ${escapeContent(wave.title)}${progress}{/${wColor}}`);
+  }
+
+  return lines.join('\n');
+}
+
+// ── Wave content ──────────────────────────────────────────────────────────────
+
+export function buildWaveContent(wave: Wave): string {
+  const lines: string[] = [];
+  const statusColor = wave.status === 'active' ? 'green-fg'
+    : wave.status === 'complete' ? 'gray-fg'
+    : 'yellow-fg';
+
+  lines.push(`{bold}{white-fg}${escapeContent(wave.title)}{/white-fg}{/bold}  {${statusColor}}${wave.status}{/${statusColor}}`);
+  lines.push('');
+
+  lines.push(`{white-fg}Demo-State{/white-fg}`);
+  lines.push(`{gray-fg}${escapeContent(wave.demoState)}{/gray-fg}`);
+  lines.push('');
+
+  // Feature progress
+  const done = wave.features.filter(f => f.waveStatus === 'complete').length;
+  const total = wave.features.length;
+  lines.push(`{white-fg}Features  {bold}${done}/${total}{/bold} complete{/white-fg}`);
+  for (const f of wave.features) {
+    const fColor = f.waveStatus === 'complete' ? 'gray-fg'
+      : f.waveStatus === 'active' ? 'green-fg'
+      : 'yellow-fg';
+    const icon = f.waveStatus === 'complete' ? '✓' : f.waveStatus === 'active' ? '●' : '○';
+    const deps = f.dependsOn.length > 0 ? `  {gray-fg}← ${f.dependsOn.join(', ')}{/gray-fg}` : '';
+    lines.push(`  {${fColor}}${icon} ${escapeContent(f.slug)}  ${f.waveStatus}{/${fColor}}${deps}`);
+  }
+  lines.push('');
+
+  // Open research
+  if (wave.openResearch.length > 0) {
+    lines.push(`{white-fg}Open Research{/white-fg}`);
+    for (const item of wave.openResearch) {
+      lines.push(`  {yellow-fg}? ${escapeContent(item)}{/yellow-fg}`);
+    }
+    lines.push('');
+  }
+
+  // Next action hint
+  if (wave.status === 'active' || wave.status === 'planned') {
+    lines.push(`{gray-fg}Next → {white-fg}/mdd plan-execute ${escapeContent(wave.id)}{/white-fg}{/gray-fg}`);
+  }
+
+  return lines.join('\n');
 }
