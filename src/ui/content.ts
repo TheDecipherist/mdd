@@ -182,7 +182,7 @@ export function driftColor(doc: MddDoc): string {
 export function buildDocListItem(doc: MddDoc): string {
   const icon = driftIcon(doc);
   const color = driftColor(doc);
-  const label = doc.archived ? `{gray-fg}🗄 ${escapeContent(doc.id)}{/gray-fg}` : `{${color}}${icon} ${escapeContent(doc.id)}{/${color}}`;
+  const label = doc.archived ? `{gray-fg}🗄 ${doc.id}{/gray-fg}` : `{${color}}${icon} ${doc.id}{/${color}}`;
   return ` ${label}`;
 }
 
