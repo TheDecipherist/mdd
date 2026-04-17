@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import type { Initiative, Wave, MddWorkspace } from '../types/index.js';
-import { buildInitiativeContent, buildWaveContent, buildStatusBar } from './content.js';
+import { buildInitiativeContent, buildWaveContent, buildStatusBar, renderMarkdown } from './content.js';
 
 // ── Fixtures ───────────────────────────────────────────────────────────────────
 
@@ -50,6 +50,31 @@ const EMPTY_WORKSPACE: MddWorkspace = {
   ...WORKSPACE_FIXTURE,
   initiatives: [],
 };
+
+// ── renderMarkdown — wide emoji normalisation ─────────────────────────────────
+
+describe('renderMarkdown — wide emoji normalisation', () => {
+  it('should replace ✅ ⚠️ ❌ ❓ with single-column equivalents', () => {
+    const input = '| ✅ | good |\n| ⚠️ | warn |\n| ❌ | bad |\n| ❓ | unknown |';
+    const result = renderMarkdown(input);
+    // Wide emoji must not appear in the output
+    expect(result).not.toContain('✅');
+    expect(result).not.toContain('⚠️');
+    expect(result).not.toContain('❌');
+    expect(result).not.toContain('❓');
+    // Single-column replacements must be present
+    expect(result).toContain('✓');
+    expect(result).toContain('!');
+    expect(result).toContain('✗');
+    expect(result).toContain('?');
+  });
+
+  it('should normalise wide emoji in plain prose too', () => {
+    const result = renderMarkdown('Status: ✅ done');
+    expect(result).not.toContain('✅');
+    expect(result).toContain('✓');
+  });
+});
 
 // ── buildInitiativeContent ─────────────────────────────────────────────────────
 

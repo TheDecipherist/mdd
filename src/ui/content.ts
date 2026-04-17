@@ -9,6 +9,22 @@ function escapeContent(text: string): string {
   return `{escape}${text}{/escape}`;
 }
 
+// ── Wide emoji normalisation ─────────────────────────────────────────────────
+
+// Replaces known wide (2-column) emoji with single-column equivalents so that
+// blessed's column-width calculations stay accurate when rendering doc content.
+function normalizeWideChars(text: string): string {
+  return text
+    .replace(/✅/g, '✓')
+    .replace(/⚠️/g, '!')
+    .replace(/❌/g, '✗')
+    .replace(/❓/g, '?')
+    .replace(/🗄/g, '~')
+    .replace(/➡️/g, '->')
+    .replace(/➡/g, '->')
+    .replace(/►/g, '>');
+}
+
 // ── Markdown table renderer ─────────────────────────────────────────────────
 
 function parseTableRow(line: string): string[] {
@@ -86,7 +102,7 @@ function renderTable(tableLines: string[]): string {
 // ── Markdown → blessed tags ─────────────────────────────────────────────────
 
 export function renderMarkdown(raw: string): string {
-  const lines = raw.split('\n');
+  const lines = normalizeWideChars(raw).split('\n');
   const result: string[] = [];
   let inFence = false;
   let tableBuffer: string[] = [];
