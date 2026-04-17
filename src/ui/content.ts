@@ -192,7 +192,7 @@ export function buildSectionHeader(label: string, count: number): string {
 
 export function buildAuditListItem(audit: AuditFile): string {
   const typeLabel = audit.type.padEnd(8).slice(0, 8);
-  return ` {white-fg}${escapeContent(typeLabel)}{/white-fg} {gray-fg}${escapeContent(audit.date)}{/gray-fg}`;
+  return ` {white-fg}${typeLabel}{/white-fg} {gray-fg}${audit.date}{/gray-fg}`;
 }
 
 // ── Right panel content builders ─────────────────────────────────────────────
