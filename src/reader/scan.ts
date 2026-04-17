@@ -16,7 +16,7 @@ export function runDriftScan(docs: MddDoc[], gitAvailable: boolean): MddDoc[] {
   }
 
   return docs.map(doc => {
-    if (doc.archived || doc.status === 'deprecated') {
+    if (doc.archived || doc.status === 'deprecated' || doc.type === 'task') {
       return { ...doc, driftStatus: 'in-sync' as DriftStatus };
     }
     return { ...doc, ...checkDocDrift(doc) };
@@ -69,7 +69,7 @@ function checkDocDrift(doc: MddDoc): { driftStatus: DriftStatus; driftCommits: s
 }
 
 export function buildScanSummary(docs: MddDoc[]): ScanSummary {
-  const active = docs.filter(d => !d.archived);
+  const active = docs.filter(d => !d.archived && d.type !== 'task');
   return {
     inSync: active.filter(d => d.driftStatus === 'in-sync').length,
     drifted: active.filter(d => d.driftStatus === 'drifted').length,
