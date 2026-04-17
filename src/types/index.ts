@@ -54,6 +54,7 @@ export interface MddDoc {
   testFiles: string[];
   body: string;           // raw markdown body (below frontmatter)
   archived: boolean;
+  type: 'feature' | 'task';  // optional in frontmatter — absence means 'feature'
   driftStatus: DriftStatus;
   driftCommits: string[]; // recent commit messages since last_synced
 }

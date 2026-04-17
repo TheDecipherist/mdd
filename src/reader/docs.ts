@@ -54,6 +54,7 @@ function parseDocFile(filepath: string, filename: string, archived: boolean): Md
       testFiles: toStringArray(data.test_files),
       body: content.trim(),
       archived,
+      type: (data.type === 'task' ? 'task' : 'feature') as 'feature' | 'task',
       driftStatus: 'untracked', // filled in by scan.ts
       driftCommits: [],
     };

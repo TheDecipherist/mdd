@@ -76,17 +76,34 @@ function buildEntries(ws: MddWorkspace): ListEntry[] {
   const archivedDocs = ws.docs.filter(d => d.archived);
   const allDisplayedDocs = [...activeDocs, ...archivedDocs];
 
+  const featureDocs = allDisplayedDocs.filter(d => d.type !== 'task');
+  const taskDocs = allDisplayedDocs.filter(d => d.type === 'task');
+
   // Feature docs section
   entries.push({
-    label: buildSectionHeader('FEATURE DOCS', allDisplayedDocs.length),
+    label: buildSectionHeader('FEATURE DOCS', featureDocs.length),
     item: { kind: 'header' },
   });
 
-  for (const doc of allDisplayedDocs) {
+  for (const doc of featureDocs) {
     entries.push({
       label: buildDocListItem(doc),
       item: { kind: 'doc', doc },
     });
+  }
+
+  // Tasks section (frozen — no drift tracking)
+  if (taskDocs.length > 0) {
+    entries.push({
+      label: buildSectionHeader('TASKS', taskDocs.length),
+      item: { kind: 'header' },
+    });
+    for (const doc of taskDocs) {
+      entries.push({
+        label: buildDocListItem(doc),
+        item: { kind: 'doc', doc },
+      });
+    }
   }
 
   // Audit reports section
