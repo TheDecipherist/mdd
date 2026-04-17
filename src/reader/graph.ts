@@ -54,8 +54,8 @@ export function renderGraphAscii(graph: DependencyGraph): string {
     for (const dep of node.dependsOn) {
       const broken = graph.brokenEdges.some(e => e.from === node.id && e.to === dep);
       const risky = graph.riskyEdges.some(e => e.from === node.id && e.to === dep);
-      const marker = broken ? ' ❌' : risky ? ' ⚠️' : '';
-      lines.push(`  ${node.id} ──► ${dep}${marker}`);
+      const marker = broken ? ' [broken]' : risky ? ' [risky]' : '';
+      lines.push(`  ${node.id} --> ${dep}${marker}`);
     }
   }
 
