@@ -19,10 +19,11 @@ function normalizeWideChars(text: string): string {
     .replace(/⚠️/g, '!')
     .replace(/❌/g, '✗')
     .replace(/❓/g, '?')
-    .replace(/🗄/g, '~')
+    .replace(/🗄\uFE0F?/g, '~')   // handle 🗄 with or without variation selector
     .replace(/➡️/g, '->')
     .replace(/➡/g, '->')
-    .replace(/►/g, '>');
+    .replace(/►/g, '>')
+    .replace(/\uFE0F/g, '');       // strip any remaining emoji variation selectors
 }
 
 // ── Markdown table renderer ─────────────────────────────────────────────────
@@ -34,12 +35,14 @@ function parseTableRow(line: string): string[] {
   return parts.slice(start, end).map(c => c.trim());
 }
 
-// Visual width of a cell: strip markdown span markers (**bold**, `code`)
-// so padding calculations match what actually renders on screen
+// Visual width of a cell: strip markdown span markers (**bold**, `code`) and
+// any stray emoji variation selectors (U+FE0F, zero-width) so padding
+// calculations match what actually renders on screen.
 function cellVisualWidth(cell: string): number {
   return cell
     .replace(/\*\*([^*]+)\*\*/g, '$1')
     .replace(/`([^`]+)`/g, '$1')
+    .replace(/\uFE0F/g, '')
     .length;
 }
 

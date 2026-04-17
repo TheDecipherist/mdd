@@ -74,6 +74,15 @@ describe('renderMarkdown — wide emoji normalisation', () => {
     expect(result).not.toContain('✅');
     expect(result).toContain('✓');
   });
+
+  it('should strip the variation selector from 🗄️ so table widths stay correct', () => {
+    // 🗄️ = U+1F5C4 + U+FE0F — the VS16 variation selector must not remain
+    const input = '| Icon | Meaning |\n|------|--------|\n| 🗄️ dim | Deprecated |';
+    const result = renderMarkdown(input);
+    // The variation selector (U+FE0F) must not appear in output
+    expect(result).not.toContain('\uFE0F');
+    expect(result).toContain('~ dim');
+  });
 });
 
 // ── buildInitiativeContent ─────────────────────────────────────────────────────
