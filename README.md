@@ -57,10 +57,10 @@ mdd dashboard
 
    | Icon | Meaning |
    |------|---------|
-   | ✅ | In sync with source files |
-   | ⚠️ | Drifted — commits since last sync |
-   | ❌ | Broken — source files missing |
-   | ❓ | Untracked — no source files defined |
+   | `✓` | In sync with source files |
+   | `!` | Drifted — commits since last sync |
+   | `✗` | Broken — source files missing |
+   | `?` | Untracked — no source files defined |
 
 3. **AUDIT REPORTS** *(shown only if audits exist)*
 
