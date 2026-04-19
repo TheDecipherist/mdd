@@ -38,6 +38,19 @@ export interface Initiative {
   waves: Wave[];
 }
 export type DocStatus = 'draft' | 'in_progress' | 'complete' | 'deprecated';
+export type OpsStatus = 'draft' | 'in_progress' | 'complete' | 'deprecated';
+
+export interface MddOps {
+  filename: string;
+  id: string;
+  title: string;
+  status: OpsStatus;
+  platform: string;
+  environments: string[];
+  lastSynced: string | null;
+  knownIssues: string[];
+  body: string;
+}
 
 export interface MddDoc {
   filename: string;       // e.g. "01-project-scaffolding.md"
@@ -91,6 +104,7 @@ export interface ScanSummary {
 export interface MddWorkspace {
   docs: MddDoc[];
   audits: AuditFile[];
+  ops: MddOps[];
   startupContent: string | null;
   graph: DependencyGraph;
   scan: ScanSummary;

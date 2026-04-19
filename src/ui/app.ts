@@ -1,11 +1,13 @@
 import blessed from 'blessed';
-import type { MddWorkspace, MddDoc, AuditFile, Initiative, Wave } from '../types/index.js';
+import type { MddWorkspace, MddDoc, MddOps, AuditFile, Initiative, Wave } from '../types/index.js';
 import {
   buildDocListItem,
+  buildOpsListItem,
   buildSectionHeader,
   buildAuditListItem,
   buildStartupContent,
   buildDocContent,
+  buildOpsContent,
   buildAuditContent,
   buildGraphContent,
   buildStatusBar,
@@ -18,6 +20,7 @@ import {
 type ListItemKind =
   | { kind: 'header' }
   | { kind: 'doc'; doc: MddDoc }
+  | { kind: 'ops'; ops: MddOps }
   | { kind: 'audit'; audit: AuditFile }
   | { kind: 'graph' }
   | { kind: 'initiative'; initiative: Initiative; expanded: boolean }
@@ -106,6 +109,21 @@ function buildEntries(ws: MddWorkspace): ListEntry[] {
     }
   }
 
+  // Ops runbooks section
+  const opsDocs = ws.ops ?? [];
+  if (opsDocs.length > 0) {
+    entries.push({
+      label: buildSectionHeader('OPS RUNBOOKS', opsDocs.length),
+      item: { kind: 'header' },
+    });
+    for (const ops of opsDocs) {
+      entries.push({
+        label: buildOpsListItem(ops),
+        item: { kind: 'ops', ops },
+      });
+    }
+  }
+
   // Audit reports section
   if (ws.audits.length > 0) {
     entries.push({
@@ -138,6 +156,9 @@ function contentForEntry(entry: ListEntry, ws: MddWorkspace): string {
   }
   if (item.kind === 'doc') {
     return buildDocContent(item.doc);
+  }
+  if (item.kind === 'ops') {
+    return buildOpsContent(item.ops);
   }
   if (item.kind === 'audit') {
     return buildAuditContent(item.audit);

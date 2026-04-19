@@ -1,4 +1,4 @@
-import type { MddDoc, AuditFile, MddWorkspace, DependencyGraph, Initiative, Wave } from '../types/index.js';
+import type { MddDoc, MddOps, AuditFile, MddWorkspace, DependencyGraph, Initiative, Wave } from '../types/index.js';
 import { renderGraphAscii } from '../reader/graph.js';
 
 // ── Blessed tag escaping ────────────────────────────────────────────────────
@@ -209,6 +209,14 @@ export function buildSectionHeader(label: string, count: number): string {
   return `{cyan-fg}{bold}${label}{/bold}{/cyan-fg} {gray-fg}${count}{/gray-fg}`;
 }
 
+export function buildOpsListItem(ops: MddOps): string {
+  const statusColor = ops.status === 'complete' ? 'green-fg'
+    : ops.status === 'in_progress' ? 'cyan-fg'
+    : ops.status === 'draft' ? 'yellow-fg'
+    : 'gray-fg';
+  return ` {${statusColor}}▶ ${ops.id}{/${statusColor}}`;
+}
+
 export function buildAuditListItem(audit: AuditFile): string {
   const typeLabel = audit.type.padEnd(8).slice(0, 8);
   return ` {white-fg}${typeLabel}{/white-fg} {gray-fg}${audit.date}{/gray-fg}`;
@@ -373,6 +381,11 @@ export function buildStatusBar(ws: MddWorkspace): string {
     `{gray-fg}AUDITS {bold}${audits.length}{/bold}{/gray-fg}`,
   ];
 
+  const ops = ws.ops ?? [];
+  if (ops.length > 0) {
+    segments.push(`{magenta-fg}OPS {bold}${ops.length}{/bold}{/magenta-fg}`);
+  }
+
   if (initiatives.length > 0) {
     const activeCount = initiatives.filter(i => i.status === 'active').length;
     const activeWaves = initiatives
@@ -483,6 +496,55 @@ export function buildWaveContent(wave: Wave): string {
   if (wave.status === 'active' || wave.status === 'planned') {
     lines.push(`{gray-fg}Next → {white-fg}/mdd plan-execute ${escapeContent(wave.id)}{/white-fg}{/gray-fg}`);
   }
+
+  return lines.join('\n');
+}
+
+// ── Ops content ───────────────────────────────────────────────────────────────
+
+export function buildOpsContent(ops: MddOps): string {
+  const lines: string[] = [];
+
+  lines.push(`{bold}{white-fg}${escapeContent(ops.title)}{/white-fg}{/bold}`);
+  lines.push('');
+
+  const statusColor = ops.status === 'complete' ? 'green-fg'
+    : ops.status === 'in_progress' ? 'cyan-fg'
+    : ops.status === 'draft' ? 'yellow-fg'
+    : 'gray-fg';
+
+  lines.push(
+    `{${statusColor}}[${ops.status.replace('_', ' ')}]{/${statusColor}}  ` +
+    `{gray-fg}platform: ${escapeContent(ops.platform)}{/gray-fg}`
+  );
+
+  if (ops.environments.length > 0) {
+    lines.push(`{gray-fg}environments: ${escapeContent(ops.environments.join(', '))}{/gray-fg}`);
+  }
+  lines.push('');
+
+  if (ops.knownIssues.length > 0) {
+    lines.push(`{red-fg}Known issues: ${ops.knownIssues.length}{/red-fg}`);
+    for (const issue of ops.knownIssues) {
+      lines.push(`  {yellow-fg}• ${escapeContent(issue)}{/yellow-fg}`);
+    }
+    lines.push('');
+  }
+
+  if (ops.lastSynced) {
+    lines.push(`{gray-fg}Last synced: ${escapeContent(ops.lastSynced)}{/gray-fg}`);
+    lines.push('');
+  }
+
+  lines.push(`{gray-fg}${'─'.repeat(40)}{/gray-fg}`);
+  lines.push('');
+
+  if (ops.body.trim()) {
+    lines.push(renderMarkdown(ops.body));
+  }
+
+  lines.push('');
+  lines.push(`{gray-fg}Run → {white-fg}/mdd runop ${escapeContent(ops.id)}{/white-fg}{/gray-fg}`);
 
   return lines.join('\n');
 }

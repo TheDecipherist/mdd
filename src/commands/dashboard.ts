@@ -2,6 +2,7 @@ import { existsSync, readFileSync } from 'fs';
 import { join } from 'path';
 import { readDocs } from '../reader/docs.js';
 import { readAudits } from '../reader/audits.js';
+import { readOps } from '../reader/ops.js';
 import { readInitiatives } from '../reader/initiatives.js';
 import { checkGitAvailable, runDriftScan, buildScanSummary } from '../reader/scan.js';
 import { buildDependencyGraph } from '../reader/graph.js';
@@ -25,8 +26,9 @@ export async function loadWorkspace(mddDir: string): Promise<MddWorkspace> {
     : null;
 
   const initiatives = readInitiatives(mddDir);
+  const ops = readOps(mddDir);
 
-  return { docs, audits, startupContent, graph, scan, issuesTotal, gitAvailable, initiatives };
+  return { docs, audits, ops, startupContent, graph, scan, issuesTotal, gitAvailable, initiatives };
 }
 
 export function findMddDir(cwd: string): string | null {

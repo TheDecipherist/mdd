@@ -38,6 +38,7 @@ const INITIATIVE_FIXTURE: Initiative = {
 const WORKSPACE_FIXTURE: MddWorkspace = {
   docs: [],
   audits: [],
+  ops: [],
   startupContent: null,
   graph: { nodes: [], brokenEdges: [], riskyEdges: [], orphans: [] },
   scan: { inSync: 0, drifted: 0, broken: 0, untracked: 0 },
