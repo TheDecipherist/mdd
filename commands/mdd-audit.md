@@ -1,0 +1,237 @@
+## AUDIT MODE — `/mdd audit [section]`
+
+Triggered when arguments start with `audit`.
+
+### Phase A1 — Scope
+
+**Stale job detection (runs first):** Check `.mdd/jobs/` for any existing `audit-*/` folder.
+- If found: check whether a corresponding `audits/report-<date>.md` exists.
+  - If yes: job completed but cleanup failed — delete the stale jobs folder and proceed normally.
+  - If no: job was interrupted — read `MANIFEST.md` from the jobs folder and count complete vs total entries. Present to user:
+    ```
+    Found interrupted audit from <date>.
+    MANIFEST shows <done>/<total> files complete.
+
+      [R] Resume — continue from where it left off
+      [D] Discard — delete and start fresh
+    ```
+  - Resume: reuse the existing job folder, existing agent notes, pick up from the first `[ ]` in the manifest. Files already marked `[x]`, `[!]`, or `[e]` are never re-processed. Skip to Phase A3.
+  - Discard: delete the jobs folder, proceed normally.
+
+**Scope resolution:**
+1. **Read all `.mdd/docs/*.md` files** — build the feature map. Also read all `.mdd/ops/*.md` files — check for: missing mandatory sections, literal credential values (critical violation), stale `last_synced`, services with no `health_check` defined.
+2. **If no `.mdd/` directory exists:** Create it with `docs/`, `audits/`, `ops/`, and `jobs/` subdirectories. Then tell the user: "No MDD documentation found. Run `/mdd` for each feature to create docs first, or I can scan the codebase and create them now. Which do you prefer?"
+   - If "scan": read all source files and generate documentation files (Phase 0)
+   - If "manual": exit and let the user create docs per feature
+3. Resolve every source file referenced across all feature docs. Deduplicate (same file may appear in multiple feature docs).
+
+**Incremental vs full (only when a previous completed audit exists):**
+```
+A completed audit exists from <date>.
+
+  [F] Full audit — regenerate manifest from all source files
+      Use when: significant new code added, want a clean baseline, or last audit was >2 weeks ago
+  [I] Incremental — manifest contains only files modified since <date>
+      Use when: applied fixes and want to verify them, or auditing only a new feature
+```
+
+**Agent scaling:**
+
+| Files in scope | Agents |
+|---|---|
+| < 10 | 1 (Single-Feature Audit Mode — see below) |
+| 10–25 | 2 |
+| 26–50 | 3 |
+| 51–100 | 5 |
+| 100+ | 8 (default ceiling) |
+
+Default ceiling is 8. Overridable via `MDD_MAX_AGENTS` environment variable. Values below 1 fall back to 1. The scale table still determines count within the ceiling — `MDD_MAX_AGENTS` only raises or lowers the cap.
+
+**Shard sizing:** Balanced by estimated token load (file size), not raw file count. Main inspects file sizes before assigning and redistributes to keep shards roughly equal in estimated read cost.
+
+**Create the job folder and write MANIFEST.md (nothing else proceeds until the manifest exists on disk):**
+
+Create `.mdd/jobs/audit-<date>/` and write `MANIFEST.md`:
+
+```markdown
+# Audit Manifest
+# Job: audit-<date>
+# Generated: <ISO timestamp>
+# Total files: <N>
+# Agents: <N>
+# Status: IN PROGRESS
+#
+# States: [ ] pending  [~] in progress  [x] complete  [!] findings  [e] error
+
+## Shard 1 (Agent 1) — files 1-<N>
+[ ] src/handlers/auth.ts
+[ ] src/handlers/users.ts
+...
+
+## Shard 2 (Agent 2) — files <N+1>-<M>
+[ ] src/handlers/billing.ts
+...
+```
+
+---
+
+### Phase A2 — Per-Agent Config Setup
+
+Main writes a shard file and config file for each agent into the job folder **before spawning anything**.
+
+**`shard-N.md`** — flat list of files assigned to this agent, extracted from the manifest. The agent uses this to know its scope without parsing the full manifest.
+
+**`agent-N-config.md`** format:
+
+```markdown
+# Agent <N> Audit Config
+
+## Identity
+You are Audit Agent <N> of <total>.
+Job: audit-<date>
+
+## Paths (relative to project root)
+Shard file:  .mdd/jobs/audit-<date>/shard-<N>.md
+Notes file:  .mdd/jobs/audit-<date>/agent-<N>-notes.md
+Manifest:    .mdd/jobs/audit-<date>/MANIFEST.md
+
+## Rules
+- Write findings to your notes file ONLY. Never touch another agent's file.
+- Mark each file in MANIFEST before clearing context.
+- Clear context after every single file — no exceptions.
+- On every startup (including post-clear): follow STARTUP SEQUENCE below.
+
+## Startup Sequence
+1. Read this config file
+2. Read shard-<N>.md to know your file list
+3. Read MANIFEST.md — find the first [ ] entry in Shard <N>
+4. Read the last 20 lines of agent-<N>-notes.md for continuity
+5. Begin the per-file loop at that first [ ] entry
+```
+
+This config file contains no source code or findings — only paths and instructions. It is the only thing an agent needs to resume correctly after a context clear.
+
+---
+
+### Phase A3 — Parallel Agent Execution
+
+Main spawns all agents simultaneously. Each agent receives only the path to its config file.
+
+**Per-file loop (each agent follows exactly):**
+
+```
+STARTUP (run on every fresh start and after every context clear):
+  1. Read agent-N-config.md
+  2. Read shard-N.md
+  3. Read MANIFEST.md — find first [ ] in own shard
+  4. Read last 20 lines of agent-N-notes.md for continuity
+  5. Begin per-file loop
+
+PER-FILE LOOP:
+  1. Mark file as [~] in MANIFEST.md        ← write to disk first
+  2. Read the source file fully
+  3. Analyze against audit criteria
+  4. Append to agent-N-notes.md:
+       ## src/handlers/auth.ts
+       <findings, or "No issues found">
+  5. Mark file as [x] or [!] in MANIFEST.md ← [!] = has findings
+  6. Clear context                           ← every file, no exceptions
+  7. On restart: run STARTUP above
+```
+
+**Hard rules:**
+- Write to own notes file ONLY — never another agent's file
+- Checkpoint order: mark `[~]` → read → analyze → write notes → mark `[x]`/`[!]` → clear. Never clear before the final mark.
+- If a file cannot be read (missing, binary, too large): mark `[e]` in manifest, append one-line error to notes, proceed to next file
+- Skip any file already marked `[x]`, `[!]`, or `[e]` — never re-process
+
+**Why clear after every file:** Every file gets a full, fresh context window with maximum analysis budget. The notes file and manifest are the memory — the analysis does not need to survive the clear.
+
+**Why mark `[~]` before reading:** A stuck `[~]` is re-processed at convergence. Duplicate analysis is better than missing analysis.
+
+---
+
+### Phase A4 — Convergence Check
+
+After all agents signal completion, main reads `MANIFEST.md` and checks for any `[ ]` or `[~]` entries.
+
+- **`[ ]` entries:** agent never reached this file — re-run that agent's shard for remaining files
+- **`[~]` entries:** agent cleared between `[~]` mark and final mark — re-process that file
+- **`[e]` entries:** main attempts to read the file itself; if still unreadable, it remains `[e]` and is flagged in the final report as unaudited with the reason
+
+Audit does not advance to Phase A5 until every file is `[x]`, `[!]`, or `[e]`.
+
+---
+
+### Phase A5 — Merge
+
+Main merges all agent notes into the canonical output file:
+
+1. Read `MANIFEST.md` to get canonical file order
+2. For each file in manifest order, locate its `## <filepath>` section in the correct agent notes file
+3. Append to `audits/notes-<date>.md` in that order
+4. Verify entry count in `audits/notes-<date>.md` matches manifest file count
+
+Merge is in manifest order, not agent completion order. The job folder is not touched during or after merge — all temp files remain until the report is confirmed in Phase A6.
+
+---
+
+### Phase A6 — Analyze
+
+Read ONLY `audits/notes-<date>.md` (NOT source code again). Produce `audits/report-<date>.md` — include `mdd_version: <current from mdd.md frontmatter>` as the first line of frontmatter:
+
+1. Executive summary
+2. Feature completeness matrix
+3. Findings by severity (P1 Critical / P2 High / P3 Medium / P4 Low)
+4. Test coverage summary
+5. Fix plan with effort estimates and affected files per finding
+
+**Once `audits/report-<date>.md` is confirmed written and non-empty:**
+1. Copy `jobs/audit-<date>/MANIFEST.md` → `audits/MANIFEST-<date>.md`
+2. Delete entire `jobs/audit-<date>/` folder
+
+The manifest is kept permanently in `audits/` — `[x]` vs `[!]` per file shows what had findings without parsing the full notes file.
+
+---
+
+### Phase A7 — Present Findings + Fix
+
+Show the user:
+```
+🔍 MDD Audit Complete
+
+Findings: <N> total (<N> P1 Critical, <N> P2 High, <N> P3 Medium, <N> P4 Low)
+Report: .mdd/audits/report-<date>.md
+MANIFEST: .mdd/audits/MANIFEST-<date>.md (<N> files with findings / <total> audited)
+
+Top issues:
+  1. <most critical finding>
+  2. <second most critical>
+  3. <third most critical>
+
+Estimated fix time: <N> hours (traditional) → <N> minutes (MDD)
+
+Fix all now? (yes / review report first / fix only P1+P2)
+```
+
+**After the report is written**, trigger the `.mdd/.startup.md` rebuild (same logic as in Status Mode — rebuild auto-generated zone, preserve Notes zone) so the Last Audit block reflects the new findings regardless of whether the user proceeds with fixes.
+
+If user says yes (or selects a subset):
+
+**Fix loop:** Read the findings report. For each finding to fix:
+1. Read the specific source files
+2. Apply the fix
+3. Write or update tests
+4. Run tests after each fix group
+
+Report progress per finding. Update documentation `known_issues` to remove fixed items. Update `mdd_version` to current on every `.mdd/docs/*.md` file that is edited during fixes.
+
+**After fixes are complete and results are written to `.mdd/audits/results-<date>.md`**, trigger the `.mdd/.startup.md` rebuild so the Last Audit block reflects the new numbers.
+
+---
+
+### Single-Feature Audit Mode
+
+When running `/mdd audit <section>` with fewer than 10 resolved files, skip the shard/config/agent system. Main conversation runs the per-file loop directly — context clear between each file, writing to a single `agent-1-notes.md` in the job folder. The job folder structure and completion sequence are otherwise identical.
+
+---

@@ -1,0 +1,48 @@
+{
+  "name": "@thedecipherist/mdd",
+  "version": "1.0.0",
+  "description": "MDD — Manual-Driven Development workflow for Claude Code",
+  "type": "module",
+  "bin": {
+    "mdd": "dist/cli.js"
+  },
+  "files": [
+    "dist/",
+    "commands/"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "prepublishOnly": "pnpm build"
+  },
+  "keywords": [
+    "mdd",
+    "manual-driven-development",
+    "claude-code",
+    "claude",
+    "ai",
+    "workflow",
+    "developer-tools",
+    "slash-commands"
+  ],
+  "author": "TheDecipherist",
+  "license": "MIT",
+  "dependencies": {
+    "commander": "^12.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "typescript": "^5.4.5"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/TheDecipherist/mdd.git"
+  },
+  "homepage": "https://github.com/TheDecipherist/mdd#readme",
+  "bugs": {
+    "url": "https://github.com/TheDecipherist/mdd/issues"
+  }
+}
