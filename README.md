@@ -55,6 +55,7 @@ Then in Claude Code:
 - [MDD Versioning](#mdd-versioning)
 - [Real Results: Self-Audit](#real-results-self-audit)
 - [History: From Starter Kit to Standalone Package](#history-from-starter-kit-to-standalone-package)
+- [Dashboards](#dashboards)
 - [Companion Tools](#companion-tools)
 - [License](#license)
 
@@ -824,9 +825,58 @@ Within the starter kit, the entire MDD workflow lived in a single `mdd.md` file 
 
 ---
 
+## Dashboards
+
+MDD ships with two companion dashboards for exploring your `.mdd/` workspace — one terminal-native, one browser-based. Both are available as standalone packages today and **will soon be merged directly into the `mdd` package**, so they'll be launchable via the `mdd` command without a separate install.
+
+### mdd-tui — Terminal Dashboard
+
+A live terminal UI for navigating your MDD workspace without leaving the command line. Shows feature doc health, drift status, audit reports, initiative/wave progress, and full markdown content in a split-pane view.
+
+```bash
+npm install -g mdd-tui
+mdd-tui
+```
+
+**Key features:**
+- Split-pane: scrollable file list (left) + full markdown render (right)
+- Initiative tree with collapsible waves and feature-level progress counters
+- Drift status icons — see which docs are in sync vs. changed at a glance
+- Ops runbook browser and audit report viewer
+- Keyboard-driven navigation (`j`/`k` to move, `h`/`l` to switch panes, `r` to refresh, `q` to quit)
+
+[npm: mdd-tui](https://www.npmjs.com/package/mdd-tui) · [GitHub](https://github.com/TheDecipherist/mdd-tui)
+
+### mdd-dashboard — Browser Dashboard *(in active development)*
+
+A visual, browser-based dashboard for MDD projects. Renders your feature dependency graph as an interactive D3 diagram with live reload on file changes.
+
+> **Status:** mdd-dashboard is in active development and not yet fully operational. Early adopters are welcome — expect rough edges while it catches up to the full MDD feature set.
+
+```bash
+npm install -g mdd-dashboard
+mdd-dashboard
+# MDD Dashboard running at http://localhost:7321
+```
+
+**Key features:**
+- Interactive D3 graph — force simulation or strict hierarchy (initiative → wave → feature) layout
+- Three-tier filter system: live search, type chips, status dropdown, advanced field filters, and git-aware filters
+- Live reload via SSE — graph updates the moment you save a `.mdd/` file, no page refresh needed
+- Click any node to open a detail panel: full doc body, git history, source files, depends-on navigation
+- Mini-map overlay for large graphs (100+ docs)
+
+[npm: mdd-dashboard](https://www.npmjs.com/package/mdd-dashboard) · [GitHub](https://github.com/TheDecipherist/mdd-dashboard)
+
+---
+
+> **Coming soon:** Both dashboards will be merged into the `mdd` package so you can launch either directly from the `mdd` CLI — no separate install needed.
+
+---
+
 ## Companion Tools
 
-- **[mdd-tui](https://github.com/TheDecipherist/mdd-tui)** - Terminal dashboard for browsing your `.mdd/` workspace (docs, audits, graph, ops runbooks) in a live TUI. `npm install -g @thedecipherist/mdd-tui`
+- **[mdd-tui](https://github.com/TheDecipherist/mdd-tui)** - Terminal dashboard for browsing your `.mdd/` workspace (docs, audits, graph, ops runbooks) in a live TUI. `npm install -g mdd-tui`
 - **[Claude Code Mastery Starter Kit](https://github.com/TheDecipherist/claude-code-mastery-project-starter-kit)** - Full project scaffolding: hooks, CLAUDE.md templates, TypeScript rules, agents, skills, StrictDB. MDD originated here.
 - **[strictdb](https://www.npmjs.com/package/strictdb)** - Database wrapper with guardrails used across starter kit projects
 

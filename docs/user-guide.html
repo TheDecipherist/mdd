@@ -74,6 +74,13 @@
                   <span class="dropdown-item-desc">Terminal dashboard for .mdd/</span>
                 </span>
               </a>
+              <a href="https://github.com/TheDecipherist/mdd-dashboard" target="_blank" rel="noopener" role="menuitem">
+                <img src="https://github.com/favicon.ico" alt="" class="link-favicon" />
+                <span class="dropdown-item-text">
+                  <span class="dropdown-item-title">mdd-dashboard</span>
+                  <span class="dropdown-item-desc">Browser visual dashboard</span>
+                </span>
+              </a>
               <a href="https://github.com/TheDecipherist/claude-code-mastery-project-starter-kit" target="_blank" rel="noopener" role="menuitem">
                 <img src="https://github.com/favicon.ico" alt="" class="link-favicon" />
                 <span class="dropdown-item-text">
@@ -105,6 +112,7 @@
     <a href="#mdd-directory">The .mdd/ Directory</a>
     <a href="#versioning">MDD Versioning</a>
     <a href="#migration">Migrating from the Starter Kit</a>
+    <a href="#dashboards">Dashboards</a>
   </div>
   <div class="mobile-projects">
     <div class="toc-header">Links</div>
@@ -155,6 +163,7 @@ mdd install</code></pre>
         <a href="#mdd-directory">The .mdd/ Directory</a>
         <a href="#versioning">MDD Versioning</a>
         <a href="#migration">Migrating from Starter Kit</a>
+        <a href="#dashboards">Dashboards</a>
       </nav>
     </aside>
 
@@ -1865,7 +1874,116 @@ mdd install</code></pre>
 
         <div class="callout">
           <p>
-            <strong>Companion tool:</strong> <a href="https://github.com/TheDecipherist/mdd-tui" target="_blank" rel="noopener">mdd-tui</a> is a terminal dashboard for browsing your <code>.mdd/</code> workspace - docs, audits, graph, and ops runbooks in a live TUI. Install with <code>npm install -g @thedecipherist/mdd-tui</code>.
+            See the <a href="#dashboards">Dashboards section</a> below for mdd-tui and mdd-dashboard — two companion tools for exploring your <code>.mdd/</code> workspace visually.
+          </p>
+        </div>
+      </section>
+
+      <!-- ======================== DASHBOARDS ======================== -->
+      <section id="dashboards">
+        <h2>Dashboards</h2>
+
+        <p>
+          MDD ships with two companion dashboards for exploring your <code>.mdd/</code> workspace.
+          Both are available as standalone packages today and <strong>will soon be merged directly
+          into the <code>mdd</code> package</strong> — launchable via the <code>mdd</code> command
+          without a separate install.
+        </p>
+
+        <h3>mdd-tui — Terminal Dashboard</h3>
+
+        <p>
+          A live terminal UI for navigating your MDD workspace without leaving the command line.
+          Split-pane view: scrollable file list on the left, full markdown render on the right.
+          Shows feature doc health, drift status, audit reports, initiative and wave progress,
+          and ops runbook content.
+        </p>
+
+        <pre><code class="language-bash">npm install -g mdd-tui
+mdd-tui</code></pre>
+
+        <p>Run from any project directory that has a <code>.mdd/</code> folder.</p>
+
+        <h4>Navigation</h4>
+        <table>
+          <thead><tr><th>Key</th><th>Action</th></tr></thead>
+          <tbody>
+            <tr><td><code>↑</code> / <code>k</code></td><td>Move up / scroll up in right panel</td></tr>
+            <tr><td><code>↓</code> / <code>j</code></td><td>Move down / scroll down in right panel</td></tr>
+            <tr><td><code>→</code> / <code>l</code> / <code>Enter</code></td><td>Focus right panel or expand initiative</td></tr>
+            <tr><td><code>←</code> / <code>h</code> / <code>Esc</code></td><td>Focus left panel</td></tr>
+            <tr><td><code>r</code></td><td>Refresh workspace</td></tr>
+            <tr><td><code>q</code> / <code>Ctrl+C</code></td><td>Quit</td></tr>
+          </tbody>
+        </table>
+
+        <h4>What it shows</h4>
+        <ul>
+          <li><strong>Initiatives</strong> — collapsible tree with wave progress (e.g. <code>2/3</code> features complete)</li>
+          <li><strong>Feature docs</strong> — drift status icons: <code>✓</code> in sync, <code>⚠</code> drifted, <code>✗</code> broken reference</li>
+          <li><strong>Ops runbooks</strong> — last runop date and service health at a glance</li>
+          <li><strong>Audit reports</strong> — findings summary with severity counts</li>
+        </ul>
+
+        <p>
+          <a href="https://www.npmjs.com/package/mdd-tui" target="_blank" rel="noopener">npm: mdd-tui</a>
+          &nbsp;&mdash;&nbsp;
+          <a href="https://github.com/TheDecipherist/mdd-tui" target="_blank" rel="noopener">GitHub: mdd-tui</a>
+        </p>
+
+        <h3>mdd-dashboard — Browser Dashboard <em>(in active development)</em></h3>
+
+        <div class="callout">
+          <p>
+            <strong>Status:</strong> mdd-dashboard is in active development and not yet fully
+            operational. Early adopters are welcome — expect rough edges while it catches up
+            to the full MDD feature set.
+          </p>
+        </div>
+
+        <p>
+          A visual, browser-based dashboard for MDD projects. Renders your feature dependency
+          graph as an interactive D3 diagram with live reload on file changes.
+        </p>
+
+        <pre><code class="language-bash">npm install -g mdd-dashboard
+mdd-dashboard
+# MDD Dashboard running at http://localhost:7321</code></pre>
+
+        <p>Or without installing:</p>
+
+        <pre><code class="language-bash">npx mdd-dashboard --path ~/projects/my-mdd-project</code></pre>
+
+        <h4>Dashboard features</h4>
+        <ul>
+          <li><strong>Force / Tree layout toggle</strong> — switch between D3 force simulation (organic clustering) and strict hierarchy (initiative → wave → feature)</li>
+          <li><strong>Three-tier filter system</strong> — live search, type chips, status dropdown, 11 advanced field filters, and git-aware filters (author, modified-since, changed in last N commits)</li>
+          <li><strong>Live reload</strong> — SSE pushes graph updates the moment you save a <code>.mdd/</code> file, no page refresh needed</li>
+          <li><strong>Detail panel</strong> — click any node to see the full doc body, git history, source files, and depends-on chips that navigate the graph</li>
+          <li><strong>Mini-map</strong> — 160×120px overlay for large graphs (100+ docs)</li>
+          <li><strong>Three-tier loading</strong> — frontmatter parsed at startup (&lt;200ms), body fetched on demand, git history loaded async in background</li>
+        </ul>
+
+        <h4>CLI flags</h4>
+        <table>
+          <thead><tr><th>Flag</th><th>Description</th></tr></thead>
+          <tbody>
+            <tr><td><code>--path &lt;dir&gt;</code></td><td>Project directory to inspect (default: cwd)</td></tr>
+            <tr><td><code>--port &lt;n&gt;</code></td><td>Starting port (default: 7321, scans up to 7340)</td></tr>
+            <tr><td><code>--no-open</code></td><td>Skip opening a browser tab</td></tr>
+          </tbody>
+        </table>
+
+        <p>
+          <a href="https://www.npmjs.com/package/mdd-dashboard" target="_blank" rel="noopener">npm: mdd-dashboard</a>
+          &nbsp;&mdash;&nbsp;
+          <a href="https://github.com/TheDecipherist/mdd-dashboard" target="_blank" rel="noopener">GitHub: mdd-dashboard</a>
+        </p>
+
+        <div class="callout">
+          <p>
+            <strong>Coming soon:</strong> Both dashboards will be merged into the <code>mdd</code>
+            package — launch either directly from the <code>mdd</code> CLI, no separate install needed.
           </p>
         </div>
       </section>
@@ -1886,6 +2004,10 @@ mdd install</code></pre>
       <a href="https://github.com/TheDecipherist/mdd-tui" target="_blank" rel="noopener">
         <img src="https://github.com/favicon.ico" alt="" class="link-favicon" />
         mdd-tui
+      </a>
+      <a href="https://github.com/TheDecipherist/mdd-dashboard" target="_blank" rel="noopener">
+        <img src="https://github.com/favicon.ico" alt="" class="link-favicon" />
+        mdd-dashboard
       </a>
       <a href="https://github.com/TheDecipherist/claude-code-mastery-project-starter-kit" target="_blank" rel="noopener">
         <img src="https://github.com/favicon.ico" alt="" class="link-favicon" />
