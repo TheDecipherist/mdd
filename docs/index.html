@@ -1,0 +1,933 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MDD — Manual-Driven Development</title>
+
+  <!-- SEO Meta Tags -->
+  <meta name="description" content="MDD (Manual-Driven Development) — One command. Twenty-one modes. Complete feature lifecycle from documentation to verified deployment. An npm package for Claude Code." />
+  <meta name="keywords" content="MDD, Manual-Driven Development, Claude Code, AI development, npm, software lifecycle, feature development, code audit" />
+  <meta name="author" content="TheDecipherist" />
+  <meta name="robots" content="index, follow" />
+  <link rel="canonical" href="https://thedecipherist.github.io/mdd" />
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://thedecipherist.github.io/mdd" />
+  <meta property="og:title" content="MDD — Manual-Driven Development" />
+  <meta property="og:description" content="One command. Twenty-one modes. Complete feature lifecycle from documentation to verified deployment." />
+  <meta property="og:image" content="https://thedecipherist.github.io/mdd/mdd_hero.webp" />
+  <meta property="og:site_name" content="MDD" />
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="MDD — Manual-Driven Development" />
+  <meta name="twitter:description" content="One command. Twenty-one modes. Complete feature lifecycle from documentation to verified deployment." />
+  <meta name="twitter:image" content="https://thedecipherist.github.io/mdd/mdd_hero.webp" />
+
+  <!-- Schema.org JSON-LD -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "MDD — Manual-Driven Development",
+    "alternateName": "MDD",
+    "description": "One command. Twenty-one modes. Complete feature lifecycle from documentation to verified deployment. An npm package for Claude Code.",
+    "url": "https://thedecipherist.github.io/mdd",
+    "downloadUrl": "https://www.npmjs.com/package/@thedecipherist/mdd",
+    "applicationCategory": "DeveloperApplication",
+    "operatingSystem": "Any",
+    "softwareVersion": "1.0.0",
+    "license": "https://opensource.org/licenses/MIT",
+    "author": {
+      "@type": "Person",
+      "name": "TheDecipherist",
+      "url": "https://thedecipherist.com"
+    },
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD"
+    }
+  }
+  </script>
+
+  <!-- Favicon: data URI SVG — letter "M" in teal on dark background -->
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%2308090f'/%3E%3Ctext x='16' y='23' text-anchor='middle' font-family='system-ui%2C sans-serif' font-size='18' font-weight='800' fill='%2300e5cc'%3EM%3C/text%3E%3C/svg%3E" />
+
+  <!-- Rybbit Analytics -->
+  <script async src="https://app.rybbit.io/api/script.js" data-site-id="e7e29192d813"></script>
+
+  <!-- Prism.js CSS -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" />
+
+  <!-- Site Styles -->
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+  <!-- ===================== -->
+  <!-- Fixed Glassmorphism Header -->
+  <!-- ===================== -->
+  <header>
+    <nav class="container">
+      <ul>
+        <li>
+          <button
+            class="menu-toggle"
+            id="menu-toggle"
+            aria-label="Toggle navigation menu"
+            aria-expanded="false"
+            aria-controls="mobile-menu"
+          >
+            <span class="hamburger-line"></span>
+            <span class="hamburger-line"></span>
+            <span class="hamburger-line"></span>
+          </button>
+        </li>
+        <li>
+          <a href="#" class="brand">
+            <span class="brand-text">
+              <span class="brand-title">MDD</span>
+              <span class="brand-author">by <a href="https://thedecipherist.com" target="_blank" rel="noopener">TheDecipherist</a></span>
+            </span>
+          </a>
+        </li>
+      </ul>
+      <ul>
+        <li>
+          <a href="https://github.com/TheDecipherist/mdd" target="_blank" rel="noopener">GitHub</a>
+        </li>
+        <li>
+          <a href="user-guide.html">User Guide</a>
+        </li>
+        <li class="dropdown">
+          <button class="dropdown-toggle" aria-haspopup="true" aria-expanded="false">
+            Projects
+            <svg class="dropdown-arrow" width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+              <path d="M2 4l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+          <div class="dropdown-menu" role="menu">
+            <a href="https://github.com/TheDecipherist/mdd-tui" target="_blank" rel="noopener" role="menuitem">
+              <span class="dropdown-item-text">
+                <span class="dropdown-item-title">mdd-tui</span>
+                <span class="dropdown-item-desc">Terminal dashboard for MDD</span>
+              </span>
+            </a>
+            <a href="https://github.com/TheDecipherist/claude-code-mastery-project-starter-kit" target="_blank" rel="noopener" role="menuitem">
+              <span class="dropdown-item-text">
+                <span class="dropdown-item-title">Starter Kit</span>
+                <span class="dropdown-item-desc">Full project scaffolding</span>
+              </span>
+            </a>
+          </div>
+        </li>
+      </ul>
+    </nav>
+  </header>
+
+  <!-- ===================== -->
+  <!-- Mobile Menu Overlay   -->
+  <!-- ===================== -->
+  <div class="mobile-menu-overlay" id="mobile-menu-overlay" aria-hidden="true"></div>
+
+  <!-- Mobile Menu Drawer -->
+  <nav class="mobile-menu" id="mobile-menu" aria-label="Mobile navigation">
+    <div class="mobile-toc">
+      <p class="toc-header">On this page</p>
+      <a href="#why">Why MDD</a>
+      <a href="#how-it-works">How It Works</a>
+      <a href="#install">Installation</a>
+      <a href="#modes">All 21 Modes</a>
+      <a href="#build">Build Mode</a>
+      <a href="#audit">Audit Mode</a>
+      <a href="#results">Real Results</a>
+      <a href="#history">From Starter Kit to Standalone</a>
+      <a href="#tools">Companion Tools</a>
+    </div>
+    <div class="mobile-projects">
+      <p class="toc-header">Projects</p>
+      <a href="user-guide.html">User Guide</a>
+      <a href="https://github.com/TheDecipherist/mdd" target="_blank" rel="noopener">GitHub</a>
+      <a href="https://www.npmjs.com/package/@thedecipherist/mdd" target="_blank" rel="noopener">npm</a>
+      <a href="https://github.com/TheDecipherist/mdd-tui" target="_blank" rel="noopener">mdd-tui</a>
+      <a href="https://github.com/TheDecipherist/claude-code-mastery-project-starter-kit" target="_blank" rel="noopener">Starter Kit</a>
+    </div>
+  </nav>
+
+  <!-- ===================== -->
+  <!-- Hero Section          -->
+  <!-- ===================== -->
+  <section class="hero">
+    <div class="hero-glow" aria-hidden="true"></div>
+    <div class="hero-content container">
+      <div class="hero-badge">npm install -g @thedecipherist/mdd</div>
+      <h1>MDD &mdash; Manual-Driven Development</h1>
+      <p class="hero-subtitle">
+        One command. Twenty-one modes. Complete feature lifecycle from documentation to verified deployment.
+      </p>
+      <div class="hero-actions">
+        <a href="user-guide.html" class="btn btn-primary">Read the Guide &rarr;</a>
+        <a href="https://github.com/TheDecipherist/mdd" target="_blank" rel="noopener" class="btn btn-secondary">View on GitHub</a>
+      </div>
+    </div>
+    <div class="hero-banner">
+      <img
+        src="mdd_hero.webp"
+        alt="MDD hero image — electric teal crystals and neon green runes on a dark background"
+        width="1400"
+        loading="eager"
+      />
+    </div>
+  </section>
+
+  <!-- ===================== -->
+  <!-- Main Layout           -->
+  <!-- ===================== -->
+  <div class="main-layout container">
+
+    <!-- Sidebar TOC -->
+    <aside id="sidebar" aria-label="Table of contents">
+      <p class="toc-header">On this page</p>
+      <nav id="toc">
+        <a href="#why">Why MDD</a>
+        <a href="#how-it-works">How It Works</a>
+        <a href="#install">Installation</a>
+        <a href="#modes">All 21 Modes</a>
+        <a href="#build">Build Mode</a>
+        <a href="#audit">Audit Mode</a>
+        <a href="#results">Real Results</a>
+        <a href="#history">From Starter Kit to Standalone</a>
+        <a href="#tools">Companion Tools</a>
+      </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main id="content">
+
+      <!-- ===================== -->
+      <!-- Section: Why MDD      -->
+      <!-- ===================== -->
+      <section id="why">
+        <h2>Why MDD</h2>
+
+        <h3>The Problem</h3>
+        <p>
+          Most people prompt Claude Code like this: <em>fix the bug in my auth system.</em>
+          Claude reads 40 files, burns through context, produces something that technically
+          compiles but misses the bigger picture. The model is spending most of its budget
+          on orientation — figuring out what your project even is — rather than solving
+          your actual problem.
+        </p>
+
+        <h3>The Solution</h3>
+        <p>
+          MDD flips this. <strong>Write structured documentation first.</strong> Claude reads
+          one doc instead of 40 files &mdash; 200 tokens instead of 20,000. Every invocation
+          of <code>/mdd</code> starts with a clear, human-authored map of the feature, the
+          data flow, the test plan, and the acceptance criteria. Claude never needs to guess.
+        </p>
+
+        <div class="callout">
+          <p>
+            <strong>The core insight:</strong> The documentation you write before coding is
+            not overhead. It is the primary context Claude Code consumes. Writing it first is
+            the highest-leverage thing you can do.
+          </p>
+        </div>
+
+        <table class="scale-table">
+          <thead>
+            <tr>
+              <th>Phase</th>
+              <th>What MDD does</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>&#128196; Document</td>
+              <td>Generates structured feature docs, data-flow maps, and test plans before any code is written</td>
+            </tr>
+            <tr>
+              <td>&#128269; Audit</td>
+              <td>Deploys parallel agents to read every file and surface severity-rated findings</td>
+            </tr>
+            <tr>
+              <td>&#128200; Analyze</td>
+              <td>Compares findings against documentation, identifies root causes, and ranks fixes by impact</td>
+            </tr>
+            <tr>
+              <td>&#9989; Fix &amp; Verify</td>
+              <td>Implements fixes with mandatory red/green/integration gates — nothing ships until tests pass in a real environment</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- ===================== -->
+      <!-- Section: How It Works -->
+      <!-- ===================== -->
+      <section id="how-it-works">
+        <h2>How It Works</h2>
+
+        <p>
+          MDD is installed as a Claude Code slash command. When you run <code>/mdd</code>,
+          the router reads the first argument and loads <em>only the command file that
+          handles that mode</em>. The full instruction set spans 28,000 tokens — none of
+          it is loaded unless it is needed.
+        </p>
+
+        <h3>Lazy-Loading Architecture</h3>
+        <p>
+          The <code>/mdd</code> command is split across 7 focused files. The router
+          dispatches to exactly one file per invocation:
+        </p>
+
+        <table class="scale-table">
+          <thead>
+            <tr>
+              <th>File</th>
+              <th>~Tokens</th>
+              <th>Handles</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>mdd.md (router)</td>
+              <td>~460</td>
+              <td>Entry point — reads mode, delegates to the correct command file</td>
+            </tr>
+            <tr>
+              <td>mdd-build.md</td>
+              <td>~8,000</td>
+              <td>Full 7-phase feature development pipeline with gates</td>
+            </tr>
+            <tr>
+              <td>mdd-audit.md</td>
+              <td>~4,500</td>
+              <td>Parallel agent code review with manifest tracking</td>
+            </tr>
+            <tr>
+              <td>mdd-manage.md</td>
+              <td>~3,200</td>
+              <td>status, scan, update, note, deprecate</td>
+            </tr>
+            <tr>
+              <td>mdd-lifecycle.md</td>
+              <td>~4,800</td>
+              <td>reverse-engineer, graph, upgrade, commands</td>
+            </tr>
+            <tr>
+              <td>mdd-plan.md</td>
+              <td>~4,200</td>
+              <td>plan-initiative, plan-wave, plan-execute</td>
+            </tr>
+            <tr>
+              <td>mdd-ops.md</td>
+              <td>~2,800</td>
+              <td>ops, runop, update-op, ops list</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="callout green">
+          <p>
+            A <code>/mdd status</code> loads ~460 tokens. A <code>/mdd audit</code> loads ~700 tokens.
+            The full 28,000-token set is always available &mdash; never loaded unnecessarily.
+          </p>
+        </div>
+
+        <p>
+          This design means your context window stays clean. Claude Code enters each mode
+          with a fresh, focused instruction set rather than carrying the weight of every
+          other mode it will never use in this session.
+        </p>
+      </section>
+
+      <!-- ===================== -->
+      <!-- Section: Installation -->
+      <!-- ===================== -->
+      <section id="install">
+        <h2>Installation</h2>
+
+        <p>
+          MDD installs globally via npm. One command puts <code>/mdd</code> in every
+          Claude Code session on your machine.
+        </p>
+
+        <pre><code class="language-bash">npm install -g @thedecipherist/mdd
+mdd install</code></pre>
+
+        <p>
+          <code>mdd install</code> copies the command files to your Claude Code global
+          commands directory. After that, <code>/mdd</code> is available in any project,
+          any directory, any session — no per-project setup required.
+        </p>
+
+        <h3>Options</h3>
+
+        <div class="step">
+          <div class="step-number">1</div>
+          <div class="step-content">
+            <h3>Standard install (recommended)</h3>
+            <p>Installs to your Claude Code global commands directory automatically.</p>
+            <pre><code class="language-bash">mdd install</code></pre>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="step-number">2</div>
+          <div class="step-content">
+            <h3>Custom directory</h3>
+            <p>Install to a specific path — useful for team-shared configurations.</p>
+            <pre><code class="language-bash">mdd install --dir /path/to/claude/commands</code></pre>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="step-number">3</div>
+          <div class="step-content">
+            <h3>Update to latest version</h3>
+            <p>Pull the latest MDD version and re-install the command files.</p>
+            <pre><code class="language-bash">npm update -g @thedecipherist/mdd
+mdd install</code></pre>
+          </div>
+        </div>
+
+        <div class="callout amber">
+          <p>
+            <strong>Note:</strong> You only need to run <code>mdd install</code> once after
+            installing or updating. The slash command is registered globally and persists
+            across all Claude Code sessions.
+          </p>
+        </div>
+      </section>
+
+      <!-- ===================== -->
+      <!-- Section: All 21 Modes -->
+      <!-- ===================== -->
+      <section id="modes">
+        <h2>All 21 Modes</h2>
+
+        <p>
+          MDD organises its 21 modes into 6 groups. Each group is loaded independently —
+          running a manage command never loads the build pipeline, and running a plan command
+          never loads the audit system. Pick the mode that matches what you need right now.
+        </p>
+
+        <div class="commands-grid">
+
+          <div class="command-card">
+            <h3>&#9889; Build</h3>
+            <p class="command-desc">
+              <code>/mdd &lt;feature description&gt;</code>
+            </p>
+            <p class="command-desc">
+              The flagship mode. Runs the full 7-phase feature development pipeline with
+              mandatory gates before any code is written, tested, or shipped.
+            </p>
+            <ul>
+              <li>Understand context</li>
+              <li>Map data flow</li>
+              <li>Generate documentation</li>
+              <li>Write test skeletons</li>
+              <li>Plan implementation</li>
+              <li>Implement with iteration</li>
+              <li>Verify in real environment</li>
+            </ul>
+          </div>
+
+          <div class="command-card">
+            <h3>&#128269; Audit</h3>
+            <p class="command-desc">
+              <code>/mdd audit</code>
+            </p>
+            <p class="command-desc">
+              Parallel agent code review that scales agent count to codebase size. Each
+              file gets a full fresh context budget. Findings are severity-rated and
+              resumable if interrupted.
+            </p>
+            <ul>
+              <li>Agent scaling by file count</li>
+              <li>Manifest-tracked progress</li>
+              <li>Severity-rated findings</li>
+              <li>Automatic resume detection</li>
+            </ul>
+          </div>
+
+          <div class="command-card">
+            <h3>&#128196; Manage</h3>
+            <p class="command-desc">Day-to-day project tracking and maintenance.</p>
+            <ul>
+              <li><code>/mdd status</code> — project health summary</li>
+              <li><code>/mdd scan</code> — detect drift from docs</li>
+              <li><code>/mdd update</code> — update feature docs</li>
+              <li><code>/mdd note</code> — append a project note</li>
+              <li><code>/mdd deprecate</code> — mark features retired</li>
+            </ul>
+          </div>
+
+          <div class="command-card">
+            <h3>&#128260; Lifecycle</h3>
+            <p class="command-desc">Understand and evolve existing codebases.</p>
+            <ul>
+              <li><code>/mdd reverse-engineer</code> — generate docs from code</li>
+              <li><code>/mdd graph</code> — dependency visualization</li>
+              <li><code>/mdd upgrade</code> — plan major version migrations</li>
+              <li><code>/mdd commands</code> — list all available modes</li>
+            </ul>
+          </div>
+
+          <div class="command-card">
+            <h3>&#128203; Plan</h3>
+            <p class="command-desc">Multi-feature initiative and wave planning.</p>
+            <ul>
+              <li><code>/mdd plan-initiative</code> — scope a feature set</li>
+              <li><code>/mdd plan-wave</code> — phase work into waves</li>
+              <li><code>/mdd plan-execute</code> — run a planned wave</li>
+            </ul>
+          </div>
+
+          <div class="command-card">
+            <h3>&#9881;&#65039; Ops</h3>
+            <p class="command-desc">Repeatable operational procedures and runbooks.</p>
+            <ul>
+              <li><code>/mdd ops</code> — create an ops runbook</li>
+              <li><code>/mdd runop</code> — execute a runbook step-by-step</li>
+              <li><code>/mdd update-op</code> — revise an existing runbook</li>
+              <li><code>/mdd ops list</code> — list all runbooks</li>
+            </ul>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- ===================== -->
+      <!-- Section: Build Mode   -->
+      <!-- ===================== -->
+      <section id="build">
+        <h2>Build Mode</h2>
+
+        <p>
+          Build mode is the core of MDD. When you run <code>/mdd &lt;feature description&gt;</code>,
+          Claude Code enters a structured 7-phase pipeline. <strong>No code is written until
+          documentation, data flow, and tests exist.</strong> Three mandatory gates enforce this.
+        </p>
+
+        <h3>The Pipeline</h3>
+
+        <div class="phase-pipeline" role="list">
+
+          <div class="pipeline-step" role="listitem">
+            <div class="pipeline-dot">&#128269;</div>
+            <div class="pipeline-label">Understand</div>
+          </div>
+          <div class="pipeline-arrow" aria-hidden="true">&rarr;</div>
+
+          <div class="pipeline-step" role="listitem">
+            <div class="pipeline-dot">&#128200;</div>
+            <div class="pipeline-label">Data Flow</div>
+          </div>
+          <div class="pipeline-arrow" aria-hidden="true">&rarr;</div>
+
+          <div class="pipeline-step" role="listitem">
+            <div class="pipeline-dot">&#128196;</div>
+            <div class="pipeline-label">Document</div>
+          </div>
+          <div class="pipeline-arrow" aria-hidden="true">&rarr;</div>
+
+          <div class="pipeline-step" role="listitem">
+            <div class="pipeline-dot">&#9989;</div>
+            <div class="pipeline-label">Test Skeletons</div>
+          </div>
+          <div class="pipeline-arrow" aria-hidden="true">&rarr;</div>
+
+          <div class="pipeline-step" role="listitem">
+            <div class="pipeline-dot gate">&#128308;</div>
+            <div class="pipeline-label gate">Red Gate</div>
+          </div>
+          <div class="pipeline-arrow" aria-hidden="true">&rarr;</div>
+
+          <div class="pipeline-step" role="listitem">
+            <div class="pipeline-dot">&#128203;</div>
+            <div class="pipeline-label">Plan</div>
+          </div>
+          <div class="pipeline-arrow" aria-hidden="true">&rarr;</div>
+
+          <div class="pipeline-step" role="listitem">
+            <div class="pipeline-dot">&#9997;&#65039;</div>
+            <div class="pipeline-label">Implement</div>
+          </div>
+          <div class="pipeline-arrow" aria-hidden="true">&rarr;</div>
+
+          <div class="pipeline-step" role="listitem">
+            <div class="pipeline-dot gate">&#128994;</div>
+            <div class="pipeline-label gate">Green Gate</div>
+          </div>
+          <div class="pipeline-arrow" aria-hidden="true">&rarr;</div>
+
+          <div class="pipeline-step" role="listitem">
+            <div class="pipeline-dot">&#128202;</div>
+            <div class="pipeline-label">Verify</div>
+          </div>
+          <div class="pipeline-arrow" aria-hidden="true">&rarr;</div>
+
+          <div class="pipeline-step" role="listitem">
+            <div class="pipeline-dot gate">&#9989;</div>
+            <div class="pipeline-label gate">Integration Gate</div>
+          </div>
+
+        </div>
+
+        <h3>The Three Gates</h3>
+
+        <div class="concept-grid">
+          <div class="concept-card">
+            <h3>&#128308; Red Gate</h3>
+            <p>
+              All tests must exist and fail for the right reason before implementation begins.
+              This confirms the test suite actually catches regressions — a passing test with
+              no implementation is a broken test.
+            </p>
+          </div>
+          <div class="concept-card">
+            <h3>&#128994; Green Gate</h3>
+            <p>
+              All tests must pass. If they do not, MDD enters a <strong>5-iteration
+              diagnosis loop</strong> — root cause first, never symptom-patching.
+              After 5 failed iterations the loop stops and the issue is escalated clearly.
+            </p>
+          </div>
+          <div class="concept-card">
+            <h3>&#9989; Integration Gate</h3>
+            <p>
+              The feature is verified in a real environment — not a mocked test runner.
+              Actual API calls, actual database queries, actual edge cases. This gate
+              cannot be skipped.
+            </p>
+          </div>
+        </div>
+
+        <h3>Key Highlights</h3>
+        <ul>
+          <li><strong>Parallel context agents</strong> — the Understand phase uses multiple agents to read the codebase simultaneously, preserving the main session's context budget</li>
+          <li><strong>Documentation-first enforcement</strong> — the Red Gate physically prevents implementation until docs and failing tests exist</li>
+          <li><strong>Root-cause-first diagnosis</strong> — the Green Gate loop diagnoses the deepest root cause before touching code</li>
+          <li><strong>Real environment verification</strong> — the Integration Gate runs against a live environment, not mocks</li>
+        </ul>
+      </section>
+
+      <!-- ===================== -->
+      <!-- Section: Audit Mode   -->
+      <!-- ===================== -->
+      <section id="audit">
+        <h2>Audit Mode</h2>
+
+        <p>
+          <code>/mdd audit</code> reviews your entire codebase using parallel sub-agents.
+          Agent count scales automatically with the size of the project. Every file gets a
+          full, uncontaminated context budget.
+        </p>
+
+        <h3>Agent Scaling</h3>
+
+        <table class="scale-table">
+          <thead>
+            <tr>
+              <th>File Count</th>
+              <th>Agents Deployed</th>
+              <th>Strategy</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>&lt; 10 files</td>
+              <td>1 agent</td>
+              <td>Sequential — single focused pass</td>
+            </tr>
+            <tr>
+              <td>10 – 25 files</td>
+              <td>2 agents</td>
+              <td>Split into two parallel batches</td>
+            </tr>
+            <tr>
+              <td>26 – 50 files</td>
+              <td>3 agents</td>
+              <td>Three parallel batches</td>
+            </tr>
+            <tr>
+              <td>51 – 100 files</td>
+              <td>5 agents</td>
+              <td>Five parallel batches</td>
+            </tr>
+            <tr>
+              <td>100+ files</td>
+              <td>8 agents</td>
+              <td>Eight parallel batches</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="callout">
+          <p>
+            <strong>Context clear after every file</strong> — each file gets a full, fresh
+            analysis budget. Findings from file 1 do not crowd out the analysis of file 50.
+          </p>
+        </div>
+
+        <h3>Manifest System</h3>
+        <p>
+          MDD tracks audit progress using a manifest file written to <code>.mdd/audit/</code>.
+          Each file's status is tracked with a single character:
+        </p>
+        <ul>
+          <li><code>[ ]</code> &mdash; pending, not yet reviewed</li>
+          <li><code>[~]</code> &mdash; in progress, agent currently reading</li>
+          <li><code>[x]</code> &mdash; complete, no significant findings</li>
+          <li><code>[!]</code> &mdash; findings recorded, needs attention</li>
+          <li><code>[e]</code> &mdash; error, agent failed to read this file</li>
+        </ul>
+        <p>
+          If an audit is interrupted — by a timeout, a crash, or a manual stop — MDD
+          automatically detects the incomplete manifest on the next run and resumes from
+          where it left off. No work is lost.
+        </p>
+
+        <h3>Finding Severity Levels</h3>
+        <div class="feature-grid">
+          <div class="feature-card">
+            <div class="feature-icon feature-icon-pink">&#128308;</div>
+            <h3>Critical</h3>
+            <p>Security vulnerabilities, data loss risks, or logic errors that produce incorrect results in production.</p>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon feature-icon-amber">&#128992;</div>
+            <h3>High</h3>
+            <p>Significant bugs, missing error handling, or architectural issues that will cause problems under real load.</p>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon feature-icon-cyan">&#128993;</div>
+            <h3>Medium</h3>
+            <p>Code quality issues, test gaps, or patterns that will become problems as the codebase grows.</p>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon feature-icon-green">&#128994;</div>
+            <h3>Low</h3>
+            <p>Style inconsistencies, minor inefficiencies, and documentation gaps that do not affect correctness.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================== -->
+      <!-- Section: Real Results -->
+      <!-- ===================== -->
+      <section id="results">
+        <h2>Real Results</h2>
+
+        <p>
+          The Claude Code Mastery Starter Kit ran a full MDD audit on itself — 57 source
+          files, end to end. Here are the numbers.
+        </p>
+
+        <div class="stat-grid">
+          <div class="stat-card">
+            <div class="stat-number">48 min</div>
+            <div class="stat-label">Total time, start to finish</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-number">57</div>
+            <div class="stat-label">Files read and analysed</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-number">20</div>
+            <div class="stat-label">Actionable findings surfaced</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-number">125</div>
+            <div class="stat-label">Tests written and passing</div>
+          </div>
+        </div>
+
+        <table class="results-table">
+          <thead>
+            <tr>
+              <th>Phase</th>
+              <th>Duration</th>
+              <th>Output</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>A1 — Create documentation</td>
+              <td>8 min</td>
+              <td>Feature docs, data-flow maps, test plans</td>
+            </tr>
+            <tr>
+              <td>A2 — Read files and take notes</td>
+              <td>18 min</td>
+              <td>57 files reviewed, manifest complete</td>
+            </tr>
+            <tr>
+              <td>A3 — Analyse and rank findings</td>
+              <td>7 min</td>
+              <td>20 findings, severity-rated and prioritised</td>
+            </tr>
+            <tr>
+              <td>A5 — Fix and verify</td>
+              <td>15 min</td>
+              <td>All fixes implemented, 125 tests green</td>
+            </tr>
+            <tr>
+              <td><strong>Total</strong></td>
+              <td><strong>48 min</strong></td>
+              <td><strong>Production-ready codebase, fully documented</strong></td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="callout green">
+          <p>
+            <strong>Source:</strong> The Claude Code Mastery Project Starter Kit self-audited
+            itself using MDD v1.0.0. All times measured wall-clock. No manual intervention
+            between phases.
+          </p>
+        </div>
+      </section>
+
+      <!-- =========================== -->
+      <!-- Section: History            -->
+      <!-- =========================== -->
+      <section id="history">
+        <h2>From Starter Kit to Standalone</h2>
+
+        <div class="history-block">
+          <h3>Where MDD came from</h3>
+          <p>
+            MDD started as a single file inside the
+            <a href="https://github.com/TheDecipherist/claude-code-mastery-project-starter-kit" target="_blank" rel="noopener">Claude Code Mastery Project Starter Kit</a>.
+            The original <code>mdd.md</code> was a monolithic instruction document — roughly
+            <strong>28,000 tokens</strong> loaded in full on every single <code>/mdd</code>
+            invocation, regardless of which mode was being used. A <code>/mdd status</code>
+            check was carrying the same weight as a full build pipeline run.
+          </p>
+
+          <h3>Two changes that made it a product</h3>
+          <p>
+            <strong>1. Split into 7 focused files with lazy loading.</strong> The router
+            reads the mode argument and loads only the relevant command file. A
+            <code>/mdd status</code> now consumes ~460 tokens instead of 28,000. The full
+            instruction set is always available — never loaded unnecessarily.
+          </p>
+          <p>
+            <strong>2. Extracted as a standalone npm package.</strong> MDD is now
+            <code>@thedecipherist/mdd</code> — installable independently, versioned
+            independently, and usable in any project regardless of tech stack.
+          </p>
+
+          <h3>What this means for you</h3>
+          <p>
+            <strong>You no longer need the starter kit to use MDD.</strong> Any project,
+            any tech stack, any team. Install once, use everywhere.
+          </p>
+          <p>
+            The starter kit still exists and is actively maintained. MDD is now one
+            component you can adopt independently — or as part of the full kit if you want
+            the complete scaffolding, conventions, and toolchain that surrounds it.
+          </p>
+          <p>
+            <a href="https://github.com/TheDecipherist/claude-code-mastery-project-starter-kit" target="_blank" rel="noopener">View the Claude Code Mastery Project Starter Kit &rarr;</a>
+          </p>
+        </div>
+      </section>
+
+      <!-- ===================== -->
+      <!-- Section: Tools        -->
+      <!-- ===================== -->
+      <section id="tools">
+        <h2>Companion Tools</h2>
+
+        <p>
+          MDD is one part of a broader ecosystem. These tools are designed to work alongside
+          it — each independently useful, each better in combination.
+        </p>
+
+        <div class="feature-grid">
+
+          <div class="feature-card">
+            <div class="feature-icon feature-icon-cyan">&#128187;</div>
+            <h3>mdd-tui</h3>
+            <p>
+              A terminal dashboard for MDD. Visualise audit progress, browse findings,
+              track manifest status, and monitor active build pipelines — all from the
+              command line.
+            </p>
+            <p>
+              <a href="https://www.npmjs.com/package/@thedecipherist/mdd-tui" target="_blank" rel="noopener">npm: @thedecipherist/mdd-tui</a>
+              &nbsp;&mdash;&nbsp;
+              <a href="https://github.com/TheDecipherist/mdd-tui" target="_blank" rel="noopener">GitHub</a>
+            </p>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon feature-icon-green">&#128218;</div>
+            <h3>Claude Code Mastery Project Starter Kit</h3>
+            <p>
+              Full project scaffolding for Claude Code. Includes MDD, StrictDB, a
+              conventions guide, TypeScript config, pre-commit hooks, and the complete
+              project structure that the mastery guides are built around.
+            </p>
+            <p>
+              <a href="https://github.com/TheDecipherist/claude-code-mastery-project-starter-kit" target="_blank" rel="noopener">View on GitHub &rarr;</a>
+            </p>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon feature-icon-purple">&#128451;&#65039;</div>
+            <h3>StrictDB</h3>
+            <p>
+              A shared database access layer that enforces a single connection pattern
+              across your entire project. Eliminates the class of bugs that come from
+              multiple files managing their own database connections.
+            </p>
+            <p>
+              <a href="https://www.npmjs.com/package/strictdb" target="_blank" rel="noopener">npm: strictdb</a>
+            </p>
+          </div>
+
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- ===================== -->
+  <!-- Footer                -->
+  <!-- ===================== -->
+  <footer>
+    <div class="container">
+      <div class="footer-projects">
+        <span class="footer-label">Projects:</span>
+        <a href="https://github.com/TheDecipherist/mdd" target="_blank" rel="noopener">GitHub</a>
+        <a href="https://www.npmjs.com/package/@thedecipherist/mdd" target="_blank" rel="noopener">npm</a>
+        <a href="user-guide.html">User Guide</a>
+        <a href="https://github.com/TheDecipherist/mdd-tui" target="_blank" rel="noopener">mdd-tui</a>
+        <a href="https://github.com/TheDecipherist/claude-code-mastery-project-starter-kit" target="_blank" rel="noopener">Starter Kit</a>
+        <a href="https://www.npmjs.com/package/strictdb" target="_blank" rel="noopener">StrictDB</a>
+      </div>
+      <p>
+        MDD v1.0.0 &mdash; MIT License &mdash; by
+        <a href="https://thedecipherist.com" target="_blank" rel="noopener">TheDecipherist</a>
+      </p>
+    </div>
+  </footer>
+
+  <!-- Prism.js -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+
+  <!-- App -->
+  <script src="app.js"></script>
+</body>
+</html>

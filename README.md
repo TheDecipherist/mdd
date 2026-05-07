@@ -6,6 +6,20 @@
 
 > **One command. Twenty-one modes. Complete feature lifecycle from documentation to verified deployment.**
 
+<p align="center">
+  <a href="https://thedecipherist.github.io/mdd">
+    <img src="https://img.shields.io/badge/📖_Documentation-thedecipherist.github.io%2Fmdd-00e5cc?style=for-the-badge&labelColor=08090f" alt="Documentation Site" />
+  </a>
+  &nbsp;
+  <a href="https://thedecipherist.github.io/mdd/user-guide.html">
+    <img src="https://img.shields.io/badge/📚_User_Guide-Full_Reference-00ff88?style=for-the-badge&labelColor=08090f" alt="User Guide" />
+  </a>
+</p>
+
+[![npm version](https://img.shields.io/npm/v/@thedecipherist/mdd)](https://www.npmjs.com/package/@thedecipherist/mdd)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Node.js ≥18](https://img.shields.io/badge/node-%3E%3D18-brightgreen)](https://nodejs.org)
+
 MDD turns Claude Code from a code generator into a structured development partner. Every feature starts with documentation. Every fix starts with an audit. No exceptions.
 
 ```bash
@@ -18,23 +32,69 @@ Then in Claude Code:
 /mdd add user authentication with JWT tokens
 ```
 
+📖 **[Full Documentation Site](https://thedecipherist.github.io/mdd)** · [User Guide](https://thedecipherist.github.io/mdd/user-guide.html) · [GitHub](https://github.com/TheDecipherist/mdd)
+
 ---
 
-## Why MDD?
+## Contents
+
+- [Why MDD](#why-mdd)
+- [How It Works](#how-it-works)
+- [Installation](#installation)
+- [Quick Start](#quick-start)
+- [All 21 Modes at a Glance](#all-21-modes-at-a-glance)
+- [Build Mode — Feature Development](#build-mode--feature-development)
+- [Audit Mode — Code Review](#audit-mode--code-review)
+- [Status & Notes](#status--notes)
+- [Scan & Update — Drift Detection](#scan--update--drift-detection)
+- [Feature Lifecycle](#feature-lifecycle)
+- [Initiative & Wave Planning](#initiative--wave-planning)
+- [Ops Runbooks](#ops-runbooks)
+- [Feature Doc Format](#feature-doc-format)
+- [The `.mdd/` Directory](#the-mdd-directory)
+- [MDD Versioning](#mdd-versioning)
+- [Real Results: Self-Audit](#real-results-self-audit)
+- [History: From Starter Kit to Standalone Package](#history-from-starter-kit-to-standalone-package)
+- [Companion Tools](#companion-tools)
+- [License](#license)
+
+---
+
+## Why MDD
 
 Most people prompt Claude Code like this: *"fix the bug in my auth system."* Claude reads 40 files, burns through context trying to understand your architecture, and produces something that technically compiles but misses the bigger picture.
 
-MDD flips this. You write structured documentation first, then Claude reads **one doc** instead of 40 files. It gets the full picture in 200 tokens instead of 20,000.
+MDD flips this. You write structured documentation first. Then Claude reads **one doc** instead of 40 files — getting the full picture in 200 tokens instead of 20,000.
+
+**The core insight:** AI assistants work better when they have a map before they touch the territory. MDD is that map.
 
 **The workflow: Document → Audit → Fix → Verify**
 
 | Phase | What happens |
 |-------|-------------|
-| 📋 Document | Write feature docs with YAML frontmatter in `.mdd/docs/` |
-| 🔍 Audit | Read source code, write incremental notes to disk (survives compaction) |
-| 📊 Analyze | Read notes only → produce severity-rated findings report |
-| 🔧 Fix | Execute pre-planned fixes with tests |
-| ✅ Verify | Tests pass, types check, documentation updated |
+| 📋 Document | Write feature docs with YAML frontmatter in `.mdd/docs/` before a line of code |
+| 🔍 Audit | Read source code incrementally, write findings to disk (survives context compaction) |
+| 📊 Analyze | Read notes only → produce severity-rated findings report with effort estimates |
+| 🔧 Fix | Execute pre-planned fixes with test-driven green gate loop |
+| ✅ Verify | Real HTTP calls, real DB, real browser — not mocked |
+
+---
+
+## How It Works
+
+MDD installs 7 Claude command files into `~/.claude/commands/`. The main router (`mdd.md`) reads your arguments and loads **only the mode file needed** — a `/mdd status` loads ~460 tokens instead of the full ~28,000.
+
+```
+mdd.md        (~120 lines)  Router — Steps 0/0a/0b, mode dispatch, auto-branch
+mdd-build.md  (~680 lines)  BUILD MODE — Phases 0–7d
+mdd-audit.md  (~240 lines)  AUDIT MODE — Phases A1–A7
+mdd-manage.md (~340 lines)  STATUS + NOTE + SCAN + UPDATE + DEPRECATE
+mdd-lifecycle.md (~350 lines) REVERSE-ENGINEER + GRAPH + UPGRADE
+mdd-plan.md   (~350 lines)  PLAN-INITIATIVE + PLAN-WAVE + PLAN-EXECUTE + PLAN-SYNC + …
+mdd-ops.md    (~380 lines)  OPS DOCUMENT + OPS EXECUTE + OPS UPDATE + OPS LIST + COMMANDS
+```
+
+**Lazy loading is the key optimization.** Each invocation pays only for the mode it needs. The full 28,000-token set is always available but never loaded unnecessarily.
 
 ---
 
@@ -45,140 +105,240 @@ npm install -g @thedecipherist/mdd
 mdd install          # copies Claude commands to ~/.claude/commands/
 ```
 
+After installation, `/mdd` is available in every Claude Code session globally — no per-project setup needed.
+
 ```bash
-mdd update           # update to latest version
+mdd update           # update to latest installed version
 mdd install --dir /custom/path   # install to a custom directory
 ```
 
-After running `mdd install`, the `/mdd` command is available in every Claude Code session globally — no per-project setup needed.
+**Version safety:** `mdd install` compares `mdd_version` between the installed and available versions before overwriting. If you have a newer version installed, it won't silently downgrade.
 
 ---
 
-## Usage
-
-### Build a new feature
+## Quick Start
 
 ```bash
+# 1. Install globally
+npm install -g @thedecipherist/mdd && mdd install
+
+# 2. Open a project in Claude Code
+# 3. Run your first /mdd command:
 /mdd add user authentication with JWT tokens
-/mdd build payment integration with Stripe
-/mdd create admin dashboard for user management
-```
 
-Claude interviews you about requirements, writes structured documentation, generates test skeletons (red gate), presents a block-by-block build plan, implements with a 5-iteration green gate loop, then verifies against the real runtime environment.
-
-### Audit existing code
-
-```bash
-/mdd audit                    # full codebase audit
-/mdd audit database           # audit a specific section
-/mdd audit authentication     # audit just auth-related code
-```
-
-Scales across parallel agents (1–8 depending on file count). Notes written to disk every file so findings survive context compaction. Produces a severity-rated report (P1 Critical → P4 Low) with effort estimates.
-
-### Day-to-day operations
-
-```bash
-/mdd status                   # overview: docs, tests, audit state, drift
-/mdd scan                     # detect features whose source files changed since last session
-/mdd update 04                # re-sync a feature doc after code changes
-/mdd note "switched to PostgreSQL"   # append a timestamped note to session context
-/mdd commands                 # show this reference table in Claude
-```
-
-### Feature lifecycle
-
-```bash
-/mdd reverse-engineer src/handlers/payments.ts   # generate docs from undocumented code
-/mdd graph                    # dependency map with broken/risky dep warnings
-/mdd deprecate 03             # retire a feature cleanly, flag dependents
-/mdd upgrade                  # batch-patch missing frontmatter across all docs
-```
-
-### Initiative & wave planning
-
-```bash
-/mdd plan-initiative "auth system"           # create a multi-wave initiative
-/mdd plan-wave auth-system "Auth Foundation" # plan a wave with a demo state
-/mdd plan-execute auth-system-wave-1         # implement all features in a wave
-/mdd plan-sync auth-system                   # re-stamp waves after initiative changes
-/mdd plan-remove-feature auth-system-wave-1 auth-signup
-/mdd plan-cancel-initiative auth-system
-```
-
-### Ops runbooks
-
-```bash
-/mdd ops deploy swarmk to dokploy     # create a deployment runbook
-/mdd ops list                         # list all runbooks (global + project)
-/mdd runop swarmk-dokploy             # execute: pre-flight → canary → primary → post-flight
-/mdd update-op swarmk-dokploy         # edit an existing runbook
+# Claude will:
+# — Ask a few focused questions about your feature
+# — Write a feature doc to .mdd/docs/01-user-auth.md
+# — Generate test skeletons (all red — that's the point)
+# — Present a block-by-block build plan
+# — Implement with a 5-iteration green gate loop
+# — Verify against the real runtime environment
 ```
 
 ---
 
-## What Gets Installed
-
-`mdd install` copies 7 files to `~/.claude/commands/`:
-
-| File | Contents | Lines |
-|------|----------|-------|
-| `mdd.md` | Router — Steps 0/0a/0b, mode dispatch, auto-branch | ~120 |
-| `mdd-build.md` | BUILD MODE — Phases 0–7d (branch check, understand, data flow, docs, test skeletons, red gate, plan, implement, verify, commit) | ~680 |
-| `mdd-audit.md` | AUDIT MODE — Phases A1–A7 (scope, agent config, parallel execution, convergence, merge, analyze, fix) | ~240 |
-| `mdd-manage.md` | STATUS + NOTE + SCAN + UPDATE + DEPRECATE modes | ~340 |
-| `mdd-lifecycle.md` | REVERSE-ENGINEER + GRAPH + UPGRADE modes | ~350 |
-| `mdd-plan.md` | PLAN-INITIATIVE + PLAN-WAVE + PLAN-EXECUTE + PLAN-SYNC + PLAN-REMOVE-FEATURE + PLAN-CANCEL-INITIATIVE modes | ~350 |
-| `mdd-ops.md` | OPS DOCUMENT + OPS EXECUTE + OPS UPDATE + OPS LIST + COMMANDS modes | ~380 |
-
-The router loads only the mode file needed for each invocation — a `/mdd status` loads ~460 tokens instead of the full ~28,000. The full set is available but never loaded unnecessarily.
-
----
-
-## The `.mdd/` Directory
-
-All MDD artifacts live in a single dotfile directory:
+## All 21 Modes at a Glance
 
 ```
-.mdd/
-├── docs/                         # Feature documentation (one .md per feature)
-│   ├── 01-<feature-name>.md      # auto-numbered, YAML frontmatter
-│   └── archive/                  # Deprecated feature docs
-├── initiatives/                  # Initiative files (/mdd plan-initiative)
-├── waves/                        # Wave files (/mdd plan-wave)
-├── ops/                          # Ops runbooks (/mdd ops)
-├── audits/                       # Audit artifacts (gitignored)
-│   ├── flow-<feature>-<date>.md  # Data flow analysis (Phase 2)
-│   ├── notes-<date>.md           # Raw reading notes (Audit Phase A2)
-│   ├── report-<date>.md          # Severity-rated findings (Audit Phase A3)
-│   ├── scan-<date>.md            # Drift report (/mdd scan)
-│   └── graph-<date>.md           # Dependency graph (/mdd graph)
-├── jobs/                         # Active audit jobs (gitignored, auto-deleted)
-└── .startup.md                   # Auto-generated session context
+/mdd <feature description>                 Build Mode — Document, plan, and implement
+/mdd audit [section]                       Audit Mode — Scan code for violations and drift
+/mdd status                                Overview: docs, tests, audit state, initiatives
+/mdd scan                                  Detect features whose source files changed
+/mdd update <feature-id>                   Re-sync a feature doc after code changes
+/mdd note "text"                           Append a timestamped note to .mdd/.startup.md
+/mdd note list                             Print the Notes section
+/mdd note clear                            Wipe all notes (asks for confirmation)
+/mdd deprecate <feature-id>                Archive a feature and flag all dependents
+/mdd reverse-engineer [path|feature-id]   Generate MDD docs from existing source code
+/mdd graph                                 Render the full cross-feature dependency map
+/mdd upgrade                               Batch-patch missing frontmatter across all docs
+/mdd commands                              Show the full command reference in Claude
+/mdd plan-initiative                       Create a new multi-wave initiative
+/mdd plan-wave <wave-slug>                 Plan a wave within an existing initiative
+/mdd plan-execute <wave-slug>             Run the build flow for every feature in a wave
+/mdd plan-sync                             Reconcile manual edits to initiative/wave files
+/mdd plan-remove-feature <wave> <feature>  Remove a feature from a wave
+/mdd plan-cancel-initiative <slug>         Cancel an initiative and archive its waves
+/mdd ops <description>                     Create a deployment runbook
+/mdd ops list                              Show all runbooks (global and project)
+/mdd runop <slug>                          Execute a runbook: pre-flight → canary → post-flight
+/mdd update-op <slug>                      Edit an existing runbook
 ```
 
-`.mdd/audits/` and `.mdd/jobs/` are automatically added to `.gitignore` on first run.
+---
+
+## Build Mode — Feature Development
+
+Build mode is the core of MDD. It runs 7 phases with 3 mandatory gates.
+
+**Pipeline:** Understand → Analyze → Document → Test Skeletons → **🔴 Red Gate** → Plan → Implement → **🟢 Green Gate** → Verify → **✅ Integration Gate**
+
+### Phase 0 — Bootstrap & Mode Detection
+
+Before anything else, MDD ensures the `.mdd/` directory structure exists (silently, no prompts). It also offers to create an isolated git worktree for parallel `/mdd` sessions, and checks the current branch to auto-create a feature branch.
+
+### Phase 1 — Understand the Feature
+
+MDD launches **3 parallel Explore agents** simultaneously to gather context before asking you anything:
+
+- **Agent A (Rules):** reads `CLAUDE.md` and `project-docs/ARCHITECTURE.md` — returns coding rules, quality gates, architecture summary
+- **Agent B (Features):** globs `.mdd/docs/*.md` — returns existing feature IDs, titles, statuses, dependency chains
+- **Agent C (Codebase):** globs `src/**/*` — returns directory structure, key files, detected tech stack
+
+After all three return, Claude asks you focused questions. For tooling tasks (docs, scripts, hooks) it skips the database and API questions automatically.
+
+**Questions always asked:**
+- Does this feature depend on any existing features?
+- Are there edge cases or error scenarios you already know about?
+
+**Questions for backend/API tasks:**
+- Does this need database storage?
+- Does this have API endpoints?
+- Does this need authentication/authorization?
+- Does this need real-time updates, background jobs, or external service integrations?
+
+### Phase 2 — Data Flow & Impact Analysis
+
+For non-greenfield projects, MDD traces every piece of data the feature will touch:
+
+1. **Backend origin** — where is this value computed? Which file and line?
+2. **API transport** — exact shape in the API response, TypeScript type
+3. **Frontend consumption** — how the UI receives and transforms the value
+4. **Parallel computations** — is the same concept computed elsewhere? Does it use the same logic?
+
+Results go to `.mdd/audits/flow-<feature>-<date>.md`. A mandatory gate presents findings to you before documentation is written. **This gate is not skippable** — you must confirm before proceeding.
+
+*Automatically skipped on greenfield projects (no existing docs + fewer than 5 source files).*
+
+### Phase 3 — Write the Feature Doc
+
+MDD creates `.mdd/docs/<NN>-<feature-name>.md` with this structure:
+
+```markdown
+---
+id: 01-user-auth
+title: User Authentication
+depends_on: []
+source_files:
+  - src/handlers/auth.ts
+  - src/hooks/useAuth.ts
+routes:
+  - POST /api/v1/auth/login
+  - POST /api/v1/auth/logout
+models:
+  - users
+test_files:
+  - tests/unit/auth.test.ts
+data_flow: .mdd/audits/flow-user-auth-2026-05-07.md
+last_synced: 2026-05-07
+status: draft
+phase: documentation
+mdd_version: 8
+known_issues: []
+---
+
+# 01 — User Authentication
+
+## Purpose
+## Architecture
+## Data Model
+## API Endpoints
+## Business Rules
+## Data Flow
+## Dependencies
+## Known Issues
+```
+
+**The doc is the source of truth.** Everything that follows — tests, build plan, implementation — is generated from this document.
+
+### Phase 4 — Test Skeletons
+
+From the documented endpoints, business rules, and edge cases, MDD generates test skeletons:
+
+```typescript
+describe('User Authentication', () => {
+  describe('POST /api/v1/auth/login', () => {
+    it('should return 200 and JWT token on valid credentials', async () => {
+      // Arrange
+      // Act
+      // Assert — minimum 3 assertions
+      expect.fail('Not implemented — MDD skeleton');
+    });
+
+    it('should return 401 on invalid password', async () => {
+      expect.fail('Not implemented — MDD skeleton');
+    });
+  });
+});
+```
+
+For features needing both unit and E2E tests, two parallel agents write both files simultaneously.
+
+### Phase 4b — Red Gate (mandatory)
+
+Runs the new test files immediately after generation. **All tests must fail** before implementation begins. An unexpected pass means either the assertion is wrong or pre-existing code already satisfies it — both must be diagnosed before proceeding.
+
+```
+🔴 Red Gate: 12/12 failing (expected)
+   All skeletons confirmed RED — ready to implement.
+```
+
+### Phase 5 — Build Plan
+
+MDD presents a commit-worthy, layered build plan. Each block has:
+
+- **End-state** — what is runnable when this block finishes
+- **Commit scope** — a conventional commit one-liner
+- **Verify** — exact command to prove the block is done
+- **Handoff** — what the next block expects to exist
+
+Blocks in the same dependency layer can be marked `Runs in: parallel agents` — MDD enforces a file-declaration gate (no two agents can write the same file) and a type-dependency gate before allowing parallelism.
+
+### Phase 6 — Implement (Green Gate Loop)
+
+For each block, MDD implements and runs the Green Gate:
+
+```
+Iteration 1–5:
+  Run: pnpm test:unit -- --grep "<feature>" AND pnpm typecheck
+
+  If ALL green → proceed to regression check
+  If failing:
+    DIAGNOSE (required before any fix):
+      - What is the exact error message, file, and line?
+      - Which implementation assumption was wrong?
+      - What is the ONE targeted fix?
+    FIX — implementation only (tests are NEVER modified)
+    REPORT: "Iteration N — Root cause: X / Fix applied: Y"
+
+Iteration 5 exhausted, still failing:
+  STOP. Do not attempt iteration 6.
+  Present options: (a) continue debugging, (b) narrow scope, (c) pause and review
+```
+
+After each block goes green, the full test suite runs to catch regressions.
+
+### Phase 7 — Verify + Report
+
+**Integration gate** — quality gates alone aren't enough. MDD verifies actual behavior:
+
+- **Backend features:** real HTTP calls, real DB queries, response shape matches doc
+- **Frontend features:** browser open, network tab inspection, console error check
+- **Database features:** direct DB query confirmation, EXPLAIN on primary patterns
+- **Tooling features:** run against real scenario, verify output matches doc
+
+The ownership default: *"My code is wrong until proven otherwise."* Before accepting any external blocker, MDD runs a minimal probe and forms a specific falsifiable hypothesis.
+
+On completion, MDD offers to commit and merge:
+- **Commit & merge** — stages, commits with a conventional message, merges to main
+- **Commit only** — commits on the feature branch, offers to push
+- **Skip** — leaves git state for manual handling
 
 ---
 
-## Build Mode in Detail
+## Audit Mode — Code Review
 
-Build mode runs 7 phases with 3 mandatory gates:
-
-**Pipeline:** Understand → Analyze → Document → Test Skeletons → **Red Gate** → Plan → Implement → **Green Gate** → Verify → **Integration Gate**
-
-- **Phase 1** gathers context using 3 parallel Explore agents (rules, existing features, codebase structure)
-- **Phase 2** is a mandatory Data Flow & Impact Analysis gate — traces every data value end-to-end before writing a line of docs; automatically skipped on greenfield projects
-- **Red Gate** runs every test skeleton to confirm it actually fails before implementation begins
-- Build plan uses commit-worthy blocks with runnable end-states, verification commands, and handoff contracts; independent blocks annotated for parallel execution
-- **Green Gate** implements each block with a 5-iteration diagnosis-first loop — states root cause before each fix; stops at 5 and escalates rather than continuing blindly
-- **Integration Gate** verifies real behavior (real HTTP calls, real DB, real browser) before marking complete
-
----
-
-## Audit Mode in Detail
-
-Audit mode scales with file count (1–8 parallel agents):
+Audit mode scales with file count, running 1–8 parallel agents depending on scope:
 
 | Files in scope | Agents |
 |---|---|
@@ -186,23 +346,447 @@ Audit mode scales with file count (1–8 parallel agents):
 | 10–25 | 2 |
 | 26–50 | 3 |
 | 51–100 | 5 |
-| 100+ | 8 |
+| 100+ | 8 (default ceiling, overridable via `MDD_MAX_AGENTS`) |
 
-Each agent gets a shard of files and a config file. Agents clear context between every file — every file gets a full context window with maximum analysis budget. Notes are written to disk so findings survive compaction. The manifest tracks `[ ] pending → [~] in progress → [x] complete → [!] findings → [e] error` for every file.
+### The Manifest System
+
+Before spawning a single agent, MDD writes a manifest to `.mdd/jobs/audit-<date>/MANIFEST.md`:
+
+```
+## Shard 1 (Agent 1) — files 1-15
+[ ] src/handlers/auth.ts
+[ ] src/handlers/users.ts
+...
+
+## Shard 2 (Agent 2) — files 16-30
+[ ] src/handlers/billing.ts
+```
+
+State transitions: `[ ] pending → [~] in progress → [x] complete → [!] has findings → [e] error`
+
+**Why this matters:** If Claude's context is compacted mid-audit, the manifest survives. Each agent reads its config file on startup, finds the first `[ ]` in its shard, and resumes exactly where it left off. No findings are lost.
+
+### Per-Agent Config
+
+Each agent receives a self-contained config file (not the source code):
+
+```
+# Agent 1 Audit Config
+Shard file:  .mdd/jobs/audit-<date>/shard-1.md
+Notes file:  .mdd/jobs/audit-<date>/agent-1-notes.md
+Manifest:    .mdd/jobs/audit-<date>/MANIFEST.md
+
+Startup Sequence:
+1. Read this config file
+2. Read shard-1.md to know your file list
+3. Read MANIFEST.md — find the first [ ] entry in Shard 1
+4. Read the last 20 lines of agent-1-notes.md for continuity
+5. Begin the per-file loop
+```
+
+### Per-File Loop
+
+Each agent follows this exact loop for every file:
+
+1. Mark file as `[~]` in MANIFEST (write to disk first — before reading)
+2. Read the source file fully
+3. Analyze against audit criteria
+4. Append to `agent-N-notes.md`
+5. Mark file as `[x]` or `[!]` in MANIFEST
+6. **Clear context** — every file gets a fresh context window
+
+**Context clear is mandatory.** The notes file and manifest are the memory. Every file gets maximum analysis budget.
+
+### Audit Phases
+
+- **A1 — Scope:** reads all `.mdd/docs/`, `.mdd/ops/`, resolves source files, detects interrupted audits
+- **A2 — Config Setup:** writes shard files and config files for each agent before spawning
+- **A3 — Parallel Execution:** all agents run simultaneously
+- **A4 — Convergence:** main checks for any `[ ]` or `[~]` entries, re-runs stale shards
+- **A5 — Merge:** merges all agent notes into `audits/notes-<date>.md` in manifest order
+- **A6 — Analyze:** reads notes only (not source again) → produces `audits/report-<date>.md`
+- **A7 — Present & Fix:** shows findings by severity, offers to fix all / P1+P2 only / review first
+
+### Audit Report Format
+
+```
+🔍 MDD Audit Complete
+
+Findings: 20 total (3 P1 Critical, 5 P2 High, 8 P3 Medium, 4 P4 Low)
+Report: .mdd/audits/report-2026-05-07.md
+
+Top issues:
+  1. Raw database connection in src/handlers/billing.ts (P1 — use StrictDB)
+  2. JWT secret hardcoded in src/middleware/auth.ts (P1 — use env var)
+  3. No rate limiting on /api/v1/auth/login (P2)
+
+Estimated fix time: 6 hours (traditional) → 45 minutes (MDD)
+```
+
+### Resuming an Interrupted Audit
+
+If an audit is interrupted (context limit, manual stop), re-running `/mdd audit` detects the stale job:
+
+```
+Found interrupted audit from 2026-05-07.
+MANIFEST shows 23/57 files complete.
+
+  [R] Resume — continue from where it left off
+  [D] Discard — delete and start fresh
+```
+
+---
+
+## Status & Notes
+
+### `/mdd status`
+
+Gives a complete project snapshot:
+
+```
+📊 MDD Status
+
+Feature docs:     9 files in .mdd/docs/
+Ops runbooks:     2 files in .mdd/ops/
+Last audit:       2026-05-01 (20 findings, 17 fixed, 3 open)
+Test coverage:    125 unit tests, 8 E2E tests
+Known issues:     3 tracked across 2 features
+Quality gates:    0 files over 300 lines
+
+Initiatives:      1 total (1 active)
+  Active waves:   auth-system-wave-2 [1/2 features complete]
+
+MDD version:      v8 — all files up to date
+
+Drift check:
+  8 features in sync
+  1 feature possibly drifted  ← run /mdd scan for details
+```
+
+After collecting status, `/mdd status` rebuilds `.mdd/.startup.md` — the session context file that gets loaded at the start of every Claude Code session, keeping Claude oriented without requiring a full codebase read.
+
+### `/mdd note`
+
+Three subcommands for maintaining a running log in `.mdd/.startup.md`:
+
+```bash
+/mdd note "switched from PostgreSQL to SQLite for dev"
+/mdd note list      # print all notes
+/mdd note clear     # wipe notes (asks for confirmation)
+```
+
+Notes are timestamped and survive session resets.
+
+---
+
+## Scan & Update — Drift Detection
+
+### `/mdd scan`
+
+Detects which features have drifted since their last MDD session. Uses a single Explore agent to run all git checks in parallel, then classifies each feature:
+
+| Classification | Meaning |
+|---|---|
+| ✅ in_sync | `last_synced` exists, all files exist, no commits after sync date |
+| ⚠️ drifted | Commits found after `last_synced` — doc may be stale |
+| ❌ broken | One or more `source_files` not found on disk |
+| ❓ untracked | No `last_synced` field in frontmatter |
+
+```
+🔍 MDD Scan — Drift Report
+
+  ✅ 01-project-scaffolding   — in sync (last synced: 2026-04-15)
+  ⚠️  04-content-builder       — DRIFTED (3 commits since 2026-04-01)
+                                  Latest: "fix: markdown heading parser"
+  ❌  07-github-pages           — broken reference (docs/index.html not found)
+
+Recommended actions:
+  /mdd update 04   — re-sync content-builder doc with code
+  /mdd update 07   — fix broken file reference
+```
+
+### `/mdd update <feature-id>`
+
+Re-syncs a feature doc after its code has changed:
+
+1. Reads the current source files
+2. Diffs doc vs code (new functions, removed endpoints, changed business rules)
+3. Presents a change summary and asks for confirmation
+4. Rewrites only the affected sections (preserves `known_issues`, `depends_on`)
+5. Generates test skeletons for any new documented behaviors
+6. Updates `last_synced` to today
+
+```bash
+/mdd update 04          # by number
+/mdd update 04-content-builder  # by full slug
+```
+
+---
+
+## Feature Lifecycle
+
+### `/mdd deprecate <feature-id>`
+
+Archives a feature cleanly and flags all dependents:
+
+1. Shows a deprecation summary including which other features depend on this one
+2. Moves the doc to `.mdd/docs/archive/`
+3. Adds a `known_issues` warning to each dependent doc
+4. Asks separately about deleting source files and test files — never auto-deletes
+
+### `/mdd reverse-engineer [path|feature-id]`
+
+Generates MDD documentation from existing undocumented code:
+
+- **No argument:** scans `src/` for files not registered in any `.mdd/docs/*.md`
+- **File path:** generates a doc for that specific file
+- **Feature ID:** regenerates an existing doc — shows a before/after comparison
+
+For 4+ files, uses parallel Explore agents to read in batches. Always discloses limitations upfront:
+
+```
+⚠️  Reverse-engineer limitations:
+   - "Purpose" section is inferred — review business intent carefully
+   - Implicit constraints (SLAs, compliance, product decisions) are not captured
+   - Confirm accuracy before treating this doc as the source of truth
+```
+
+### `/mdd graph`
+
+Renders the full cross-feature dependency map and detects issues:
+
+- **Broken dependency:** depends on a deprecated/archived feature
+- **Risky dependency:** a `complete` feature depends on a `draft` or `in_progress` one
+- **Orphan:** a feature with no dependents and no dependencies
+- **Task dependency:** a feature incorrectly lists a one-off task doc in `depends_on`
+
+```
+📊 MDD Dependency Graph
+
+  06-command-system ──────────────────► 01-project-scaffolding
+  09-integrations ────────────────────► 06-command-system
+  04-content-builder ─────────────────► 03-database-layer
+
+Issues:
+  ⚠️  09-integrations depends on 06-command-system (status: in_progress) — risky
+  ❌  05-testing-framework depends on 10-old-auth (deprecated) — broken
+```
+
+Saved to `.mdd/audits/graph-<date>.md`.
+
+### `/mdd upgrade`
+
+Batch-patches missing frontmatter fields (`last_synced`, `status`, `phase`) across all `.mdd/docs/*.md` files. Safe to run multiple times — already-present fields are never overwritten.
+
+Infers sensible defaults from git history, existing field values, and archive status. Shows a plan before writing anything.
+
+---
+
+## Initiative & Wave Planning
+
+For large features that span multiple weeks or deployment cycles, MDD provides a structured planning system.
+
+### Initiatives
+
+An initiative is a named goal decomposed into waves. Each wave has a "demo-state" — something concrete that a user can do when the wave is complete.
+
+```bash
+/mdd plan-initiative    # creates a new initiative with named waves
+```
+
+This writes `.mdd/initiatives/<slug>.md` with a hash-locked frontmatter. If you manually edit the file, MDD detects the hash mismatch on the next operation and requires you to run `/mdd plan-sync` first.
+
+### Waves
+
+Each wave is a set of features that collectively deliver the demo-state.
+
+```bash
+/mdd plan-wave auth-system-wave-1   # plan a wave's features and dependencies
+```
+
+Before planning a wave, MDD enforces:
+- **Open questions gate:** all product questions must be resolved before wave planning
+- **Depends-on gate:** the wave's dependency (another wave) must be `complete` first
+- **Feature ordering check:** internal feature dependencies within the wave are validated
+
+### Execution
+
+```bash
+/mdd plan-execute auth-system-wave-1   # run full MDD build for each feature in order
+```
+
+Two modes:
+- **Automated** — minimal interruptions, pauses only on 5-iteration failures or integration failures
+- **Interactive** — full MDD gates on every feature, full plan confirmations
+
+Features are executed in dependency order, skipping already-`complete` ones. If interrupted, re-running resumes from the first `active` or `planned` feature.
+
+### Sync, Remove, Cancel
+
+```bash
+/mdd plan-sync                              # reconcile manual edits via hash comparison
+/mdd plan-remove-feature <wave> <feature>  # remove a feature from a wave
+/mdd plan-cancel-initiative <slug>         # cancel initiative, archive waves, flag feature docs
+```
+
+---
+
+## Ops Runbooks
+
+Deployment runbooks for reproducing infrastructure operations reliably.
+
+### Creating a Runbook
+
+```bash
+/mdd ops deploy swarmk to dokploy
+```
+
+MDD asks: project-local (`.mdd/ops/`) or global (`~/.claude/ops/`)? Global runbooks are reusable across all projects. A collision check prevents project runbooks from shadowing global ones.
+
+The runbook format includes:
+- **Services** — each service with its Docker image, port, and health check command
+- **Regions** — deployment targets with `deploy_order` and `role` (canary/primary)
+- **Deployment strategy** — sequential or parallel, gate type (`health_check` / `manual` / `none`), `on_gate_failure` behavior
+- **Credentials** — env var names only (never values)
+- **MCP servers** — any MCP tools required during deployment
+
+### Executing a Runbook
+
+```bash
+/mdd runop swarmk-dokploy
+```
+
+Execution flow:
+1. **Pre-flight health check** — runs each service's health check across all regions, displays a status table
+2. **Deploy region by region** (in `deploy_order`):
+   - Deploy unhealthy services
+   - Run the region gate (health check / manual confirm / automatic)
+   - On gate failure: `stop` / `skip_region` / `rollback` per config
+3. **Post-flight health check** — full cross-region before/after table
+4. **Summary** — pass/fail per region, steps executed, `last_synced` updated in runbook
+
+```bash
+/mdd ops list       # show all runbooks (global + project) with last-run status
+/mdd update-op <slug>   # edit a runbook, re-ask all questions with current values pre-filled
+```
+
+---
+
+## Feature Doc Format
+
+Every `.mdd/docs/<NN>-<feature-name>.md` file uses this YAML frontmatter:
+
+| Field | Purpose |
+|-------|---------|
+| `id` | Auto-numbered slug (e.g., `01-user-auth`) |
+| `title` | Human-readable title |
+| `edition` | Project name or `Both` |
+| `depends_on` | List of feature doc IDs this feature requires |
+| `source_files` | Files that will be created or modified |
+| `routes` | API routes (e.g., `POST /api/v1/auth/login`) |
+| `models` | Database collections/tables used |
+| `test_files` | Test files for this feature |
+| `data_flow` | Path to flow analysis doc, or `greenfield` |
+| `last_synced` | Date of last doc-to-code sync (drives drift detection in `/mdd scan`) |
+| `status` | `draft` → `in_progress` → `complete` → `deprecated` |
+| `phase` | Last completed phase name |
+| `mdd_version` | Version of MDD that created/last updated this doc |
+| `known_issues` | Issues discovered during audits or implementation |
+
+**`depends_on` rules:**
+- Feature docs only — never list task docs (one-off, frozen, no ongoing contract)
+- IDs must reference existing docs — `/mdd graph` detects broken references
+- Only add, never remove without discussion — removing breaks the dependency chain
+
+---
+
+## The `.mdd/` Directory
+
+All MDD artifacts live in one place:
+
+```
+.mdd/
+├── docs/                         # Feature documentation (one .md per feature)
+│   ├── 01-<feature-name>.md      # auto-numbered, YAML frontmatter
+│   └── archive/                  # Deprecated or cancelled feature docs
+├── initiatives/                  # Initiative files (/mdd plan-initiative)
+├── waves/                        # Wave execution files (/mdd plan-wave)
+├── ops/                          # Project-scoped deployment runbooks
+├── audits/                       # ⚠️ gitignored — regenerated by /mdd audit
+│   ├── flow-<feature>-<date>.md  # Data flow analysis (Phase 2)
+│   ├── notes-<date>.md           # Raw reading notes (Audit Phase A5)
+│   ├── report-<date>.md          # Severity-rated findings (Audit Phase A6)
+│   ├── scan-<date>.md            # Drift report (/mdd scan)
+│   ├── graph-<date>.md           # Dependency graph (/mdd graph)
+│   └── MANIFEST-<date>.md        # Permanent audit manifest (which files had findings)
+├── jobs/                         # ⚠️ gitignored — auto-deleted when audit completes
+│   └── audit-<date>/             # Active audit job (agents write here during audit)
+│       ├── MANIFEST.md
+│       ├── shard-N.md
+│       ├── agent-N-config.md
+│       └── agent-N-notes.md
+└── .startup.md                   # Auto-generated session context (read by Claude on start)
+```
+
+`.mdd/audits/` and `.mdd/jobs/` are automatically added to `.gitignore` on first run. Everything else in `.mdd/` is committed — it's your project's knowledge base.
+
+### The `.startup.md` File
+
+This file is the session context that orients Claude at the start of every conversation. MDD rebuilds it automatically after every `status`, `audit`, or `note` command:
+
+```markdown
+## Project Snapshot
+Generated: 2026-05-07 | Branch: feat/user-auth
+
+## Stack
+Framework: Express + React | DB: PostgreSQL | Host: Dokploy
+
+## Features Documented
+01-project-scaffolding (complete)
+02-user-auth (in_progress)
+...
+
+## Last Audit
+2026-05-01 — 20 findings, 17 fixed, 3 open
+
+## Rules Summary
+[key rules from CLAUDE.md]
+
+---
+## Notes
+- [2026-05-07] switched from JWT lib to jose for better ESM support
+```
+
+The auto-generated section above the `---` is rebuilt each time. The Notes section below is append-only and preserved.
 
 ---
 
 ## MDD Versioning
 
-Every feature doc, wave, and initiative created by MDD is stamped with `mdd_version: N` in its frontmatter. `/mdd status` shows a breakdown of which docs are on which version. `mdd install` compares `mdd_version` between the installed and available versions before overwriting — no silent overwrites.
+Every file created by MDD is stamped with `mdd_version: N` in its frontmatter. This tracks which version of the workflow created or last updated each doc.
 
-The current MDD version is `8` (bumped with each release to this package).
+```bash
+mdd install   # compares versions before overwriting — no silent upgrades
+/mdd status   # shows version breakdown across all docs
+```
+
+Current MDD version: **8**
+
+`/mdd status` version output:
+```
+MDD version: v8 (current)
+  v8: 9 files — up to date
+  v7: 2 files — run /mdd upgrade to refresh these docs
+  v0 (unversioned): 1 file — created before versioning was introduced
+```
+
+Run `/mdd upgrade` after updating MDD to batch-patch older docs.
 
 ---
 
 ## Real Results: Self-Audit
 
-The [Claude Code Mastery Starter Kit](https://github.com/TheDecipherist/claude-code-mastery-project-starter-kit) used MDD to audit itself:
+The [Claude Code Mastery Starter Kit](https://github.com/TheDecipherist/claude-code-mastery-project-starter-kit) used MDD to audit itself. Real numbers, no cherry-picking:
 
 | Audit Step | Time | Output |
 |------------|------|--------|
@@ -212,12 +796,38 @@ The [Claude Code Mastery Starter Kit](https://github.com/TheDecipherist/claude-c
 | A5: Fix All | 10 min 53s | 17/20 fixed, 125 tests written |
 | **Total** | **~48 min** | **20 findings, 125 tests from zero** |
 
+**P1 findings fixed:**
+- 3 raw database connections replaced with StrictDB
+- 2 hardcoded secrets moved to environment variables
+- 1 missing input validation on a public endpoint
+
+---
+
+## History: From Starter Kit to Standalone Package
+
+MDD started as one component of the **[Claude Code Mastery Project Starter Kit](https://github.com/TheDecipherist/claude-code-mastery-project-starter-kit)** — a full project scaffolding tool with 27 slash commands, 9 hooks, TypeScript-first quality gates, agents, skills, and the StrictDB database layer.
+
+Within the starter kit, the entire MDD workflow lived in a single `mdd.md` file (~28,000 tokens) that was loaded in full on every invocation. This worked, but it meant every `/mdd status` call burned the entire command budget even though it only needed the status logic.
+
+**Two things changed:**
+
+1. **Split into 7 files** — the monolithic `mdd.md` was broken into a router + 6 mode files. The router loads only the file needed for each invocation. A `/mdd status` now costs ~460 tokens instead of 28,000. The full capability is always available, but never loaded unnecessarily.
+
+2. **Extracted as a standalone npm package** — MDD now lives at `@thedecipherist/mdd` and installs into Claude Code with a single `mdd install`. You don't need the starter kit to use MDD. You don't need to clone a repo, configure anything, or adapt a boilerplate. Just `npm install -g @thedecipherist/mdd && mdd install` and you're done.
+
+**The starter kit still exists** and is still maintained. It provides the broader scaffolding for TypeScript projects: CLAUDE.md templates, hooks configuration, StrictDB integration, custom agents, and skills. MDD is one part of that ecosystem. But now you can use MDD on its own — in any project, any tech stack, any language — without adopting the full kit.
+
+**What this means in practice:**
+- If you have an existing project → `npm install -g @thedecipherist/mdd && mdd install` and start running `/mdd` commands
+- If you want the full starter kit experience → clone the starter kit and MDD is included
+- If you're already on the starter kit → upgrade to the standalone MDD package for the optimized split-file version
+
 ---
 
 ## Companion Tools
 
-- **[mdd-tui](https://github.com/TheDecipherist/mdd-tui)** — Terminal dashboard for browsing your `.mdd/` workspace (docs, audits, graph, ops runbooks) in a live TUI. Install: `npm install -g @thedecipherist/mdd-tui`
-- **[Claude Code Mastery Starter Kit](https://github.com/TheDecipherist/claude-code-mastery-project-starter-kit)** — Full project scaffolding with hooks, rules, skills, and agents. MDD is one component of the kit.
+- **[mdd-tui](https://github.com/TheDecipherist/mdd-tui)** — Terminal dashboard for browsing your `.mdd/` workspace (docs, audits, graph, ops runbooks) in a live TUI. `npm install -g @thedecipherist/mdd-tui`
+- **[Claude Code Mastery Starter Kit](https://github.com/TheDecipherist/claude-code-mastery-project-starter-kit)** — Full project scaffolding: hooks, CLAUDE.md templates, TypeScript rules, agents, skills, StrictDB. MDD originated here.
 - **[strictdb](https://www.npmjs.com/package/strictdb)** — Database wrapper with guardrails used across starter kit projects
 
 ---
