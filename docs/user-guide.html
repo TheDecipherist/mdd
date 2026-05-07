@@ -3,11 +3,11 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>MDD User Guide — Manual-Driven Development</title>
-  <meta name="description" content="Complete user guide for MDD — Manual-Driven Development. Learn every mode, phase, and command for the @thedecipherist/mdd Claude Code workflow." />
+  <title>MDD User Guide - Manual-Driven Development</title>
+  <meta name="description" content="Complete user guide for MDD - Manual-Driven Development. Learn every mode, phase, and command for the @thedecipherist/mdd Claude Code workflow." />
   <meta name="keywords" content="MDD, Manual-Driven Development, Claude Code, AI workflow, slash commands, feature documentation" />
   <meta name="author" content="TheDecipherist" />
-  <meta property="og:title" content="MDD User Guide — Manual-Driven Development" />
+  <meta property="og:title" content="MDD User Guide - Manual-Driven Development" />
   <meta property="og:description" content="Complete reference for all 21 MDD modes: Build, Audit, Status, Scan, Update, Plan, Ops, and more." />
   <meta property="og:url" content="https://thedecipherist.github.io/mdd/user-guide.html" />
   <meta property="og:type" content="website" />
@@ -97,7 +97,7 @@
   <div class="mobile-toc">
     <div class="toc-header">User Guide</div>
     <a href="#getting-started">Getting Started</a>
-    <a href="#build-mode">Build Mode — 7 Phases</a>
+    <a href="#build-mode">Build Mode - 7 Phases</a>
     <a href="#audit-mode">Audit Mode</a>
     <a href="#manage-modes">Status, Notes, Scan &amp; Update</a>
     <a href="#lifecycle-modes">Lifecycle: Reverse-Engineer, Graph, Upgrade</a>
@@ -128,10 +128,10 @@
 <section class="hero">
   <div class="hero-glow"></div>
   <div class="container hero-content">
-    <div class="hero-badge">User Guide — v1.0.0</div>
+    <div class="hero-badge">User Guide - v1.0.0</div>
     <h1>MDD User Guide</h1>
     <p class="hero-subtitle">
-      Complete reference for all 21 modes — Build, Audit, Status, Scan, Update, Plan, Ops, and more.
+      Complete reference for all 21 modes - Build, Audit, Status, Scan, Update, Plan, Ops, and more.
     </p>
     <pre><code class="language-bash">npm install -g @thedecipherist/mdd
 mdd install</code></pre>
@@ -147,7 +147,7 @@ mdd install</code></pre>
       <div class="toc-header">On this page</div>
       <nav id="toc" aria-label="Table of contents">
         <a href="#getting-started">Getting Started</a>
-        <a href="#build-mode">Build Mode — 7 Phases</a>
+        <a href="#build-mode">Build Mode - 7 Phases</a>
         <a href="#audit-mode">Audit Mode</a>
         <a href="#manage-modes">Status, Notes, Scan &amp; Update</a>
         <a href="#lifecycle-modes">Lifecycle Modes</a>
@@ -185,7 +185,7 @@ mdd --version</code></pre>
 
         <p>
           After <code>mdd install</code>, the <code>/mdd</code> slash command is available in every Claude Code
-          session globally — no per-project setup, no repo cloning, no config files.
+          session globally - no per-project setup, no repo cloning, no config files.
         </p>
 
         <h3>What <code>mdd install</code> Does</h3>
@@ -195,31 +195,31 @@ mdd --version</code></pre>
         <div class="commands-grid">
           <div class="command-card">
             <h3><code>mdd.md</code></h3>
-            <p class="command-desc">Router — reads your arguments and loads only the mode file needed. Contains the auto-branch logic and the bootstrap check.</p>
+            <p class="command-desc">Router - reads your arguments and loads only the mode file needed. Contains the auto-branch logic and the bootstrap check.</p>
           </div>
           <div class="command-card">
             <h3><code>mdd-build.md</code></h3>
-            <p class="command-desc">Build mode — the full 7-phase feature development workflow (Phases 0–7d).</p>
+            <p class="command-desc">Build mode - the full 7-phase feature development workflow (Phases 0–7d).</p>
           </div>
           <div class="command-card">
             <h3><code>mdd-audit.md</code></h3>
-            <p class="command-desc">Audit mode — parallel agent code review with manifest-backed resumption (Phases A1–A7).</p>
+            <p class="command-desc">Audit mode - parallel agent code review with manifest-backed resumption (Phases A1–A7).</p>
           </div>
           <div class="command-card">
             <h3><code>mdd-manage.md</code></h3>
-            <p class="command-desc">Status, Note, Scan, Update, Deprecate — daily workflow management commands.</p>
+            <p class="command-desc">Status, Note, Scan, Update, Deprecate - daily workflow management commands.</p>
           </div>
           <div class="command-card">
             <h3><code>mdd-lifecycle.md</code></h3>
-            <p class="command-desc">Reverse-engineer, Graph, Upgrade — doc generation and codebase analysis.</p>
+            <p class="command-desc">Reverse-engineer, Graph, Upgrade - doc generation and codebase analysis.</p>
           </div>
           <div class="command-card">
             <h3><code>mdd-plan.md</code></h3>
-            <p class="command-desc">Plan-initiative, plan-wave, plan-execute, plan-sync — multi-wave initiative management.</p>
+            <p class="command-desc">Plan-initiative, plan-wave, plan-execute, plan-sync - multi-wave initiative management.</p>
           </div>
           <div class="command-card">
             <h3><code>mdd-ops.md</code></h3>
-            <p class="command-desc">Ops, runop, update-op, ops list — deployment runbook creation and execution.</p>
+            <p class="command-desc">Ops, runop, update-op, ops list - deployment runbook creation and execution.</p>
           </div>
         </div>
 
@@ -260,7 +260,7 @@ mdd --version</code></pre>
 
         <div class="callout amber">
           <p>
-            <strong>No prompts, no confirmations.</strong> The bootstrap is silent and automatic. You will not be asked anything — it just happens before your first command runs.
+            <strong>No prompts, no confirmations.</strong> The bootstrap is silent and automatic. You will not be asked anything - it just happens before your first command runs.
           </p>
         </div>
 
@@ -278,13 +278,13 @@ mdd --version</code></pre>
 # At Phase 7d you choose: commit+merge, commit only, or skip.</code></pre>
 
         <p>
-          This is not configurable — it is a guardrail. If you are already on a feature branch, no new branch is created and the router proceeds directly to the mode.
+          This is not configurable - it is a guardrail. If you are already on a feature branch, no new branch is created and the router proceeds directly to the mode.
         </p>
       </section>
 
       <!-- ===== BUILD MODE ===== -->
       <section id="build-mode">
-        <h2>Build Mode — 7 Phases</h2>
+        <h2>Build Mode - 7 Phases</h2>
 
         <p>
           Build mode is the core of MDD. It runs a structured 7-phase workflow with 3 mandatory quality gates.
@@ -338,38 +338,38 @@ mdd --version</code></pre>
           </div>
         </div>
 
-        <h3>Phase 0 — Bootstrap, Worktree Check &amp; Mode Detection</h3>
+        <h3>Phase 0 - Bootstrap, Worktree Check &amp; Mode Detection</h3>
         <p>
           Before any analysis begins, Phase 0 does three things simultaneously:
         </p>
         <ol>
-          <li><strong>Worktree check</strong> — offers to create an isolated git worktree if you want to run parallel <code>/mdd</code> sessions on different features without interference.</li>
-          <li><strong>Bootstrap</strong> — runs the one-time <code>.mdd/</code> directory setup if this is the first invocation in this project.</li>
-          <li><strong>Mode detection</strong> — inspects the argument string to determine whether this is a build, audit, status, note, scan, update, or any other mode, then loads the appropriate command file.</li>
+          <li><strong>Worktree check</strong> - offers to create an isolated git worktree if you want to run parallel <code>/mdd</code> sessions on different features without interference.</li>
+          <li><strong>Bootstrap</strong> - runs the one-time <code>.mdd/</code> directory setup if this is the first invocation in this project.</li>
+          <li><strong>Mode detection</strong> - inspects the argument string to determine whether this is a build, audit, status, note, scan, update, or any other mode, then loads the appropriate command file.</li>
         </ol>
 
-        <pre><code class="language-bash"># Example invocations — Phase 0 reads the argument and routes accordingly
+        <pre><code class="language-bash"># Example invocations - Phase 0 reads the argument and routes accordingly
 /mdd add user auth with JWT             # → Build mode
 /mdd audit                              # → Audit mode
 /mdd status                             # → Manage mode: status
 /mdd note "switched to jose library"    # → Manage mode: note</code></pre>
 
-        <h3>Phase 1 — Understand the Feature (3 Parallel Agents)</h3>
+        <h3>Phase 1 - Understand the Feature (3 Parallel Agents)</h3>
         <p>
           Before asking you a single question, MDD launches 3 Explore agents in parallel to gather the context Claude needs to ask <em>the right</em> questions.
         </p>
 
         <div class="concept-grid">
           <div class="concept-card">
-            <h3>Agent A — Rules</h3>
+            <h3>Agent A - Rules</h3>
             <p>Reads <code>CLAUDE.md</code> and <code>project-docs/ARCHITECTURE.md</code>. Returns: coding rules, quality gates, architecture summary, forbidden patterns.</p>
           </div>
           <div class="concept-card">
-            <h3>Agent B — Features</h3>
+            <h3>Agent B - Features</h3>
             <p>Globs <code>.mdd/docs/*.md</code>. Returns: existing feature IDs, titles, statuses, dependency chains, known issues. Used to pre-fill <code>depends_on</code> and detect conflicts.</p>
           </div>
           <div class="concept-card">
-            <h3>Agent C — Codebase</h3>
+            <h3>Agent C - Codebase</h3>
             <p>Globs <code>src/**/*</code>. Returns: directory tree, key files by type, detected tech stack (framework, DB, test runner, bundler). Used to adapt questions to your project.</p>
           </div>
         </div>
@@ -392,21 +392,21 @@ mdd --version</code></pre>
 
         <div class="callout green">
           <p>
-            <strong>Tooling tasks skip DB/API questions.</strong> If Claude detects from the feature description and Agent C output that this is a docs, scripts, hooks, or CI task — it skips the database and API questions automatically. Only questions relevant to the feature type are asked.
+            <strong>Tooling tasks skip DB/API questions.</strong> If Claude detects from the feature description and Agent C output that this is a docs, scripts, hooks, or CI task - it skips the database and API questions automatically. Only questions relevant to the feature type are asked.
           </p>
         </div>
 
-        <h3>Phase 2 — Data Flow &amp; Impact Analysis</h3>
+        <h3>Phase 2 - Data Flow &amp; Impact Analysis</h3>
         <p>
           For non-greenfield projects, MDD traces every piece of data the new feature will touch through the full stack. This prevents the most common integration failures.
         </p>
 
         <p>The analysis traces four layers:</p>
         <ol>
-          <li><strong>Backend origin</strong> — where is this value computed? Which file and line?</li>
-          <li><strong>API transport</strong> — exact shape in the API response, TypeScript type definition</li>
-          <li><strong>Frontend consumption</strong> — how the UI receives, transforms, and renders the value</li>
-          <li><strong>Parallel computations</strong> — is the same concept computed elsewhere? Does it use consistent logic?</li>
+          <li><strong>Backend origin</strong> - where is this value computed? Which file and line?</li>
+          <li><strong>API transport</strong> - exact shape in the API response, TypeScript type definition</li>
+          <li><strong>Frontend consumption</strong> - how the UI receives, transforms, and renders the value</li>
+          <li><strong>Parallel computations</strong> - is the same concept computed elsewhere? Does it use consistent logic?</li>
         </ol>
 
         <p>Results are written to <code>.mdd/audits/flow-&lt;feature&gt;-&lt;date&gt;.md</code>. A mandatory gate presents findings to you before documentation is written.</p>
@@ -419,7 +419,7 @@ mdd --version</code></pre>
 
         <p><strong>Automatic greenfield skip condition:</strong> Phase 2 is skipped automatically when <code>.mdd/docs/</code> contains no existing docs <em>and</em> <code>src/</code> contains fewer than 5 source files. There is nothing to trace on a blank project.</p>
 
-        <h3>Phase 3 — Writing the Feature Doc</h3>
+        <h3>Phase 3 - Writing the Feature Doc</h3>
         <p>
           MDD creates <code>.mdd/docs/&lt;NN&gt;-&lt;feature-name&gt;.md</code> with a standard structure. This doc is the source of truth for everything that follows.
         </p>
@@ -452,7 +452,7 @@ known_issues: []
 ---</code></pre>
 
         <p><strong>The 8 mandatory body sections:</strong></p>
-        <pre><code class="language-markdown"># 01 — User Authentication
+        <pre><code class="language-markdown"># 01 - User Authentication
 
 ## Purpose
 Why this feature exists and what user need it satisfies.
@@ -467,11 +467,11 @@ Fields, types, constraints, and relationships for any database models.
 Request/response shapes, status codes, auth requirements.
 
 ## Business Rules
-Logic that is not obvious from the code — validation rules, limits,
+Logic that is not obvious from the code - validation rules, limits,
 workflow decisions, and anything a new developer would need to know.
 
 ## Data Flow
-Summary of the Phase 2 analysis — or a link to the full flow doc.
+Summary of the Phase 2 analysis - or a link to the full flow doc.
 
 ## Dependencies
 What this feature requires from other features, services, or libs.
@@ -485,9 +485,9 @@ Empty on creation. Populated during audits and implementation.</code></pre>
           </p>
         </div>
 
-        <h3>Phase 4 — Test Skeletons</h3>
+        <h3>Phase 4 - Test Skeletons</h3>
         <p>
-          From the documented endpoints, business rules, and edge cases, MDD generates test skeletons. These are intentionally failing stubs — real test cases with real assertions that will fail until the implementation exists.
+          From the documented endpoints, business rules, and edge cases, MDD generates test skeletons. These are intentionally failing stubs - real test cases with real assertions that will fail until the implementation exists.
         </p>
 
         <pre><code class="language-typescript">describe('User Authentication', () => {
@@ -499,60 +499,60 @@ Empty on creation. Populated during audits and implementation.</code></pre>
       // Act
       const res = await request(app).post('/api/v1/auth/login').send(payload);
 
-      // Assert — minimum 3 assertions
+      // Assert - minimum 3 assertions
       expect(res.status).toBe(200);
       expect(res.body).toHaveProperty('token');
       expect(res.body.token).toMatch(/^eyJ/); // JWT prefix
-      expect.fail('Not implemented — MDD skeleton');
+      expect.fail('Not implemented - MDD skeleton');
     });
 
     it('should return 401 on invalid password', async () => {
-      expect.fail('Not implemented — MDD skeleton');
+      expect.fail('Not implemented - MDD skeleton');
     });
 
     it('should return 422 on malformed email', async () => {
-      expect.fail('Not implemented — MDD skeleton');
+      expect.fail('Not implemented - MDD skeleton');
     });
   });
 
   describe('Business Rules', () => {
     it('should lock account after 5 failed attempts', async () => {
-      expect.fail('Not implemented — MDD skeleton');
+      expect.fail('Not implemented - MDD skeleton');
     });
   });
 });</code></pre>
 
         <p>
-          For features that require both unit tests and end-to-end tests, two parallel agents write both files simultaneously — unit tests and E2E tests are generated at the same time.
+          For features that require both unit tests and end-to-end tests, two parallel agents write both files simultaneously - unit tests and E2E tests are generated at the same time.
         </p>
 
-        <h3>Phase 4b — Red Gate (Mandatory)</h3>
+        <h3>Phase 4b - Red Gate (Mandatory)</h3>
         <p>
           Immediately after generating skeletons, MDD runs your test suite against them. <strong>All new tests must fail.</strong>
         </p>
 
         <pre><code class="language-bash"># What a passing Red Gate looks like:
 🔴 Red Gate: 12/12 failing (expected)
-   All skeletons confirmed RED — ready to implement.
+   All skeletons confirmed RED - ready to implement.
 
 # What triggers a diagnosis:
-🔴 Red Gate: 11/12 failing — 1 unexpected pass
+🔴 Red Gate: 11/12 failing - 1 unexpected pass
    ⚠️  "should return 200 on valid credentials" passed without implementation.
    Diagnosis required before proceeding.</code></pre>
 
         <p>An unexpected pass means one of two things, and both must be diagnosed:</p>
         <ul>
-          <li>The assertion is wrong (too weak — it would pass for any response)</li>
+          <li>The assertion is wrong (too weak - it would pass for any response)</li>
           <li>Pre-existing code already satisfies this test case (and the skeleton's scope overlaps existing work)</li>
         </ul>
 
         <div class="callout amber">
           <p>
-            <strong>Red Gate is not optional.</strong> A test that passes before implementation is not a test — it is a false safety signal. The Red Gate eliminates false signals before they corrupt the Green Gate loop.
+            <strong>Red Gate is not optional.</strong> A test that passes before implementation is not a test - it is a false safety signal. The Red Gate eliminates false signals before they corrupt the Green Gate loop.
           </p>
         </div>
 
-        <h3>Phase 5 — Block-Structured Build Plan</h3>
+        <h3>Phase 5 - Block-Structured Build Plan</h3>
         <p>
           MDD presents a layered build plan before writing a line of implementation code. Each block has four components:
         </p>
@@ -560,7 +560,7 @@ Empty on creation. Populated during audits and implementation.</code></pre>
         <div class="concept-grid">
           <div class="concept-card">
             <h3>End-state</h3>
-            <p>What is runnable and demonstrably working when this block finishes. Not "I will write X" — "a user can do Y."</p>
+            <p>What is runnable and demonstrably working when this block finishes. Not "I will write X" - "a user can do Y."</p>
           </div>
           <div class="concept-card">
             <h3>Commit scope</h3>
@@ -572,23 +572,23 @@ Empty on creation. Populated during audits and implementation.</code></pre>
           </div>
           <div class="concept-card">
             <h3>Handoff</h3>
-            <p>What the next block depends on existing when it starts — the interface contract between blocks.</p>
+            <p>What the next block depends on existing when it starts - the interface contract between blocks.</p>
           </div>
         </div>
 
-        <pre><code class="language-yaml">Block 1 — Database Schema & User Model
+        <pre><code class="language-yaml">Block 1 - Database Schema & User Model
   End-state:    Users table exists, migration runs cleanly, model exports User type
   Commit:       feat(auth): add users table migration and User model
   Verify:       pnpm db:migrate && pnpm typecheck
   Handoff:      User type exported from src/models/user.ts, migration in db/migrations/
 
-Block 2 — Login Endpoint (depends on Block 1)
+Block 2 - Login Endpoint (depends on Block 1)
   End-state:    POST /api/v1/auth/login returns JWT on valid credentials, 401 on invalid
   Commit:       feat(auth): add login endpoint with JWT generation
   Verify:       pnpm test:unit -- --grep "auth login"
   Handoff:      generateToken() exported from src/utils/jwt.ts
 
-Block 3 — Auth Middleware (depends on Block 2)
+Block 3 - Auth Middleware (depends on Block 2)
   End-state:    requireAuth middleware validates JWT and rejects invalid tokens
   Commit:       feat(auth): add requireAuth middleware
   Verify:       pnpm test:unit -- --grep "requireAuth"
@@ -596,11 +596,11 @@ Block 3 — Auth Middleware (depends on Block 2)
 
         <p><strong>Parallelization rules:</strong> Blocks in the same dependency layer can be marked <code>Runs in: parallel agents</code>. Two gates must pass before parallelism is allowed:</p>
         <ul>
-          <li><strong>File declaration gate</strong> — no two parallel agents can declare the same file in their block. Conflicts must be resolved by splitting into sequential blocks.</li>
-          <li><strong>Type dependency gate</strong> — if Block A exports a type that Block B imports, Block B cannot run in parallel with Block A.</li>
+          <li><strong>File declaration gate</strong> - no two parallel agents can declare the same file in their block. Conflicts must be resolved by splitting into sequential blocks.</li>
+          <li><strong>Type dependency gate</strong> - if Block A exports a type that Block B imports, Block B cannot run in parallel with Block A.</li>
         </ul>
 
-        <h3>Phase 6 — Implement: The Green Gate Loop</h3>
+        <h3>Phase 6 - Implement: The Green Gate Loop</h3>
         <p>
           For each block in the build plan, MDD implements and then runs the Green Gate. The loop runs up to 5 iterations.
         </p>
@@ -610,34 +610,34 @@ Block 3 — Auth Middleware (depends on Block 2)
 
   RESULT: 3 failing
     DIAGNOSE (required before any fix):
-      — Exact error: "Cannot find module 'src/utils/jwt.ts'"
-      — Which assumption was wrong: jwt.ts not created yet in this block
-      — The ONE targeted fix: create src/utils/jwt.ts with generateToken()
+      - Exact error: "Cannot find module 'src/utils/jwt.ts'"
+      - Which assumption was wrong: jwt.ts not created yet in this block
+      - The ONE targeted fix: create src/utils/jwt.ts with generateToken()
 
-    FIX: implementation only — tests are never modified
-    REPORT: "Iteration 1 — Root cause: missing jwt.ts / Fix: created jwt.ts"
+    FIX: implementation only - tests are never modified
+    REPORT: "Iteration 1 - Root cause: missing jwt.ts / Fix: created jwt.ts"
 
 Iteration 2:
   Run: pnpm test:unit -- --grep "01-user-auth" &amp;&amp; pnpm typecheck
   RESULT: All green ✓
 
   Regression check: pnpm test:unit (full suite)
-  RESULT: No regressions ✓ — block complete, proceed to Block 2</code></pre>
+  RESULT: No regressions ✓ - block complete, proceed to Block 2</code></pre>
 
         <div class="callout amber">
           <p>
-            <strong>Tests are never modified during the Green Gate loop.</strong> If a test fails, the implementation is wrong — not the test. If you genuinely need to change a test (the spec changed), stop the loop, update the doc in Phase 3, and regenerate the skeleton in Phase 4.
+            <strong>Tests are never modified during the Green Gate loop.</strong> If a test fails, the implementation is wrong - not the test. If you genuinely need to change a test (the spec changed), stop the loop, update the doc in Phase 3, and regenerate the skeleton in Phase 4.
           </p>
         </div>
 
         <p><strong>Iteration 5 exhaustion protocol:</strong> If all 5 iterations are exhausted and tests are still failing, MDD stops and presents options:</p>
         <ul>
-          <li><strong>(a) Continue debugging</strong> — deeper investigation before attempting another fix</li>
-          <li><strong>(b) Narrow scope</strong> — split the block into smaller, more targeted pieces</li>
-          <li><strong>(c) Pause and review</strong> — step back and reassess the approach with you</li>
+          <li><strong>(a) Continue debugging</strong> - deeper investigation before attempting another fix</li>
+          <li><strong>(b) Narrow scope</strong> - split the block into smaller, more targeted pieces</li>
+          <li><strong>(c) Pause and review</strong> - step back and reassess the approach with you</li>
         </ul>
 
-        <h3>Phase 7a — Quality Gates</h3>
+        <h3>Phase 7a - Quality Gates</h3>
         <p>
           After all blocks go green, a full quality gate runs before integration verification:
         </p>
@@ -645,7 +645,7 @@ Iteration 2:
 pnpm test:unit          # All unit tests must pass (including the full suite)
 pnpm lint               # No linter warnings</code></pre>
 
-        <h3>Phase 7b — Integration Verification</h3>
+        <h3>Phase 7b - Integration Verification</h3>
         <p>
           Quality gates prove the code compiles and unit tests pass. Integration verification proves the feature actually works in the real runtime environment. The verification method depends on the feature type:
         </p>
@@ -683,7 +683,7 @@ pnpm lint               # No linter warnings</code></pre>
           </p>
         </div>
 
-        <h3>Phase 7c — Completion Signal</h3>
+        <h3>Phase 7c - Completion Signal</h3>
         <p>
           Once integration verification passes, MDD updates the feature doc:
         </p>
@@ -694,14 +694,14 @@ pnpm lint               # No linter warnings</code></pre>
           <li>Updates <code>.mdd/.startup.md</code> with the new feature status</li>
         </ul>
 
-        <h3>Phase 7d — Commit &amp; Merge Options</h3>
+        <h3>Phase 7d - Commit &amp; Merge Options</h3>
         <p>
           MDD offers three options for handling git state at the end of a build:
         </p>
         <ul>
-          <li><strong>Commit &amp; merge</strong> — stages all changes, commits with a conventional message, merges the feature branch to <code>main</code>, and asks if you want to push.</li>
-          <li><strong>Commit only</strong> — stages and commits on the feature branch, offers to push to remote for a PR workflow.</li>
-          <li><strong>Skip</strong> — leaves git state completely untouched for manual handling.</li>
+          <li><strong>Commit &amp; merge</strong> - stages all changes, commits with a conventional message, merges the feature branch to <code>main</code>, and asks if you want to push.</li>
+          <li><strong>Commit only</strong> - stages and commits on the feature branch, offers to push to remote for a PR workflow.</li>
+          <li><strong>Skip</strong> - leaves git state completely untouched for manual handling.</li>
         </ul>
       </section>
 
@@ -733,20 +733,20 @@ pnpm lint               # No linter warnings</code></pre>
           </tbody>
         </table>
 
-        <h3>A1 — Scope Detection</h3>
+        <h3>A1 - Scope Detection</h3>
         <p>
           Before spawning any agents, MDD reads all <code>.mdd/docs/*.md</code> and <code>.mdd/ops/*.md</code> files, resolves their <code>source_files</code> lists to actual disk paths, de-duplicates, and checks for an interrupted audit job in <code>.mdd/jobs/</code>.
         </p>
 
-        <h3>A2 — Per-Agent Config Setup</h3>
+        <h3>A2 - Per-Agent Config Setup</h3>
         <p>
           Before any agent reads a single source file, MDD writes the full job infrastructure to disk:
         </p>
         <ul>
-          <li><code>.mdd/jobs/audit-&lt;date&gt;/MANIFEST.md</code> — the master file list with state markers</li>
-          <li><code>.mdd/jobs/audit-&lt;date&gt;/shard-N.md</code> — the file list for each agent</li>
-          <li><code>.mdd/jobs/audit-&lt;date&gt;/agent-N-config.md</code> — self-contained startup instructions</li>
-          <li><code>.mdd/jobs/audit-&lt;date&gt;/agent-N-notes.md</code> — empty file for each agent's findings</li>
+          <li><code>.mdd/jobs/audit-&lt;date&gt;/MANIFEST.md</code> - the master file list with state markers</li>
+          <li><code>.mdd/jobs/audit-&lt;date&gt;/shard-N.md</code> - the file list for each agent</li>
+          <li><code>.mdd/jobs/audit-&lt;date&gt;/agent-N-config.md</code> - self-contained startup instructions</li>
+          <li><code>.mdd/jobs/audit-&lt;date&gt;/agent-N-notes.md</code> - empty file for each agent's findings</li>
         </ul>
 
         <h3>The Manifest System</h3>
@@ -754,14 +754,14 @@ pnpm lint               # No linter warnings</code></pre>
           The MANIFEST is what makes audit resumption reliable. It is written before agents start and updated throughout the audit.
         </p>
 
-        <pre><code class="language-markdown">## Shard 1 (Agent 1) — files 1-15
+        <pre><code class="language-markdown">## Shard 1 (Agent 1) - files 1-15
 [ ] src/handlers/auth.ts
 [ ] src/handlers/users.ts
 [ ] src/handlers/billing.ts
 [ ] src/middleware/requireAuth.ts
 ...
 
-## Shard 2 (Agent 2) — files 16-30
+## Shard 2 (Agent 2) - files 16-30
 [ ] src/services/stripe.ts
 [ ] src/utils/jwt.ts
 ...</code></pre>
@@ -792,7 +792,7 @@ pnpm lint               # No linter warnings</code></pre>
 
         <h3>Per-Agent Config Format</h3>
         <p>
-          Each agent receives a self-contained config file — not the source code, not the full manifest. Just what it needs to do its job independently:
+          Each agent receives a self-contained config file - not the source code, not the full manifest. Just what it needs to do its job independently:
         </p>
 
         <pre><code class="language-markdown"># Agent 1 Audit Config
@@ -803,7 +803,7 @@ Manifest:    .mdd/jobs/audit-2026-05-07/MANIFEST.md
 Startup Sequence:
 1. Read this config file
 2. Read shard-1.md to know your file list
-3. Read MANIFEST.md — find the first [ ] entry in Shard 1
+3. Read MANIFEST.md - find the first [ ] entry in Shard 1
 4. Read the last 20 lines of agent-1-notes.md for continuity
 5. Begin the per-file loop
 
@@ -829,7 +829,7 @@ Audit Criteria:
           <div class="step-number">2</div>
           <div class="step-content">
             <h3>Read the source file fully</h3>
-            <p>No partial reads — the entire file is loaded. This is why the context clear in step 6 is mandatory.</p>
+            <p>No partial reads - the entire file is loaded. This is why the context clear in step 6 is mandatory.</p>
           </div>
         </div>
         <div class="step">
@@ -857,33 +857,33 @@ Audit Criteria:
           <div class="step-number">6</div>
           <div class="step-content">
             <h3>Clear context</h3>
-            <p>Every file gets a fresh context window. The notes file and MANIFEST are the persistent memory — the source file is not. This ensures every file gets the full analysis budget regardless of how many files came before it.</p>
+            <p>Every file gets a fresh context window. The notes file and MANIFEST are the persistent memory - the source file is not. This ensures every file gets the full analysis budget regardless of how many files came before it.</p>
           </div>
         </div>
 
-        <h3>A3 — Parallel Execution</h3>
+        <h3>A3 - Parallel Execution</h3>
         <p>
           All agents are spawned simultaneously after A2 setup is complete. Each agent operates independently, writing to its own notes file and updating the shared MANIFEST atomically. Agents do not communicate with each other.
         </p>
 
-        <h3>A4 — Convergence Check</h3>
+        <h3>A4 - Convergence Check</h3>
         <p>
           After all agents signal completion, the main Claude instance reads the MANIFEST and checks for any remaining <code>[ ]</code> or <code>[~]</code> entries:
         </p>
         <ul>
-          <li><code>[ ]</code> entries — file was never started. Re-assign to a new agent and run.</li>
-          <li><code>[~]</code> entries — file was in-progress when an agent was interrupted. Re-process the file from scratch (mark back to <code>[ ]</code> first).</li>
+          <li><code>[ ]</code> entries - file was never started. Re-assign to a new agent and run.</li>
+          <li><code>[~]</code> entries - file was in-progress when an agent was interrupted. Re-process the file from scratch (mark back to <code>[ ]</code> first).</li>
         </ul>
         <p>Convergence repeats until the MANIFEST has no <code>[ ]</code> or <code>[~]</code> entries.</p>
 
-        <h3>A5 — Merge Agent Notes</h3>
+        <h3>A5 - Merge Agent Notes</h3>
         <p>
-          All <code>agent-N-notes.md</code> files are merged in manifest order (not agent order) into a single <code>.mdd/audits/notes-&lt;date&gt;.md</code>. Manifest order ensures findings appear in the same sequence as the files were processed — easier to cross-reference.
+          All <code>agent-N-notes.md</code> files are merged in manifest order (not agent order) into a single <code>.mdd/audits/notes-&lt;date&gt;.md</code>. Manifest order ensures findings appear in the same sequence as the files were processed - easier to cross-reference.
         </p>
 
-        <h3>A6 — Analyze Findings</h3>
+        <h3>A6 - Analyze Findings</h3>
         <p>
-          The analysis phase reads <em>only</em> the merged notes file — not the source code again. This is the key efficiency: all source reads happen in A3, and the analysis works from structured notes. The output is <code>.mdd/audits/report-&lt;date&gt;.md</code> with severity-rated findings and effort estimates.
+          The analysis phase reads <em>only</em> the merged notes file - not the source code again. This is the key efficiency: all source reads happen in A3, and the analysis works from structured notes. The output is <code>.mdd/audits/report-&lt;date&gt;.md</code> with severity-rated findings and effort estimates.
         </p>
 
         <pre><code class="language-bash">🔍 MDD Audit Complete
@@ -892,8 +892,8 @@ Findings: 20 total (3 P1 Critical, 5 P2 High, 8 P3 Medium, 4 P4 Low)
 Report: .mdd/audits/report-2026-05-07.md
 
 Top issues:
-  1. Raw database connection in src/handlers/billing.ts (P1 — use StrictDB)
-  2. JWT secret hardcoded in src/middleware/auth.ts (P1 — use env var)
+  1. Raw database connection in src/handlers/billing.ts (P1 - use StrictDB)
+  2. JWT secret hardcoded in src/middleware/auth.ts (P1 - use env var)
   3. No rate limiting on /api/v1/auth/login (P2)
   4. 3 endpoints not documented in any feature doc (P2)
 
@@ -902,16 +902,16 @@ Estimated fix time: 6 hours (traditional) → 45 minutes (MDD)
 Options:
   [A] Fix all findings
   [B] Fix P1 + P2 only
-  [R] Review first — show findings list before fixing</code></pre>
+  [R] Review first - show findings list before fixing</code></pre>
 
-        <h3>A7 — Present and Fix</h3>
+        <h3>A7 - Present and Fix</h3>
         <p>
-          MDD presents findings grouped by severity. You choose how to proceed. Each fix follows the same Green Gate loop as Build mode — diagnose before fix, tests must pass, regressions checked.
+          MDD presents findings grouped by severity. You choose how to proceed. Each fix follows the same Green Gate loop as Build mode - diagnose before fix, tests must pass, regressions checked.
         </p>
 
         <h3>Incremental vs Full Audit</h3>
         <p>
-          When you audit a single feature (<code>/mdd audit 01-user-auth</code>), only that feature's <code>source_files</code> are included in scope. This is an incremental audit — it does not replace the full audit report, it appends to it.
+          When you audit a single feature (<code>/mdd audit 01-user-auth</code>), only that feature's <code>source_files</code> are included in scope. This is an incremental audit - it does not replace the full audit report, it appends to it.
         </p>
         <p>
           A full <code>/mdd audit</code> with no arguments audits all files registered across all feature docs and ops runbooks.
@@ -928,8 +928,8 @@ MANIFEST shows 23/57 files complete.
   [~]  1 file in progress (will be re-processed)
   [ ] 33 files remaining
 
-  [R] Resume — continue from where it left off
-  [D] Discard — delete and start fresh</code></pre>
+  [R] Resume - continue from where it left off
+  [D] Discard - delete and start fresh</code></pre>
 
         <p>
           Choosing Resume re-runs A2 (updating config files to reflect remaining work), then continues from A3 with fresh agents. Previously completed notes are preserved and merged in A5.
@@ -941,7 +941,7 @@ MANIFEST shows 23/57 files complete.
         <h2>Status, Notes, Scan &amp; Update</h2>
 
         <p>
-          These commands handle daily workflow management — checking project state, logging decisions, detecting drift, and keeping docs in sync with code.
+          These commands handle daily workflow management - checking project state, logging decisions, detecting drift, and keeping docs in sync with code.
         </p>
 
         <h3><code>/mdd status</code></h3>
@@ -961,7 +961,7 @@ Quality gates:    0 files over 300 lines
 Initiatives:      1 total (1 active)
   Active waves:   auth-system-wave-2 [1/2 features complete]
 
-MDD version:      v8 — all files up to date
+MDD version:      v8 - all files up to date
 
 Drift check:
   8 features in sync
@@ -977,7 +977,7 @@ Drift check:
         </p>
 
         <pre><code class="language-bash"># Append a timestamped note
-/mdd note "switched from PostgreSQL to SQLite for dev — easier local setup"
+/mdd note "switched from PostgreSQL to SQLite for dev - easier local setup"
 
 # List all notes
 /mdd note list
@@ -986,13 +986,13 @@ Drift check:
 /mdd note clear</code></pre>
 
         <p>
-          Notes are appended below a <code>---</code> separator in <code>.startup.md</code>. The auto-generated section above the separator is rebuilt on each <code>/mdd status</code>. The notes section is <strong>append-only</strong> and preserved across rebuilds — cleared only by <code>/mdd note clear</code>.
+          Notes are appended below a <code>---</code> separator in <code>.startup.md</code>. The auto-generated section above the separator is rebuilt on each <code>/mdd status</code>. The notes section is <strong>append-only</strong> and preserved across rebuilds - cleared only by <code>/mdd note clear</code>.
         </p>
 
         <pre><code class="language-markdown">## Notes
 - [2026-05-07] switched from JWT lib to jose for better ESM support
-- [2026-05-05] decided against Redis for session store — overkill for current scale
-- [2026-05-03] deferred email verification to after MVP — tracked in 03-notifications</code></pre>
+- [2026-05-05] decided against Redis for session store - overkill for current scale
+- [2026-05-03] deferred email verification to after MVP - tracked in 03-notifications</code></pre>
 
         <h3><code>/mdd scan</code></h3>
         <p>
@@ -1008,25 +1008,25 @@ Drift check:
           </thead>
           <tbody>
             <tr><td>in_sync</td><td><code>last_synced</code> exists, all source files exist on disk, no commits after sync date</td></tr>
-            <tr><td>drifted</td><td>Commits found touching source files after <code>last_synced</code> — doc may be stale</td></tr>
-            <tr><td>broken</td><td>One or more <code>source_files</code> not found on disk — file was moved, renamed, or deleted</td></tr>
-            <tr><td>untracked</td><td>No <code>last_synced</code> field in frontmatter — doc predates drift detection</td></tr>
+            <tr><td>drifted</td><td>Commits found touching source files after <code>last_synced</code> - doc may be stale</td></tr>
+            <tr><td>broken</td><td>One or more <code>source_files</code> not found on disk - file was moved, renamed, or deleted</td></tr>
+            <tr><td>untracked</td><td>No <code>last_synced</code> field in frontmatter - doc predates drift detection</td></tr>
           </tbody>
         </table>
 
-        <pre><code class="language-bash">🔍 MDD Scan — Drift Report
+        <pre><code class="language-bash">🔍 MDD Scan - Drift Report
 
-  ✅ 01-project-scaffolding   — in sync (last synced: 2026-04-15)
-  ✅ 02-user-auth             — in sync (last synced: 2026-05-07)
-  ⚠️  04-content-builder       — DRIFTED (3 commits since 2026-04-01)
+  ✅ 01-project-scaffolding   - in sync (last synced: 2026-04-15)
+  ✅ 02-user-auth             - in sync (last synced: 2026-05-07)
+  ⚠️  04-content-builder       - DRIFTED (3 commits since 2026-04-01)
                                   Latest: "fix: markdown heading parser (a3f4c1b)"
-  ❌  07-github-pages           — broken reference (docs/index.html not found)
-  ❓ 08-old-feature            — untracked (no last_synced field)
+  ❌  07-github-pages           - broken reference (docs/index.html not found)
+  ❓ 08-old-feature            - untracked (no last_synced field)
 
 Recommended actions:
-  /mdd update 04   — re-sync content-builder doc with code
-  /mdd update 07   — fix broken file reference
-  /mdd upgrade     — stamp 08-old-feature with last_synced</code></pre>
+  /mdd update 04   - re-sync content-builder doc with code
+  /mdd update 07   - fix broken file reference
+  /mdd upgrade     - stamp 08-old-feature with last_synced</code></pre>
 
         <h3><code>/mdd update &lt;feature-id&gt;</code></h3>
         <p>
@@ -1062,7 +1062,7 @@ Recommended actions:
           <div class="step-number">U4</div>
           <div class="step-content">
             <h3>Rewrite affected sections only</h3>
-            <p>Rewrites only the sections that changed. <code>known_issues</code> and <code>depends_on</code> are always preserved — never overwritten by an update.</p>
+            <p>Rewrites only the sections that changed. <code>known_issues</code> and <code>depends_on</code> are always preserved - never overwritten by an update.</p>
           </div>
         </div>
         <div class="step">
@@ -1086,11 +1086,11 @@ Recommended actions:
         </p>
 
         <ol>
-          <li>Runs an impact check — reads all other feature docs and lists any that reference this feature in <code>depends_on</code>.</li>
+          <li>Runs an impact check - reads all other feature docs and lists any that reference this feature in <code>depends_on</code>.</li>
           <li>Shows a deprecation summary with the full dependent list. Requires your confirmation.</li>
           <li>Moves the doc to <code>.mdd/docs/archive/</code>.</li>
           <li>Adds a <code>known_issues</code> warning to each dependent doc: <em>"Depends on deprecated feature: &lt;id&gt;"</em>.</li>
-          <li>Asks separately about deleting source files and test files — <strong>never auto-deletes</strong>. Both are optional and confirmed individually.</li>
+          <li>Asks separately about deleting source files and test files - <strong>never auto-deletes</strong>. Both are optional and confirmed individually.</li>
         </ol>
 
         <div class="callout amber">
@@ -1115,17 +1115,17 @@ Recommended actions:
 # Generate a doc for a specific file
 /mdd reverse-engineer src/handlers/billing.ts
 
-# Regenerate an existing doc — shows before/after comparison
+# Regenerate an existing doc - shows before/after comparison
 /mdd reverse-engineer 04-content-builder</code></pre>
 
         <p>
-          For 4 or more files, reverse-engineer uses parallel Explore agents to read files in batches — same agent scaling as audit mode.
+          For 4 or more files, reverse-engineer uses parallel Explore agents to read files in batches - same agent scaling as audit mode.
         </p>
 
         <div class="callout amber">
           <p>
-            <strong>Limitations disclosure — always shown before generation:</strong>
-            <br />"Purpose" sections are inferred from code — review business intent carefully. Implicit constraints (SLAs, compliance rules, product decisions) are not captured from code alone. Confirm accuracy before treating any reverse-engineered doc as the source of truth.
+            <strong>Limitations disclosure - always shown before generation:</strong>
+            <br />"Purpose" sections are inferred from code - review business intent carefully. Implicit constraints (SLAs, compliance rules, product decisions) are not captured from code alone. Confirm accuracy before treating any reverse-engineered doc as the source of truth.
           </p>
         </div>
 
@@ -1133,10 +1133,10 @@ Recommended actions:
           When called with no argument, the scan result is shown first:
         </p>
         <pre><code class="language-bash">Found 4 undocumented source files:
-  src/handlers/billing.ts     — no feature doc references this file
-  src/services/stripe.ts      — no feature doc references this file
-  src/utils/currency.ts       — no feature doc references this file
-  src/hooks/useBilling.ts     — no feature doc references this file
+  src/handlers/billing.ts     - no feature doc references this file
+  src/services/stripe.ts      - no feature doc references this file
+  src/utils/currency.ts       - no feature doc references this file
+  src/hooks/useBilling.ts     - no feature doc references this file
 
 Generate docs for all 4? [Y/n]
 Or specify a subset: [1,3] to generate for billing.ts and currency.ts only</code></pre>
@@ -1156,7 +1156,7 @@ Or specify a subset: [1,3] to generate for billing.ts and currency.ts only</code
           <tbody>
             <tr><td>broken</td><td>A feature depends on a doc that is deprecated or archived</td></tr>
             <tr><td>risky</td><td>A <code>complete</code> feature depends on a <code>draft</code> or <code>in_progress</code> feature</td></tr>
-            <tr><td>orphan</td><td>A feature has no dependents and no dependencies — it is fully isolated</td></tr>
+            <tr><td>orphan</td><td>A feature has no dependents and no dependencies - it is fully isolated</td></tr>
             <tr><td>task dep</td><td>A feature doc incorrectly lists a one-off task doc in <code>depends_on</code></td></tr>
           </tbody>
         </table>
@@ -1170,23 +1170,23 @@ Or specify a subset: [1,3] to generate for billing.ts and currency.ts only</code
   02-user-auth (orphan)
 
 Issues:
-  ⚠️  09-integrations depends on 06-command-system (status: in_progress) — risky
-  ❌  05-testing-framework depends on 10-old-auth (deprecated) — broken dep
-  ℹ️  02-user-auth — orphan (no dependents, no dependencies)
+  ⚠️  09-integrations depends on 06-command-system (status: in_progress) - risky
+  ❌  05-testing-framework depends on 10-old-auth (deprecated) - broken dep
+  ℹ️  02-user-auth - orphan (no dependents, no dependencies)
 
 Graph saved: .mdd/audits/graph-2026-05-07.md</code></pre>
 
         <h3><code>/mdd upgrade</code></h3>
         <p>
-          Batch-patches missing frontmatter fields across all <code>.mdd/docs/*.md</code> files. Safe to run multiple times — fields that are already present are never overwritten.
+          Batch-patches missing frontmatter fields across all <code>.mdd/docs/*.md</code> files. Safe to run multiple times - fields that are already present are never overwritten.
         </p>
 
         <p><strong>Inferring defaults:</strong> MDD uses these sources to infer sensible default values rather than leaving fields blank:</p>
         <ul>
-          <li><strong><code>last_synced</code></strong> — inferred from <code>git log --follow -1 --format="%as" &lt;source_file&gt;</code> for each registered source file</li>
-          <li><strong><code>status</code></strong> — inferred from <code>phase</code> field if present; defaults to <code>draft</code> if phase is absent</li>
-          <li><strong><code>phase</code></strong> — inferred from <code>status</code>; <code>complete</code> status maps to <code>verified</code> phase</li>
-          <li><strong><code>mdd_version</code></strong> — stamped with the current MDD version number</li>
+          <li><strong><code>last_synced</code></strong> - inferred from <code>git log --follow -1 --format="%as" &lt;source_file&gt;</code> for each registered source file</li>
+          <li><strong><code>status</code></strong> - inferred from <code>phase</code> field if present; defaults to <code>draft</code> if phase is absent</li>
+          <li><strong><code>phase</code></strong> - inferred from <code>status</code>; <code>complete</code> status maps to <code>verified</code> phase</li>
+          <li><strong><code>mdd_version</code></strong> - stamped with the current MDD version number</li>
         </ul>
 
         <pre><code class="language-bash">/mdd upgrade
@@ -1194,8 +1194,8 @@ Graph saved: .mdd/audits/graph-2026-05-07.md</code></pre>
 Scanning .mdd/docs/ for missing frontmatter fields...
 
 Upgrade plan (8 files to patch):
-  04-content-builder    — add: last_synced (inferred: 2026-04-01), mdd_version
-  08-old-feature        — add: last_synced (inferred: 2026-03-15), status, phase, mdd_version
+  04-content-builder    - add: last_synced (inferred: 2026-04-01), mdd_version
+  08-old-feature        - add: last_synced (inferred: 2026-03-15), status, phase, mdd_version
   ...
 
 Apply upgrades? [Y/n]
@@ -1224,7 +1224,7 @@ Apply upgrades? [Y/n]
           </div>
           <div class="concept-card">
             <h3>Wave</h3>
-            <p>A set of features that collectively deliver a demo-state — something concrete a user can do when the wave completes. Stored in <code>.mdd/waves/&lt;slug&gt;.md</code>.</p>
+            <p>A set of features that collectively deliver a demo-state - something concrete a user can do when the wave completes. Stored in <code>.mdd/waves/&lt;slug&gt;.md</code>.</p>
           </div>
           <div class="concept-card">
             <h3>Feature</h3>
@@ -1249,7 +1249,7 @@ Apply upgrades? [Y/n]
         </div>
 
         <p>
-          The initiative file uses <strong>hash locking</strong> — a SHA-256 hash of the frontmatter is stored in the file. If you manually edit the frontmatter, the hash will not match on the next MDD operation and you will be required to run <code>/mdd plan-sync</code> before continuing.
+          The initiative file uses <strong>hash locking</strong> - a SHA-256 hash of the frontmatter is stored in the file. If you manually edit the frontmatter, the hash will not match on the next MDD operation and you will be required to run <code>/mdd plan-sync</code> before continuing.
         </p>
 
         <pre><code class="language-yaml">---
@@ -1270,23 +1270,23 @@ created: 2026-05-01
 
         <h3><code>/mdd plan-wave &lt;wave-slug&gt;</code></h3>
         <p>
-          Plans a wave — identifies and orders the feature docs that will be built in this wave.
+          Plans a wave - identifies and orders the feature docs that will be built in this wave.
           Three gates are enforced before planning can proceed:
         </p>
         <ol>
-          <li><strong>Open questions gate</strong> — all product questions for the wave must be resolved.</li>
-          <li><strong>Depends-on gate</strong> — if this wave depends on another wave, that wave must have <code>status: complete</code> before this one can be planned.</li>
-          <li><strong>Feature ordering check</strong> — internal feature dependencies within the wave are validated. If Feature B depends on Feature A, Feature A is placed first in the execution order.</li>
+          <li><strong>Open questions gate</strong> - all product questions for the wave must be resolved.</li>
+          <li><strong>Depends-on gate</strong> - if this wave depends on another wave, that wave must have <code>status: complete</code> before this one can be planned.</li>
+          <li><strong>Feature ordering check</strong> - internal feature dependencies within the wave are validated. If Feature B depends on Feature A, Feature A is placed first in the execution order.</li>
         </ol>
 
         <pre><code class="language-yaml">---
 slug: auth-system-wave-1
 initiative: auth-system-overhaul
-title: Wave 1 — Foundation
+title: Wave 1 - Foundation
 demo_state: "A user can register, log in, and see their profile page"
 depends_on: []
 features:
-  - 01-user-model        # must run first — 02 depends on it
+  - 01-user-model        # must run first - 02 depends on it
   - 02-jwt-auth          # depends on 01
   - 03-user-profile      # depends on 02
 status: planned
@@ -1300,18 +1300,18 @@ mdd_version: 8
 
         <p>Two execution modes:</p>
         <ul>
-          <li><strong>Automated</strong> — minimal interruptions. MDD pauses only on 5-iteration Green Gate failures or integration failures. All other gates are passed through automatically.</li>
-          <li><strong>Interactive</strong> — full MDD gates on every feature, full plan confirmations, and explicit "proceed?" prompts between phases. Use this when learning MDD or when features are high-risk.</li>
+          <li><strong>Automated</strong> - minimal interruptions. MDD pauses only on 5-iteration Green Gate failures or integration failures. All other gates are passed through automatically.</li>
+          <li><strong>Interactive</strong> - full MDD gates on every feature, full plan confirmations, and explicit "proceed?" prompts between phases. Use this when learning MDD or when features are high-risk.</li>
         </ul>
 
         <p><strong>Resume behavior:</strong> Features that are already <code>status: complete</code> are skipped. If an execution is interrupted, re-running <code>/mdd plan-execute &lt;wave-slug&gt;</code> resumes from the first feature with <code>status: active</code> or <code>status: planned</code>.</p>
 
         <pre><code class="language-bash">/mdd plan-execute auth-system-wave-1
 
-Wave: auth-system-wave-1 — 3 features
-  ✓ 01-user-model        — already complete, skipping
-  → 02-jwt-auth          — starting build
-  ○ 03-user-profile      — planned
+Wave: auth-system-wave-1 - 3 features
+  ✓ 01-user-model        - already complete, skipping
+  → 02-jwt-auth          - starting build
+  ○ 03-user-profile      - planned
 
 Building 02-jwt-auth...
 [Runs full Build Mode phases 0–7d for this feature]
@@ -1327,8 +1327,8 @@ Wave complete. Demo-state verified:
           Reconciles manual edits to initiative or wave files by comparing the stored <code>mdd_hash</code> against the current file content.
         </p>
         <ul>
-          <li>If hashes match — no manual edits detected, nothing to sync.</li>
-          <li>If hashes differ — shows a diff of what changed, asks you to confirm the changes are intentional, then updates the hash and may trigger a version bump on the initiative file.</li>
+          <li>If hashes match - no manual edits detected, nothing to sync.</li>
+          <li>If hashes differ - shows a diff of what changed, asks you to confirm the changes are intentional, then updates the hash and may trigger a version bump on the initiative file.</li>
           <li><strong>What triggers a version bump:</strong> adding or removing waves, changing <code>demo_state</code>, or reordering features within a wave. Cosmetic edits (typos in text) do not trigger a version bump.</li>
           <li><strong>Stale wave flagging:</strong> if wave content changes after features in that wave are already <code>complete</code>, the wave is flagged as <code>stale</code> and you are asked to confirm the completed features still satisfy the new demo-state.</li>
         </ul>
@@ -1363,8 +1363,8 @@ Wave complete. Demo-state verified:
           When creating a runbook, MDD asks whether it should be project-scoped or global:
         </p>
         <ul>
-          <li><strong>Project scope</strong> — stored in <code>.mdd/ops/&lt;slug&gt;.md</code>. Committed to git. Specific to this project.</li>
-          <li><strong>Global scope</strong> — stored in <code>~/.claude/ops/&lt;slug&gt;.md</code>. Available in all projects. For runbooks that apply across multiple projects (e.g., "deploy to Dokploy").</li>
+          <li><strong>Project scope</strong> - stored in <code>.mdd/ops/&lt;slug&gt;.md</code>. Committed to git. Specific to this project.</li>
+          <li><strong>Global scope</strong> - stored in <code>~/.claude/ops/&lt;slug&gt;.md</code>. Available in all projects. For runbooks that apply across multiple projects (e.g., "deploy to Dokploy").</li>
         </ul>
 
         <div class="callout">
@@ -1434,9 +1434,9 @@ mdd_version: 8
             <p>Gate type from <code>deployment_strategy.gate</code>: <code>health_check</code> (automatic), <code>manual</code> (requires your explicit "proceed"), or <code>none</code> (skip gate entirely).</p>
             <p>On gate failure, behavior is determined by <code>on_gate_failure</code>:</p>
             <ul>
-              <li><code>stop</code> — halt deployment entirely, leave other regions undeployed</li>
-              <li><code>skip_region</code> — skip this region, proceed to the next</li>
-              <li><code>rollback</code> — rollback this region, then stop</li>
+              <li><code>stop</code> - halt deployment entirely, leave other regions undeployed</li>
+              <li><code>skip_region</code> - skip this region, proceed to the next</li>
+              <li><code>rollback</code> - rollback this region, then stop</li>
             </ul>
           </div>
         </div>
@@ -1474,7 +1474,7 @@ Project (.mdd/ops/):
       <section id="doc-format">
         <h2>Feature Doc Reference</h2>
 
-        <h3>YAML Frontmatter — All Fields</h3>
+        <h3>YAML Frontmatter - All Fields</h3>
 
         <table class="mode-ref-table">
           <thead>
@@ -1502,7 +1502,7 @@ Project (.mdd/ops/):
             </tr>
             <tr>
               <td>depends_on</td>
-              <td>List of feature doc IDs this feature requires. Feature docs only — never task docs.</td>
+              <td>List of feature doc IDs this feature requires. Feature docs only - never task docs.</td>
               <td><code>[]</code> or list of IDs like <code>01-user-auth</code></td>
             </tr>
             <tr>
@@ -1552,7 +1552,7 @@ Project (.mdd/ops/):
             </tr>
             <tr>
               <td>known_issues</td>
-              <td>Issues discovered during audits or implementation. Append-only — never cleared automatically.</td>
+              <td>Issues discovered during audits or implementation. Append-only - never cleared automatically.</td>
               <td><code>[]</code> or list of strings</td>
             </tr>
           </tbody>
@@ -1562,14 +1562,14 @@ Project (.mdd/ops/):
         <p>Every feature doc must contain these sections in this order. Missing sections cause Phase 3 to pause and ask for the missing information before continuing.</p>
 
         <ol>
-          <li><strong>Purpose</strong> — Why this feature exists. Written for a developer who has never seen this codebase.</li>
-          <li><strong>Architecture</strong> — How this feature fits into the overall system. References to other components, services, or patterns it uses.</li>
-          <li><strong>Data Model</strong> — Fields, types, constraints, and relationships. If no database involvement: "No persistent storage."</li>
-          <li><strong>API Endpoints</strong> — Full request/response shapes, status codes, auth requirements. If no API: "No API endpoints."</li>
-          <li><strong>Business Rules</strong> — Validation rules, limits, workflow decisions, invariants. The things that are not obvious from reading the code.</li>
-          <li><strong>Data Flow</strong> — Summary of the Phase 2 analysis, or a link to the full flow doc at <code>data_flow</code> path.</li>
-          <li><strong>Dependencies</strong> — What this feature requires: other features (matching <code>depends_on</code>), external services, or specific library versions.</li>
-          <li><strong>Known Issues</strong> — Empty on creation. Populated during audits and implementation. Matches the <code>known_issues</code> frontmatter field.</li>
+          <li><strong>Purpose</strong> - Why this feature exists. Written for a developer who has never seen this codebase.</li>
+          <li><strong>Architecture</strong> - How this feature fits into the overall system. References to other components, services, or patterns it uses.</li>
+          <li><strong>Data Model</strong> - Fields, types, constraints, and relationships. If no database involvement: "No persistent storage."</li>
+          <li><strong>API Endpoints</strong> - Full request/response shapes, status codes, auth requirements. If no API: "No API endpoints."</li>
+          <li><strong>Business Rules</strong> - Validation rules, limits, workflow decisions, invariants. The things that are not obvious from reading the code.</li>
+          <li><strong>Data Flow</strong> - Summary of the Phase 2 analysis, or a link to the full flow doc at <code>data_flow</code> path.</li>
+          <li><strong>Dependencies</strong> - What this feature requires: other features (matching <code>depends_on</code>), external services, or specific library versions.</li>
+          <li><strong>Known Issues</strong> - Empty on creation. Populated during audits and implementation. Matches the <code>known_issues</code> frontmatter field.</li>
         </ol>
 
         <h3><code>depends_on</code> Rules</h3>
@@ -1577,9 +1577,9 @@ Project (.mdd/ops/):
           This field has strict rules that are enforced by <code>/mdd graph</code>:
         </p>
         <ul>
-          <li><strong>Feature docs only</strong> — never list task docs (one-off, frozen in time, no ongoing contract). Task docs are ephemeral; feature docs are permanent.</li>
-          <li><strong>IDs must reference existing docs</strong> — broken references are flagged by <code>/mdd graph</code> as broken dependencies.</li>
-          <li><strong>Only add, never remove without discussion</strong> — removing a dependency from <code>depends_on</code> breaks the assumption that downstream features have what they need. If you need to remove one, run <code>/mdd graph</code> first to understand the impact.</li>
+          <li><strong>Feature docs only</strong> - never list task docs (one-off, frozen in time, no ongoing contract). Task docs are ephemeral; feature docs are permanent.</li>
+          <li><strong>IDs must reference existing docs</strong> - broken references are flagged by <code>/mdd graph</code> as broken dependencies.</li>
+          <li><strong>Only add, never remove without discussion</strong> - removing a dependency from <code>depends_on</code> breaks the assumption that downstream features have what they need. If you need to remove one, run <code>/mdd graph</code> first to understand the impact.</li>
         </ul>
 
         <h3><code>last_synced</code> and Drift Detection</h3>
@@ -1605,7 +1605,7 @@ Project (.mdd/ops/):
         <h2>The <code>.mdd/</code> Directory</h2>
 
         <p>
-          All MDD artifacts live in one place. The directory structure is created automatically on first run — you never need to create it manually.
+          All MDD artifacts live in one place. The directory structure is created automatically on first run - you never need to create it manually.
         </p>
 
         <pre><code class="language-bash">.mdd/
@@ -1629,7 +1629,7 @@ Project (.mdd/ops/):
 │   ├── seed-staging-db.md
 │   └── reset-test-env.md
 │
-├── audits/                           # ⚠️  GITIGNORED — regenerated by /mdd audit
+├── audits/                           # ⚠️  GITIGNORED - regenerated by /mdd audit
 │   ├── flow-user-auth-2026-05-07.md  # Phase 2 data flow analysis
 │   ├── notes-2026-05-07.md           # Merged agent reading notes (Audit A5)
 │   ├── report-2026-05-07.md          # Severity-rated findings report (Audit A6)
@@ -1637,7 +1637,7 @@ Project (.mdd/ops/):
 │   ├── graph-2026-05-07.md           # Dependency graph (/mdd graph)
 │   └── MANIFEST-2026-05-07.md        # Permanent record of which files had findings
 │
-├── jobs/                             # ⚠️  GITIGNORED — deleted when audit completes
+├── jobs/                             # ⚠️  GITIGNORED - deleted when audit completes
 │   └── audit-2026-05-07/             # Active audit job directory
 │       ├── MANIFEST.md               # Live state tracking for all agents
 │       ├── shard-1.md                # File list for Agent 1
@@ -1660,7 +1660,7 @@ Project (.mdd/ops/):
           <tbody>
             <tr>
               <td><code>.mdd/audits/</code></td>
-              <td>Regenerated by <code>/mdd audit</code>. Storing audit reports in git adds noise — you care about the current state, not history. Reports are dated, so old ones accumulate quickly.</td>
+              <td>Regenerated by <code>/mdd audit</code>. Storing audit reports in git adds noise - you care about the current state, not history. Reports are dated, so old ones accumulate quickly.</td>
             </tr>
             <tr>
               <td><code>.mdd/jobs/</code></td>
@@ -1669,7 +1669,7 @@ Project (.mdd/ops/):
           </tbody>
         </table>
 
-        <p><strong>Everything else in <code>.mdd/</code> is committed</strong> — feature docs, initiatives, waves, ops runbooks, and <code>.startup.md</code> are all part of your project's knowledge base. They should be versioned alongside your source code.</p>
+        <p><strong>Everything else in <code>.mdd/</code> is committed</strong> - feature docs, initiatives, waves, ops runbooks, and <code>.startup.md</code> are all part of your project's knowledge base. They should be versioned alongside your source code.</p>
 
         <h3>The <code>.startup.md</code> Format</h3>
         <p>
@@ -1689,10 +1689,10 @@ Framework: Express + React | DB: PostgreSQL | Host: Dokploy
 04-content-builder (complete)
 
 ## Last Audit
-2026-05-01 — 20 findings, 17 fixed, 3 open
+2026-05-01 - 20 findings, 17 fixed, 3 open
 
 ## Active Initiative
-auth-system-overhaul — Wave 2: 1/2 features complete
+auth-system-overhaul - Wave 2: 1/2 features complete
 
 ## Rules Summary
 [key rules excerpted from CLAUDE.md]
@@ -1700,15 +1700,15 @@ auth-system-overhaul — Wave 2: 1/2 features complete
 ---
 ## Notes
 - [2026-05-07] switched from JWT lib to jose for better ESM support
-- [2026-05-05] decided against Redis — overkill for current scale</code></pre>
+- [2026-05-05] decided against Redis - overkill for current scale</code></pre>
 
         <p>
-          The section above <code>---</code> is fully rebuilt each time. The <code>## Notes</code> section below is append-only and preserved across rebuilds — it is only cleared by <code>/mdd note clear</code>.
+          The section above <code>---</code> is fully rebuilt each time. The <code>## Notes</code> section below is append-only and preserved across rebuilds - it is only cleared by <code>/mdd note clear</code>.
         </p>
 
         <h3>Auto-Rebuild Behavior</h3>
         <p>
-          <code>.startup.md</code> is rebuilt automatically at the end of these commands: <code>/mdd status</code>, <code>/mdd audit</code>, <code>/mdd note</code>. You never need to manually edit it — MDD keeps it current. If it becomes stale (e.g., you moved files manually), run <code>/mdd status</code> to force a rebuild.
+          <code>.startup.md</code> is rebuilt automatically at the end of these commands: <code>/mdd status</code>, <code>/mdd audit</code>, <code>/mdd note</code>. You never need to manually edit it - MDD keeps it current. If it becomes stale (e.g., you moved files manually), run <code>/mdd status</code> to force a rebuild.
         </p>
 
         <h3>Global Ops: <code>~/.claude/ops/</code></h3>
@@ -1730,7 +1730,7 @@ auth-system-overhaul — Wave 2: 1/2 features complete
         <h2>MDD Versioning</h2>
 
         <p>
-          MDD uses an integer version number (not semver) for the <em>workflow itself</em>. This is distinct from the npm package version. The workflow version tracks the structure and semantics of MDD docs — phases, frontmatter fields, section names.
+          MDD uses an integer version number (not semver) for the <em>workflow itself</em>. This is distinct from the npm package version. The workflow version tracks the structure and semantics of MDD docs - phases, frontmatter fields, section names.
         </p>
 
         <p><strong>Current MDD workflow version: 8</strong></p>
@@ -1745,20 +1745,20 @@ auth-system-overhaul — Wave 2: 1/2 features complete
           Before overwriting any file in <code>~/.claude/commands/</code>, <code>mdd install</code> reads the <code>mdd_version</code> field from the installed file and compares it against the version bundled in the npm package.
         </p>
         <ul>
-          <li>If the installed version is <strong>older</strong> — overwrite is allowed. New file is written.</li>
-          <li>If the installed version is the <strong>same</strong> — no overwrite needed. Files are identical.</li>
-          <li>If the installed version is <strong>newer</strong> — MDD warns you and does not silently downgrade. You must explicitly confirm to overwrite.</li>
+          <li>If the installed version is <strong>older</strong> - overwrite is allowed. New file is written.</li>
+          <li>If the installed version is the <strong>same</strong> - no overwrite needed. Files are identical.</li>
+          <li>If the installed version is <strong>newer</strong> - MDD warns you and does not silently downgrade. You must explicitly confirm to overwrite.</li>
         </ul>
 
         <pre><code class="language-bash">$ mdd install
 Comparing versions...
-  mdd.md          installed: v8  available: v8  — up to date
-  mdd-build.md    installed: v8  available: v8  — up to date
-  mdd-audit.md    installed: v7  available: v8  — will update
-  mdd-manage.md   installed: v8  available: v8  — up to date
-  mdd-lifecycle.md installed: v8 available: v8  — up to date
-  mdd-plan.md     installed: v8  available: v8  — up to date
-  mdd-ops.md      installed: v8  available: v8  — up to date
+  mdd.md          installed: v8  available: v8  - up to date
+  mdd-build.md    installed: v8  available: v8  - up to date
+  mdd-audit.md    installed: v7  available: v8  - will update
+  mdd-manage.md   installed: v8  available: v8  - up to date
+  mdd-lifecycle.md installed: v8 available: v8  - up to date
+  mdd-plan.md     installed: v8  available: v8  - up to date
+  mdd-ops.md      installed: v8  available: v8  - up to date
 
 Updating 1 file. Proceed? [Y/n]
 ✓ mdd-audit.md updated to v8</code></pre>
@@ -1769,9 +1769,9 @@ Updating 1 file. Proceed? [Y/n]
         </p>
 
         <pre><code class="language-bash">MDD version: v8 (current)
-  v8: 9 files — up to date
-  v7: 2 files — run /mdd upgrade to refresh these docs
-  v0 (unversioned): 1 file — created before versioning was introduced</code></pre>
+  v8: 9 files - up to date
+  v7: 2 files - run /mdd upgrade to refresh these docs
+  v0 (unversioned): 1 file - created before versioning was introduced</code></pre>
 
         <h3><code>/mdd upgrade</code> for Batch Patching</h3>
         <p>
@@ -1780,7 +1780,7 @@ Updating 1 file. Proceed? [Y/n]
 
         <div class="callout green">
           <p>
-            <strong>Upgrade is idempotent.</strong> Running it multiple times is safe — fields that are already present are never overwritten. It only adds what is missing.
+            <strong>Upgrade is idempotent.</strong> Running it multiple times is safe - fields that are already present are never overwritten. It only adds what is missing.
           </p>
         </div>
       </section>
@@ -1798,7 +1798,7 @@ Updating 1 file. Proceed? [Y/n]
         <div class="concept-grid">
           <div class="concept-card">
             <h3>Before: Monolithic <code>mdd.md</code></h3>
-            <p>The entire MDD workflow lived in a single <code>mdd.md</code> file (~28,000 tokens). Loaded in full on every <code>/mdd</code> invocation — even <code>/mdd status</code>.</p>
+            <p>The entire MDD workflow lived in a single <code>mdd.md</code> file (~28,000 tokens). Loaded in full on every <code>/mdd</code> invocation - even <code>/mdd status</code>.</p>
           </div>
           <div class="concept-card">
             <h3>After: 7 Split Files</h3>
@@ -1822,7 +1822,7 @@ mdd install</code></pre>
           <div class="step-number">2</div>
           <div class="step-content">
             <h3>Your <code>.mdd/</code> directory is fully compatible</h3>
-            <p>All existing feature docs, audit reports, and ops runbooks in your <code>.mdd/</code> directory work without any changes. The doc format has not changed — only the command files changed.</p>
+            <p>All existing feature docs, audit reports, and ops runbooks in your <code>.mdd/</code> directory work without any changes. The doc format has not changed - only the command files changed.</p>
           </div>
         </div>
 
@@ -1855,19 +1855,19 @@ mdd install</code></pre>
           The standalone MDD package contains only the MDD workflow. The starter kit's other components are separate and not part of <code>@thedecipherist/mdd</code>:
         </p>
         <ul>
-          <li><strong>Hooks configuration</strong> — the starter kit's pre/post hooks for linting, testing, and context injection are not included.</li>
-          <li><strong>CLAUDE.md templates</strong> — the starter kit's opinionated CLAUDE.md with TypeScript rules, error handling standards, and quality gates is not included.</li>
-          <li><strong>StrictDB</strong> — the database wrapper is a <a href="https://www.npmjs.com/package/strictdb" target="_blank" rel="noopener">separate npm package</a> (<code>strictdb</code>), not part of MDD.</li>
-          <li><strong>Custom agents and skills</strong> — the starter kit includes custom Claude agents and skills beyond the MDD workflow.</li>
+          <li><strong>Hooks configuration</strong> - the starter kit's pre/post hooks for linting, testing, and context injection are not included.</li>
+          <li><strong>CLAUDE.md templates</strong> - the starter kit's opinionated CLAUDE.md with TypeScript rules, error handling standards, and quality gates is not included.</li>
+          <li><strong>StrictDB</strong> - the database wrapper is a <a href="https://www.npmjs.com/package/strictdb" target="_blank" rel="noopener">separate npm package</a> (<code>strictdb</code>), not part of MDD.</li>
+          <li><strong>Custom agents and skills</strong> - the starter kit includes custom Claude agents and skills beyond the MDD workflow.</li>
         </ul>
 
         <p>
-          If you want the full starter kit experience in a new project, clone the <a href="https://github.com/TheDecipherist/claude-code-mastery-project-starter-kit" target="_blank" rel="noopener">Claude Code Mastery Project Starter Kit</a> — MDD is included and pre-configured. If you only want MDD in an existing project, the standalone package is all you need.
+          If you want the full starter kit experience in a new project, clone the <a href="https://github.com/TheDecipherist/claude-code-mastery-project-starter-kit" target="_blank" rel="noopener">Claude Code Mastery Project Starter Kit</a> - MDD is included and pre-configured. If you only want MDD in an existing project, the standalone package is all you need.
         </p>
 
         <div class="callout">
           <p>
-            <strong>Companion tool:</strong> <a href="https://github.com/TheDecipherist/mdd-tui" target="_blank" rel="noopener">mdd-tui</a> is a terminal dashboard for browsing your <code>.mdd/</code> workspace — docs, audits, graph, and ops runbooks in a live TUI. Install with <code>npm install -g @thedecipherist/mdd-tui</code>.
+            <strong>Companion tool:</strong> <a href="https://github.com/TheDecipherist/mdd-tui" target="_blank" rel="noopener">mdd-tui</a> is a terminal dashboard for browsing your <code>.mdd/</code> workspace - docs, audits, graph, and ops runbooks in a live TUI. Install with <code>npm install -g @thedecipherist/mdd-tui</code>.
           </p>
         </div>
       </section>
