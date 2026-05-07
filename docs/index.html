@@ -110,10 +110,16 @@
             </svg>
           </button>
           <div class="dropdown-menu" role="menu">
-            <a href="https://github.com/TheDecipherist/mdd-tui" target="_blank" rel="noopener" role="menuitem">
+            <a href="#dashboards" role="menuitem">
               <span class="dropdown-item-text">
                 <span class="dropdown-item-title">mdd-tui</span>
                 <span class="dropdown-item-desc">Terminal dashboard for MDD</span>
+              </span>
+            </a>
+            <a href="#dashboards" role="menuitem">
+              <span class="dropdown-item-text">
+                <span class="dropdown-item-title">mdd-dashboard</span>
+                <span class="dropdown-item-desc">Browser visual dashboard</span>
               </span>
             </a>
             <a href="https://github.com/TheDecipherist/claude-code-mastery-project-starter-kit" target="_blank" rel="noopener" role="menuitem">
@@ -145,6 +151,7 @@
       <a href="#audit">Audit Mode</a>
       <a href="#results">Real Results</a>
       <a href="#history">From Starter Kit to Standalone</a>
+      <a href="#dashboards">Dashboards</a>
       <a href="#tools">Companion Tools</a>
     </div>
     <div class="mobile-projects">
@@ -153,6 +160,7 @@
       <a href="https://github.com/TheDecipherist/mdd" target="_blank" rel="noopener">GitHub</a>
       <a href="https://www.npmjs.com/package/@thedecipherist/mdd" target="_blank" rel="noopener">npm</a>
       <a href="https://github.com/TheDecipherist/mdd-tui" target="_blank" rel="noopener">mdd-tui</a>
+      <a href="https://github.com/TheDecipherist/mdd-dashboard" target="_blank" rel="noopener">mdd-dashboard</a>
       <a href="https://github.com/TheDecipherist/claude-code-mastery-project-starter-kit" target="_blank" rel="noopener">Starter Kit</a>
     </div>
   </nav>
@@ -200,6 +208,7 @@
         <a href="#audit">Audit Mode</a>
         <a href="#results">Real Results</a>
         <a href="#history">From Starter Kit to Standalone</a>
+        <a href="#dashboards">Dashboards</a>
         <a href="#tools">Companion Tools</a>
       </nav>
     </aside>
@@ -843,6 +852,80 @@ mdd install</code></pre>
       </section>
 
       <!-- ===================== -->
+      <!-- Section: Dashboards   -->
+      <!-- ===================== -->
+      <section id="dashboards">
+        <h2>Dashboards</h2>
+
+        <p>
+          MDD ships with two companion dashboards for exploring your <code>.mdd/</code> workspace.
+          Both are available as standalone packages today and <strong>will soon be merged directly
+          into the <code>mdd</code> package</strong> — launchable via the <code>mdd</code> command
+          without a separate install.
+        </p>
+
+        <div class="feature-grid">
+
+          <div class="feature-card">
+            <div class="feature-icon feature-icon-cyan">&#128187;</div>
+            <h3>mdd-tui</h3>
+            <p>
+              A live terminal UI for navigating your MDD workspace without leaving the command line.
+              Split-pane view: scrollable file list on the left, full markdown render on the right.
+              Shows doc health, drift status, audit reports, initiative/wave progress, and ops runbooks.
+            </p>
+            <p><strong>Install &amp; run:</strong></p>
+            <pre><code class="language-bash">npm install -g mdd-tui
+mdd-tui</code></pre>
+            <p>
+              Keyboard-driven navigation (<code>j</code>/<code>k</code> to move,
+              <code>h</code>/<code>l</code> to switch panes, <code>r</code> to refresh,
+              <code>q</code> to quit). Collapsible initiative tree with wave-level progress counters.
+            </p>
+            <p>
+              <a href="https://www.npmjs.com/package/mdd-tui" target="_blank" rel="noopener">npm: mdd-tui</a>
+              &nbsp;&mdash;&nbsp;
+              <a href="https://github.com/TheDecipherist/mdd-tui" target="_blank" rel="noopener">GitHub</a>
+            </p>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon feature-icon-purple">&#127760;</div>
+            <h3>mdd-dashboard <span style="font-size:0.7em;opacity:0.7;font-weight:400;">in active development</span></h3>
+            <p>
+              A visual, browser-based dashboard for MDD projects. Renders your feature dependency
+              graph as an interactive D3 diagram with live reload on file changes. Click any node
+              to see the full doc, git history, source files, and depends-on navigation.
+            </p>
+            <p>
+              <strong>Status:</strong> mdd-dashboard is in active development and not yet fully
+              operational. Early adopters welcome — expect rough edges while it catches up to the
+              full MDD feature set.
+            </p>
+            <p><strong>Install &amp; run:</strong></p>
+            <pre><code class="language-bash">npm install -g mdd-dashboard
+mdd-dashboard
+# Dashboard running at http://localhost:7321</code></pre>
+            <p>
+              Force/tree layout toggle, three-tier filters (live search, type chips, git-aware),
+              SSE live reload, and a mini-map overlay for large graphs.
+            </p>
+            <p>
+              <a href="https://www.npmjs.com/package/mdd-dashboard" target="_blank" rel="noopener">npm: mdd-dashboard</a>
+              &nbsp;&mdash;&nbsp;
+              <a href="https://github.com/TheDecipherist/mdd-dashboard" target="_blank" rel="noopener">GitHub</a>
+            </p>
+          </div>
+
+        </div>
+
+        <p style="margin-top:1.5rem;padding:1rem 1.25rem;border-left:3px solid var(--accent);background:rgba(0,229,204,0.06);border-radius:0 6px 6px 0;">
+          <strong>Coming soon:</strong> Both dashboards will be merged into the <code>mdd</code>
+          package — launch either directly from the <code>mdd</code> CLI, no separate install needed.
+        </p>
+      </section>
+
+      <!-- ===================== -->
       <!-- Section: Tools        -->
       <!-- ===================== -->
       <section id="tools">
@@ -913,6 +996,7 @@ mdd install</code></pre>
         <a href="https://www.npmjs.com/package/@thedecipherist/mdd" target="_blank" rel="noopener">npm</a>
         <a href="user-guide.html">User Guide</a>
         <a href="https://github.com/TheDecipherist/mdd-tui" target="_blank" rel="noopener">mdd-tui</a>
+        <a href="https://github.com/TheDecipherist/mdd-dashboard" target="_blank" rel="noopener">mdd-dashboard</a>
         <a href="https://github.com/TheDecipherist/claude-code-mastery-project-starter-kit" target="_blank" rel="noopener">Starter Kit</a>
         <a href="https://www.npmjs.com/package/strictdb" target="_blank" rel="noopener">StrictDB</a>
       </div>
