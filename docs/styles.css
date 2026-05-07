@@ -341,6 +341,7 @@ header nav ul:last-child a:hover {
   gap: 1rem;
   justify-content: center;
   flex-wrap: wrap;
+  margin-bottom: 3rem;
 }
 
 /* Buttons */
