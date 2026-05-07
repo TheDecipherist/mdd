@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>MDD — Manual-Driven Development</title>
+  <title>MDD - Manual-Driven Development</title>
 
   <!-- SEO Meta Tags -->
-  <meta name="description" content="MDD (Manual-Driven Development) — One command. Twenty-one modes. Complete feature lifecycle from documentation to verified deployment. An npm package for Claude Code." />
+  <meta name="description" content="MDD (Manual-Driven Development) - One command. Twenty-one modes. Complete feature lifecycle from documentation to verified deployment. An npm package for Claude Code." />
   <meta name="keywords" content="MDD, Manual-Driven Development, Claude Code, AI development, npm, software lifecycle, feature development, code audit" />
   <meta name="author" content="TheDecipherist" />
   <meta name="robots" content="index, follow" />
@@ -15,14 +15,14 @@
   <!-- Open Graph -->
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://thedecipherist.github.io/mdd" />
-  <meta property="og:title" content="MDD — Manual-Driven Development" />
+  <meta property="og:title" content="MDD - Manual-Driven Development" />
   <meta property="og:description" content="One command. Twenty-one modes. Complete feature lifecycle from documentation to verified deployment." />
   <meta property="og:image" content="https://thedecipherist.github.io/mdd/mdd_hero.webp" />
   <meta property="og:site_name" content="MDD" />
 
   <!-- Twitter Card -->
   <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="MDD — Manual-Driven Development" />
+  <meta name="twitter:title" content="MDD - Manual-Driven Development" />
   <meta name="twitter:description" content="One command. Twenty-one modes. Complete feature lifecycle from documentation to verified deployment." />
   <meta name="twitter:image" content="https://thedecipherist.github.io/mdd/mdd_hero.webp" />
 
@@ -31,7 +31,7 @@
   {
     "@context": "https://schema.org",
     "@type": "SoftwareApplication",
-    "name": "MDD — Manual-Driven Development",
+    "name": "MDD - Manual-Driven Development",
     "alternateName": "MDD",
     "description": "One command. Twenty-one modes. Complete feature lifecycle from documentation to verified deployment. An npm package for Claude Code.",
     "url": "https://thedecipherist.github.io/mdd",
@@ -53,7 +53,7 @@
   }
   </script>
 
-  <!-- Favicon: data URI SVG — letter "M" in teal on dark background -->
+  <!-- Favicon: data URI SVG - letter "M" in teal on dark background -->
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%2308090f'/%3E%3Ctext x='16' y='23' text-anchor='middle' font-family='system-ui%2C sans-serif' font-size='18' font-weight='800' fill='%2300e5cc'%3EM%3C/text%3E%3C/svg%3E" />
 
   <!-- Rybbit Analytics -->
@@ -176,7 +176,7 @@
     <div class="hero-banner">
       <img
         src="mdd_hero.webp"
-        alt="MDD hero image — electric teal crystals and neon green runes on a dark background"
+        alt="MDD hero image - electric teal crystals and neon green runes on a dark background"
         width="1400"
         loading="eager"
       />
@@ -218,7 +218,7 @@
           Most people prompt Claude Code like this: <em>fix the bug in my auth system.</em>
           Claude reads 40 files, burns through context, produces something that technically
           compiles but misses the bigger picture. The model is spending most of its budget
-          on orientation — figuring out what your project even is — rather than solving
+          on orientation - figuring out what your project even is - rather than solving
           your actual problem.
         </p>
 
@@ -260,7 +260,7 @@
             </tr>
             <tr>
               <td>&#9989; Fix &amp; Verify</td>
-              <td>Implements fixes with mandatory red/green/integration gates — nothing ships until tests pass in a real environment</td>
+              <td>Implements fixes with mandatory red/green/integration gates - nothing ships until tests pass in a real environment</td>
             </tr>
           </tbody>
         </table>
@@ -275,7 +275,7 @@
         <p>
           MDD is installed as a Claude Code slash command. When you run <code>/mdd</code>,
           the router reads the first argument and loads <em>only the command file that
-          handles that mode</em>. The full instruction set spans 28,000 tokens — none of
+          handles that mode</em>. The full instruction set spans 28,000 tokens - none of
           it is loaded unless it is needed.
         </p>
 
@@ -297,7 +297,7 @@
             <tr>
               <td>mdd.md (router)</td>
               <td>~460</td>
-              <td>Entry point — reads mode, delegates to the correct command file</td>
+              <td>Entry point - reads mode, delegates to the correct command file</td>
             </tr>
             <tr>
               <td>mdd-build.md</td>
@@ -363,7 +363,7 @@ mdd install</code></pre>
         <p>
           <code>mdd install</code> copies the command files to your Claude Code global
           commands directory. After that, <code>/mdd</code> is available in any project,
-          any directory, any session — no per-project setup required.
+          any directory, any session - no per-project setup required.
         </p>
 
         <h3>Options</h3>
@@ -381,7 +381,7 @@ mdd install</code></pre>
           <div class="step-number">2</div>
           <div class="step-content">
             <h3>Custom directory</h3>
-            <p>Install to a specific path — useful for team-shared configurations.</p>
+            <p>Install to a specific path - useful for team-shared configurations.</p>
             <pre><code class="language-bash">mdd install --dir /path/to/claude/commands</code></pre>
           </div>
         </div>
@@ -412,7 +412,7 @@ mdd install</code></pre>
         <h2>All 21 Modes</h2>
 
         <p>
-          MDD organises its 21 modes into 6 groups. Each group is loaded independently —
+          MDD organises its 21 modes into 6 groups. Each group is loaded independently -
           running a manage command never loads the build pipeline, and running a plan command
           never loads the audit system. Pick the mode that matches what you need right now.
         </p>
@@ -461,11 +461,11 @@ mdd install</code></pre>
             <h3>&#128196; Manage</h3>
             <p class="command-desc">Day-to-day project tracking and maintenance.</p>
             <ul>
-              <li><code>/mdd status</code> — project health summary</li>
-              <li><code>/mdd scan</code> — detect drift from docs</li>
-              <li><code>/mdd update</code> — update feature docs</li>
-              <li><code>/mdd note</code> — append a project note</li>
-              <li><code>/mdd deprecate</code> — mark features retired</li>
+              <li><code>/mdd status</code> - project health summary</li>
+              <li><code>/mdd scan</code> - detect drift from docs</li>
+              <li><code>/mdd update</code> - update feature docs</li>
+              <li><code>/mdd note</code> - append a project note</li>
+              <li><code>/mdd deprecate</code> - mark features retired</li>
             </ul>
           </div>
 
@@ -473,10 +473,10 @@ mdd install</code></pre>
             <h3>&#128260; Lifecycle</h3>
             <p class="command-desc">Understand and evolve existing codebases.</p>
             <ul>
-              <li><code>/mdd reverse-engineer</code> — generate docs from code</li>
-              <li><code>/mdd graph</code> — dependency visualization</li>
-              <li><code>/mdd upgrade</code> — plan major version migrations</li>
-              <li><code>/mdd commands</code> — list all available modes</li>
+              <li><code>/mdd reverse-engineer</code> - generate docs from code</li>
+              <li><code>/mdd graph</code> - dependency visualization</li>
+              <li><code>/mdd upgrade</code> - plan major version migrations</li>
+              <li><code>/mdd commands</code> - list all available modes</li>
             </ul>
           </div>
 
@@ -484,9 +484,9 @@ mdd install</code></pre>
             <h3>&#128203; Plan</h3>
             <p class="command-desc">Multi-feature initiative and wave planning.</p>
             <ul>
-              <li><code>/mdd plan-initiative</code> — scope a feature set</li>
-              <li><code>/mdd plan-wave</code> — phase work into waves</li>
-              <li><code>/mdd plan-execute</code> — run a planned wave</li>
+              <li><code>/mdd plan-initiative</code> - scope a feature set</li>
+              <li><code>/mdd plan-wave</code> - phase work into waves</li>
+              <li><code>/mdd plan-execute</code> - run a planned wave</li>
             </ul>
           </div>
 
@@ -494,10 +494,10 @@ mdd install</code></pre>
             <h3>&#9881;&#65039; Ops</h3>
             <p class="command-desc">Repeatable operational procedures and runbooks.</p>
             <ul>
-              <li><code>/mdd ops</code> — create an ops runbook</li>
-              <li><code>/mdd runop</code> — execute a runbook step-by-step</li>
-              <li><code>/mdd update-op</code> — revise an existing runbook</li>
-              <li><code>/mdd ops list</code> — list all runbooks</li>
+              <li><code>/mdd ops</code> - create an ops runbook</li>
+              <li><code>/mdd runop</code> - execute a runbook step-by-step</li>
+              <li><code>/mdd update-op</code> - revise an existing runbook</li>
+              <li><code>/mdd ops list</code> - list all runbooks</li>
             </ul>
           </div>
 
@@ -588,7 +588,7 @@ mdd install</code></pre>
             <h3>&#128308; Red Gate</h3>
             <p>
               All tests must exist and fail for the right reason before implementation begins.
-              This confirms the test suite actually catches regressions — a passing test with
+              This confirms the test suite actually catches regressions - a passing test with
               no implementation is a broken test.
             </p>
           </div>
@@ -596,14 +596,14 @@ mdd install</code></pre>
             <h3>&#128994; Green Gate</h3>
             <p>
               All tests must pass. If they do not, MDD enters a <strong>5-iteration
-              diagnosis loop</strong> — root cause first, never symptom-patching.
+              diagnosis loop</strong> - root cause first, never symptom-patching.
               After 5 failed iterations the loop stops and the issue is escalated clearly.
             </p>
           </div>
           <div class="concept-card">
             <h3>&#9989; Integration Gate</h3>
             <p>
-              The feature is verified in a real environment — not a mocked test runner.
+              The feature is verified in a real environment - not a mocked test runner.
               Actual API calls, actual database queries, actual edge cases. This gate
               cannot be skipped.
             </p>
@@ -612,10 +612,10 @@ mdd install</code></pre>
 
         <h3>Key Highlights</h3>
         <ul>
-          <li><strong>Parallel context agents</strong> — the Understand phase uses multiple agents to read the codebase simultaneously, preserving the main session's context budget</li>
-          <li><strong>Documentation-first enforcement</strong> — the Red Gate physically prevents implementation until docs and failing tests exist</li>
-          <li><strong>Root-cause-first diagnosis</strong> — the Green Gate loop diagnoses the deepest root cause before touching code</li>
-          <li><strong>Real environment verification</strong> — the Integration Gate runs against a live environment, not mocks</li>
+          <li><strong>Parallel context agents</strong> - the Understand phase uses multiple agents to read the codebase simultaneously, preserving the main session's context budget</li>
+          <li><strong>Documentation-first enforcement</strong> - the Red Gate physically prevents implementation until docs and failing tests exist</li>
+          <li><strong>Root-cause-first diagnosis</strong> - the Green Gate loop diagnoses the deepest root cause before touching code</li>
+          <li><strong>Real environment verification</strong> - the Integration Gate runs against a live environment, not mocks</li>
         </ul>
       </section>
 
@@ -645,7 +645,7 @@ mdd install</code></pre>
             <tr>
               <td>&lt; 10 files</td>
               <td>1 agent</td>
-              <td>Sequential — single focused pass</td>
+              <td>Sequential - single focused pass</td>
             </tr>
             <tr>
               <td>10 – 25 files</td>
@@ -672,7 +672,7 @@ mdd install</code></pre>
 
         <div class="callout">
           <p>
-            <strong>Context clear after every file</strong> — each file gets a full, fresh
+            <strong>Context clear after every file</strong> - each file gets a full, fresh
             analysis budget. Findings from file 1 do not crowd out the analysis of file 50.
           </p>
         </div>
@@ -690,7 +690,7 @@ mdd install</code></pre>
           <li><code>[e]</code> &mdash; error, agent failed to read this file</li>
         </ul>
         <p>
-          If an audit is interrupted — by a timeout, a crash, or a manual stop — MDD
+          If an audit is interrupted - by a timeout, a crash, or a manual stop - MDD
           automatically detects the incomplete manifest on the next run and resumes from
           where it left off. No work is lost.
         </p>
@@ -727,7 +727,7 @@ mdd install</code></pre>
         <h2>Real Results</h2>
 
         <p>
-          The Claude Code Mastery Starter Kit ran a full MDD audit on itself — 57 source
+          The Claude Code Mastery Starter Kit ran a full MDD audit on itself - 57 source
           files, end to end. Here are the numbers.
         </p>
 
@@ -760,22 +760,22 @@ mdd install</code></pre>
           </thead>
           <tbody>
             <tr>
-              <td>A1 — Create documentation</td>
+              <td>A1 - Create documentation</td>
               <td>8 min</td>
               <td>Feature docs, data-flow maps, test plans</td>
             </tr>
             <tr>
-              <td>A2 — Read files and take notes</td>
+              <td>A2 - Read files and take notes</td>
               <td>18 min</td>
               <td>57 files reviewed, manifest complete</td>
             </tr>
             <tr>
-              <td>A3 — Analyse and rank findings</td>
+              <td>A3 - Analyse and rank findings</td>
               <td>7 min</td>
               <td>20 findings, severity-rated and prioritised</td>
             </tr>
             <tr>
-              <td>A5 — Fix and verify</td>
+              <td>A5 - Fix and verify</td>
               <td>15 min</td>
               <td>All fixes implemented, 125 tests green</td>
             </tr>
@@ -807,7 +807,7 @@ mdd install</code></pre>
           <p>
             MDD started as a single file inside the
             <a href="https://github.com/TheDecipherist/claude-code-mastery-project-starter-kit" target="_blank" rel="noopener">Claude Code Mastery Project Starter Kit</a>.
-            The original <code>mdd.md</code> was a monolithic instruction document — roughly
+            The original <code>mdd.md</code> was a monolithic instruction document - roughly
             <strong>28,000 tokens</strong> loaded in full on every single <code>/mdd</code>
             invocation, regardless of which mode was being used. A <code>/mdd status</code>
             check was carrying the same weight as a full build pipeline run.
@@ -818,11 +818,11 @@ mdd install</code></pre>
             <strong>1. Split into 7 focused files with lazy loading.</strong> The router
             reads the mode argument and loads only the relevant command file. A
             <code>/mdd status</code> now consumes ~460 tokens instead of 28,000. The full
-            instruction set is always available — never loaded unnecessarily.
+            instruction set is always available - never loaded unnecessarily.
           </p>
           <p>
             <strong>2. Extracted as a standalone npm package.</strong> MDD is now
-            <code>@thedecipherist/mdd</code> — installable independently, versioned
+            <code>@thedecipherist/mdd</code> - installable independently, versioned
             independently, and usable in any project regardless of tech stack.
           </p>
 
@@ -833,7 +833,7 @@ mdd install</code></pre>
           </p>
           <p>
             The starter kit still exists and is actively maintained. MDD is now one
-            component you can adopt independently — or as part of the full kit if you want
+            component you can adopt independently - or as part of the full kit if you want
             the complete scaffolding, conventions, and toolchain that surrounds it.
           </p>
           <p>
@@ -850,7 +850,7 @@ mdd install</code></pre>
 
         <p>
           MDD is one part of a broader ecosystem. These tools are designed to work alongside
-          it — each independently useful, each better in combination.
+          it - each independently useful, each better in combination.
         </p>
 
         <div class="feature-grid">
@@ -860,7 +860,7 @@ mdd install</code></pre>
             <h3>mdd-tui</h3>
             <p>
               A terminal dashboard for MDD. Visualise audit progress, browse findings,
-              track manifest status, and monitor active build pipelines — all from the
+              track manifest status, and monitor active build pipelines - all from the
               command line.
             </p>
             <p>
