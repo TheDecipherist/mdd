@@ -7,7 +7,7 @@ Quick overview of MDD state for the project:
 3. **Scan `.mdd/jobs/`** — detect any active audit job (see below)
 4. **Count tests** — `pnpm test:unit --reporter=json 2>/dev/null | jq '.numTotalTests'`
 5. **Count known issues** — grep `known_issues` across all docs
-6. **Read current mdd_version** — from `mdd.md` frontmatter (or `~/.claude/commands/mdd.md` if not local)
+6. **Read current mdd_version** — from `mdd.md` frontmatter. Check `.claude/commands/mdd.md` first (local install), then `~/.claude/commands/mdd.md` (global install). Use whichever exists.
 7. **Scan all `.mdd/` files** — grep `mdd_version` from each, group by version number
 8. **Scan `.mdd/initiatives/`** — count initiative files, group by status
 9. **Scan `.mdd/waves/`** — count wave files, group by status; for each active wave count complete vs total features

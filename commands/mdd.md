@@ -99,26 +99,30 @@ The user's full arguments are: **$ARGUMENTS**
 
 Parse these arguments to determine the mode. **Before doing anything else, read the appropriate mode file listed below.** The mode file contains the complete instructions for that mode. When mode file instructions reference `$ARGUMENTS`, treat it as the arguments stated above.
 
-Find the MDD commands directory by checking `~/.claude/commands/` (global install via `npm install -g mdd`).
+Find the MDD commands directory by checking in this order:
+1. `.claude/commands/` in the current project (local install via `mdd install --install-local`)
+2. `~/.claude/commands/` (global install via `npm install -g @thedecipherist/mdd && mdd install`)
+
+Use whichever path contains `mdd-audit.md`. Store it as `$MDD_DIR` and use it for all mode file reads below.
 
 - If arguments start with `audit` →
-  **Read `~/.claude/commands/mdd-audit.md` then follow its AUDIT MODE instructions.**
+  **Read `$MDD_DIR/mdd-audit.md` then follow its AUDIT MODE instructions.**
 
 - If arguments start with `status`, `note`, `scan`, `update`, `deprecate`, or `rebuild-tags` →
-  **Read `~/.claude/commands/mdd-manage.md` then follow the relevant mode instructions.**
+  **Read `$MDD_DIR/mdd-manage.md` then follow the relevant mode instructions.**
 
 - If arguments start with `reverse-engineer`, `reverse`, `graph`, or `upgrade` →
-  **Read `~/.claude/commands/mdd-lifecycle.md` then follow the relevant mode instructions.**
+  **Read `$MDD_DIR/mdd-lifecycle.md` then follow the relevant mode instructions.**
 
 - If arguments start with `plan-` →
-  **Read `~/.claude/commands/mdd-plan.md` then follow the relevant PLAN mode instructions.**
+  **Read `$MDD_DIR/mdd-plan.md` then follow the relevant PLAN mode instructions.**
 
 - If arguments start with `ops`, `runop`, `update-op`, or `commands` →
-  **Read `~/.claude/commands/mdd-ops.md` then follow the relevant OPS/COMMANDS mode instructions.**
+  **Read `$MDD_DIR/mdd-ops.md` then follow the relevant OPS/COMMANDS mode instructions.**
 
 - If arguments are empty → ask the user what they want to do (build a feature, run an audit, check status, etc.)
 
-- Otherwise → **Read `~/.claude/commands/mdd-build.md` then follow BUILD MODE instructions.**
+- Otherwise → **Read `$MDD_DIR/mdd-build.md` then follow BUILD MODE instructions.**
 
 ---
 
