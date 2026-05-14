@@ -4,7 +4,7 @@
 
 # MDD - Manual-Driven Development for Claude Code
 
-> **One command. Twenty-three modes. Complete feature lifecycle from documentation to verified deployment.**
+> **One command. Twenty-four modes. Complete feature lifecycle from documentation to verified deployment.**
 
 <p align="center">
   <a href="https://thedecipherist.github.io/mdd">
@@ -42,7 +42,7 @@ Then in Claude Code:
 - [How It Works](#how-it-works)
 - [Installation](#installation)
 - [Quick Start](#quick-start)
-- [All 21 Modes at a Glance](#all-21-modes-at-a-glance)
+- [All 24 Modes at a Glance](#all-24-modes-at-a-glance)
 - [Build Mode - Feature Development](#build-mode--feature-development)
 - [Audit Mode - Code Review](#audit-mode--code-review)
 - [Status & Notes](#status--notes)
@@ -236,7 +236,7 @@ Every feature doc and ops runbook has a `tags:` field (4–8 domain-concept keyw
 
 ---
 
-## All 22 Modes at a Glance
+## All 24 Modes at a Glance
 
 ```
 /mdd <feature description>                 Build Mode - Document, plan, and implement
@@ -245,6 +245,7 @@ Every feature doc and ops runbook has a `tags:` field (4–8 domain-concept keyw
 /mdd scan                                  Detect features whose source files changed
 /mdd update <feature-id>                   Re-sync a feature doc after code changes
 /mdd rebuild-tags [--force]                Generate tags for all docs and rebuild .startup.md
+/mdd connect                               Rebuild the connections map from all docs
 /mdd note "text"                           Append a timestamped note to .mdd/.startup.md
 /mdd note list                             Print the Notes section
 /mdd note clear                            Wipe all notes (asks for confirmation)
@@ -585,7 +586,7 @@ Notes are timestamped and survive session resets.
 
 ### `/mdd scan`
 
-Detects which features have drifted since their last MDD session. Uses a single Explore agent to run all git checks in parallel, then classifies each feature:
+Detects which features have drifted since their last MDD session, and checks whether `connections.md` is stale. Uses a single Explore agent to run all git checks in parallel, then classifies each feature:
 
 | Classification | Meaning |
 |---|---|
@@ -845,6 +846,43 @@ Every `.mdd/docs/<NN>-<feature-name>.md` file uses this YAML frontmatter:
 
 ---
 
+## Connections Map
+
+Every MDD project maintains a committed `.mdd/connections.md` file — a pre-computed relationship map that gives Claude and the dashboard instant access to the full project graph without reading every doc.
+
+```bash
+/mdd connect    # regenerate manually at any time
+```
+
+It contains three sections:
+
+**Path Tree** — all feature docs grouped by their `path` field, sorted alphabetically, ready for dashboard rendering:
+```
+Auth
+  ├── Login     02-auth-login    complete
+  └── OAuth     03-oauth-google  draft
+E-commerce
+  └── Cart      07-cart          in_progress
+```
+
+**Dependency Graph** — a Mermaid diagram of all `depends_on` relationships with status-coded nodes:
+```mermaid
+graph TD
+  A["07-cart"]:::in_progress --> B["02-auth-login"]:::complete
+  classDef complete fill:#00e5cc,color:#000
+  classDef in_progress fill:#ffaa00,color:#000
+  classDef draft fill:#888,color:#fff
+```
+
+**Source File Overlap** — files referenced by 2+ docs (co-change risk):
+```
+src/handlers/auth.ts → 02-auth-login, 03-oauth-google
+```
+
+**Kept in sync automatically** — every MDD operation that creates, modifies, archives, or upgrades a doc regenerates `connections.md` as its final step. `/mdd status` and `/mdd scan` detect and flag staleness. The file is committed to git (not gitignored) so it's always available without re-running any command.
+
+---
+
 ## The `.mdd/` Directory
 
 All MDD artifacts live in one place:
@@ -870,7 +908,8 @@ All MDD artifacts live in one place:
 │       ├── shard-N.md
 │       ├── agent-N-config.md
 │       └── agent-N-notes.md
-└── .startup.md                   # Auto-generated session context (read by Claude on start)
+├── .startup.md                   # Auto-generated session context (read by Claude on start)
+└── connections.md                # Pre-computed relationship map (path tree + Mermaid graph)
 ```
 
 `.mdd/audits/` and `.mdd/jobs/` are automatically added to `.gitignore` on first run. Everything else in `.mdd/` is committed - it's your project's knowledge base.

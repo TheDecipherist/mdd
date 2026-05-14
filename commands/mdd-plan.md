@@ -262,6 +262,16 @@ When all features are `complete`:
      - `mdd_version: <current from mdd.md frontmatter>`
 6. Rebuild `.mdd/.startup.md`.
 
+Then regenerate connections.md:
+
+**Regenerate `.mdd/connections.md`:**
+Read all `.mdd/docs/*.md` (excluding `archive/`) — frontmatter only (id, title, status, path, depends_on, source_files). Never read doc bodies. Then:
+- **Path tree:** sort docs by path alphabetically, then by id within the same path. Render as indented tree using `├──` / `└──` characters. Each leaf: `<path-leaf-segment>  <id>  <status>`.
+- **Mermaid graph:** one node per doc (short node ID), one `-->` edge per `depends_on` entry, `:::<status>` suffix on each node. Include `classDef complete fill:#00e5cc,color:#000`, `in_progress fill:#ffaa00,color:#000`, `draft fill:#888,color:#fff`, `deprecated fill:#555,color:#aaa`.
+- **Source overlap:** build map of source_file → docs that reference it. Include only files with 2+ docs.
+- **Warnings:** broken `depends_on` refs (target doesn't exist), circular dependencies, docs missing `path`.
+- **Write** `.mdd/connections.md` with YAML frontmatter (`generated: <today>`, `doc_count: <N>`, `connection_count: <N>`, `overlap_count: <N>`) and four sections: Path Tree, Dependency Graph (Mermaid), Source File Overlap, Warnings.
+
 ---
 
 ## PLAN-SYNC MODE — `/mdd plan-sync`

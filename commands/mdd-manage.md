@@ -70,6 +70,15 @@ After collecting status, rebuild the auto-generated zone of `.mdd/.startup.md`:
 3. Write the rebuilt auto-generated section + `---` divider + preserved Notes section back to `.mdd/.startup.md`. Update `mdd_version` in the file's frontmatter to current.
 4. If no `.mdd/.startup.md` exists yet, create it fresh using the template with an empty Notes section, stamped with current `mdd_version`.
 
+### Check `.mdd/connections.md` Freshness
+
+After rebuilding `.startup.md`, check connections.md:
+
+1. If `.mdd/connections.md` does not exist → report: `⚠️  connections.md missing — run /mdd connect to generate`
+2. Read `generated:` date from connections.md frontmatter. Find the most recent `last_synced` date across all docs.
+   - If `generated` < most recent `last_synced` → report: `⚠️  connections.md stale (generated: <X>, newest doc synced: <Y>) — run /mdd connect`
+   - If up to date → report: `✅ connections.md current (generated: <X>, <N> docs, <N> edges)`
+
 ---
 
 ## NOTE MODE — `/mdd note`
@@ -184,6 +193,7 @@ Recommended actions:
   /mdd update 07   — fix broken file reference
   /mdd update 09   — add last_synced by running update mode
   /mdd upgrade     — add path field to <N> docs missing it  ← omit this line when there are no docs missing path
+  /mdd connect     — rebuild connections.md if stale or missing
 ```
 
 **Initiative/wave drift check** (only shown if `.mdd/initiatives/` exists):
@@ -209,6 +219,13 @@ Ops Runbooks:
   ✅ swarmk-dokploy   — last runop: 2026-04-17
   ⚠️  rulecatch-dokploy — runbook edited 3 days ago but no runop since → run /mdd runop rulecatch-dokploy
 ```
+
+**Connections map check:**
+
+Check `.mdd/connections.md`:
+- Missing → classify as `broken` and include in findings: `❌  connections.md — missing (run /mdd connect)`
+- `generated:` older than most recent `last_synced` → classify as `drifted`: `⚠️  connections.md — stale (run /mdd connect)`
+- Up to date → `✅ connections.md — current`
 
 Save the full report to `.mdd/audits/scan-<date>.md`.
 
@@ -287,6 +304,16 @@ New test skeletons: <N> appended to tests/unit/<feature-name>.test.ts
 Branch: <current branch>
 ```
 
+After updating the doc, regenerate connections.md:
+
+**Regenerate `.mdd/connections.md`:**
+Read all `.mdd/docs/*.md` (excluding `archive/`) — frontmatter only (id, title, status, path, depends_on, source_files). Never read doc bodies. Then:
+1. **Path tree:** sort docs by path alphabetically, then by id within the same path. Render as an indented tree using `├──` / `└──` characters. Each leaf line: `<path-leaf-segment>  <id>  <status>`.
+2. **Mermaid graph:** one node per doc (short node ID), one `-->` edge per `depends_on` entry, `:::<status>` suffix on each node. Include `classDef complete fill:#00e5cc,color:#000`, `in_progress fill:#ffaa00,color:#000`, `draft fill:#888,color:#fff`, `deprecated fill:#555,color:#aaa`.
+3. **Source overlap:** build a map of source_file → docs that reference it. Include only files with 2+ docs.
+4. **Warnings:** flag broken `depends_on` references (target does not exist), circular dependencies, docs missing `path` field.
+5. **Write** `.mdd/connections.md` with YAML frontmatter (`generated: <today>`, `doc_count: <N>`, `connection_count: <N edges>`, `overlap_count: <N overlap files>`) followed by four sections: Path Tree, Dependency Graph (Mermaid), Source File Overlap, Warnings.
+
 ---
 
 ## DEPRECATE MODE — `/mdd deprecate <feature-id>`
@@ -330,6 +357,16 @@ If user says yes:
 4. For each dependent doc, add an entry to its `known_issues`: `<NN>-<feature-name> has been deprecated — review this feature's dependency.`
 5. Ask the user separately: "Delete source files? (yes / no)" and "Delete test files? (yes / no)" — never auto-delete.
 6. Rebuild `.mdd/.startup.md`.
+
+Then regenerate connections.md:
+
+**Regenerate `.mdd/connections.md`:**
+Read all `.mdd/docs/*.md` (excluding `archive/`) — frontmatter only (id, title, status, path, depends_on, source_files). Never read doc bodies. Then:
+1. **Path tree:** sort docs by path alphabetically, then by id within the same path. Render as an indented tree using `├──` / `└──` characters. Each leaf line: `<path-leaf-segment>  <id>  <status>`.
+2. **Mermaid graph:** one node per doc (short node ID), one `-->` edge per `depends_on` entry, `:::<status>` suffix on each node. Include `classDef complete fill:#00e5cc,color:#000`, `in_progress fill:#ffaa00,color:#000`, `draft fill:#888,color:#fff`, `deprecated fill:#555,color:#aaa`.
+3. **Source overlap:** build a map of source_file → docs that reference it. Include only files with 2+ docs.
+4. **Warnings:** flag broken `depends_on` references (target does not exist), circular dependencies, docs missing `path` field.
+5. **Write** `.mdd/connections.md` with YAML frontmatter (`generated: <today>`, `doc_count: <N>`, `connection_count: <N edges>`, `overlap_count: <N overlap files>`) followed by four sections: Path Tree, Dependency Graph (Mermaid), Source File Overlap, Warnings.
 
 Report:
 ```
@@ -389,6 +426,16 @@ For each doc missing `tags:` (or all docs if `--force`):
 
 Trigger the `.mdd/.startup.md` rebuild (same logic as Status Mode — rebuild auto-generated zone, preserve Notes zone). The rebuilt startup now reflects tags on every feature and ops line.
 
+Then regenerate connections.md:
+
+**Regenerate `.mdd/connections.md`:**
+Read all `.mdd/docs/*.md` (excluding `archive/`) — frontmatter only (id, title, status, path, depends_on, source_files). Never read doc bodies. Then:
+1. **Path tree:** sort docs by path alphabetically, then by id within the same path. Render as an indented tree using `├──` / `└──` characters. Each leaf line: `<path-leaf-segment>  <id>  <status>`.
+2. **Mermaid graph:** one node per doc (short node ID), one `-->` edge per `depends_on` entry, `:::<status>` suffix on each node. Include `classDef complete fill:#00e5cc,color:#000`, `in_progress fill:#ffaa00,color:#000`, `draft fill:#888,color:#fff`, `deprecated fill:#555,color:#aaa`.
+3. **Source overlap:** build a map of source_file → docs that reference it. Include only files with 2+ docs.
+4. **Warnings:** flag broken `depends_on` references (target does not exist), circular dependencies, docs missing `path` field.
+5. **Write** `.mdd/connections.md` with YAML frontmatter (`generated: <today>`, `doc_count: <N>`, `connection_count: <N edges>`, `overlap_count: <N overlap files>`) followed by four sections: Path Tree, Dependency Graph (Mermaid), Source File Overlap, Warnings.
+
 ### Phase RT4 — Report
 
 ```
@@ -408,3 +455,27 @@ Run /mdd status to see the full updated startup snapshot.
 ```
 
 ---
+
+## CONNECT MODE — `/mdd connect`
+
+Triggered when arguments start with `connect`. Performs a full rebuild of `.mdd/connections.md` unconditionally — no staleness check, always regenerates from scratch.
+
+**Regenerate `.mdd/connections.md`:**
+Read all `.mdd/docs/*.md` (excluding `archive/`) — frontmatter only (id, title, status, path, depends_on, source_files). Never read doc bodies. Then:
+1. **Path tree:** sort docs by path alphabetically, then by id within the same path. Render as an indented tree using `├──` / `└──` characters. Each leaf line: `<path-leaf-segment>  <id>  <status>`.
+2. **Mermaid graph:** one node per doc (short node ID), one `-->` edge per `depends_on` entry, `:::<status>` suffix on each node. Include `classDef complete fill:#00e5cc,color:#000`, `in_progress fill:#ffaa00,color:#000`, `draft fill:#888,color:#fff`, `deprecated fill:#555,color:#aaa`.
+3. **Source overlap:** build a map of source_file → docs that reference it. Include only files with 2+ docs.
+4. **Warnings:** flag broken `depends_on` references (target does not exist), circular dependencies, docs missing `path` field.
+5. **Write** `.mdd/connections.md` with YAML frontmatter (`generated: <today>`, `doc_count: <N>`, `connection_count: <N edges>`, `overlap_count: <N overlap files>`) followed by four sections: Path Tree, Dependency Graph (Mermaid), Source File Overlap, Warnings.
+
+Report when done:
+```
+🔗 connections.md rebuilt
+
+  Docs:            <N>
+  Dependency edges: <N>
+  Source overlaps:  <N files referenced by 2+ docs>
+  Warnings:         <N> (or "none")
+
+✅ .mdd/connections.md updated (<today>)
+```

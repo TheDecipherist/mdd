@@ -348,7 +348,14 @@ After all patches are applied:
 
 1. Re-scan `.mdd/docs/*.md` — confirm 0 docs have missing `last_synced` or `path`
 2. Trigger the `.mdd/.startup.md` rebuild (same logic as Status Mode)
-3. Report:
+3. **Regenerate `.mdd/connections.md`:**
+   Read all `.mdd/docs/*.md` (excluding `archive/`) — frontmatter only (id, title, status, path, depends_on, source_files). Never read doc bodies. Then:
+   - **Path tree:** sort docs by path alphabetically, then by id within the same path. Render as indented tree using `├──` / `└──` characters. Each leaf: `<path-leaf-segment>  <id>  <status>`.
+   - **Mermaid graph:** one node per doc (short node ID), one `-->` edge per `depends_on` entry, `:::<status>` suffix on each node. Include `classDef` block for complete/in_progress/draft/deprecated.
+   - **Source overlap:** map source_file → docs that reference it. Include only files with 2+ docs.
+   - **Warnings:** broken `depends_on` refs, circular deps, docs missing `path`.
+   - **Write** `.mdd/connections.md` with YAML frontmatter (`generated: <today>`, `doc_count`, `connection_count`, `overlap_count`) and four sections: Path Tree, Dependency Graph, Source File Overlap, Warnings.
+4. Report:
 
 ```
 ✅ MDD Upgrade Complete
@@ -359,6 +366,7 @@ Fields added:
   status      — <N> docs
   phase       — <N> docs
 Docs skipped:     <N> (all fields already present)
+connections.md: updated (<N> docs, <N> edges)
 
 Run `/mdd scan` to see current drift status across all docs.
 ```

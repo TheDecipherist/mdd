@@ -610,7 +610,15 @@ where the agent patches the wrong thing because it accepted an external excuse t
    - `last_synced: <today>`
    - `mdd_version: <current from mdd.md frontmatter>`
 
-2. Display the completion signal:
+2. **Regenerate `.mdd/connections.md`:**
+   Read all `.mdd/docs/*.md` (excluding `archive/`) — frontmatter only (id, title, status, path, depends_on, source_files). Never read doc bodies. Then:
+   - **Path tree:** sort docs by path alphabetically, then by id within the same path. Render as indented tree using `├──` / `└──` characters. Each leaf: `<path-leaf-segment>  <id>  <status>`.
+   - **Mermaid graph:** one node per doc (short node ID), one `-->` edge per `depends_on` entry, `:::<status>` suffix on each node. Include `classDef` block for complete/in_progress/draft/deprecated.
+   - **Source overlap:** map source_file → docs that reference it. Include only files with 2+ docs.
+   - **Warnings:** broken `depends_on` refs, circular deps, docs missing `path`.
+   - **Write** `.mdd/connections.md` with YAML frontmatter (`generated: <today>`, `doc_count`, `connection_count`, `overlap_count`) and four sections: Path Tree, Dependency Graph, Source File Overlap, Warnings.
+
+3. Display the completion signal:
 ```
 ✅ MDD Complete: <Feature Name>
 
@@ -621,6 +629,7 @@ Blocks: <N>/<N> complete
 Tests: <N>/<N> passing
 Integration: verified (<feature type> — real environment)
 Typecheck: clean
+Connections: .mdd/connections.md updated
 
 New patterns established: <any new rules worth adding to CLAUDE.md>
 

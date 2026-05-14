@@ -8,7 +8,7 @@
   <meta name="keywords" content="MDD, Manual-Driven Development, Claude Code, AI workflow, slash commands, feature documentation" />
   <meta name="author" content="TheDecipherist" />
   <meta property="og:title" content="MDD User Guide - Manual-Driven Development" />
-  <meta property="og:description" content="Complete reference for all 23 MDD modes: Build, Audit, Status, Scan, Update, Plan, Ops, and more." />
+  <meta property="og:description" content="Complete reference for all 24 MDD modes: Build, Audit, Status, Scan, Update, Connect, Plan, Ops, and more." />
   <meta property="og:url" content="https://thedecipherist.github.io/mdd/user-guide.html" />
   <meta property="og:type" content="website" />
   <link rel="canonical" href="https://thedecipherist.github.io/mdd/user-guide.html" />
@@ -110,6 +110,7 @@
     <a href="#manage-modes">Status, Notes, Scan &amp; Update</a>
     <a href="#lifecycle-modes">Lifecycle: Reverse-Engineer, Graph, Upgrade</a>
     <a href="#import-spec">Import Spec</a>
+    <a href="#connections-map">Connections Map</a>
     <a href="#plan-modes">Initiative &amp; Wave Planning</a>
     <a href="#ops-modes">Ops Runbooks</a>
     <a href="#doc-format">Feature Doc Reference</a>
@@ -141,7 +142,7 @@
     <div class="hero-badge">User Guide - v1.0.0</div>
     <h1>MDD User Guide</h1>
     <p class="hero-subtitle">
-      Complete reference for all 23 modes - Build, Audit, Status, Scan, Update, Plan, Ops, and more.
+      Complete reference for all 24 modes - Build, Audit, Status, Scan, Update, Connect, Plan, Ops, and more.
     </p>
     <pre><code class="language-bash">npm install -g @thedecipherist/mdd
 mdd install</code></pre>
@@ -163,6 +164,7 @@ mdd install</code></pre>
         <a href="#manage-modes">Status, Notes, Scan &amp; Update</a>
         <a href="#lifecycle-modes">Lifecycle Modes</a>
         <a href="#import-spec" style="padding-left:1.25rem;font-size:0.85em">Import Spec</a>
+        <a href="#connections-map">Connections Map</a>
         <a href="#plan-modes">Initiative &amp; Wave Planning</a>
         <a href="#ops-modes">Ops Runbooks</a>
         <a href="#doc-format">Feature Doc Reference</a>
@@ -1053,7 +1055,7 @@ Drift check:
 
         <h3><code>/mdd scan</code></h3>
         <p>
-          Detects features whose source files have changed since <code>last_synced</code>. Uses a single Explore agent to run all git checks in parallel, then classifies each feature:
+          Detects features whose source files have changed since <code>last_synced</code>. Uses a single Explore agent to run all git checks in parallel, then classifies each feature. Scan also checks the freshness of <code>.mdd/connections.md</code> — a missing file is flagged as <code>broken</code>, and a file whose modification timestamp is older than the most recently modified feature doc is flagged as <code>drifted</code>.
         </p>
 
         <table class="scale-table">
@@ -1079,11 +1081,13 @@ Drift check:
                                   Latest: "fix: markdown heading parser (a3f4c1b)"
   ❌  07-github-pages           - broken reference (docs/index.html not found)
   ❓ 08-old-feature            - untracked (no last_synced field)
+  ⚠️  connections.md            - DRIFTED (older than most recent feature doc)
 
 Recommended actions:
   /mdd update 04   - re-sync content-builder doc with code
   /mdd update 07   - fix broken file reference
-  /mdd upgrade     - stamp 08-old-feature with last_synced</code></pre>
+  /mdd upgrade     - stamp 08-old-feature with last_synced
+  /mdd connect     - rebuild connections map</code></pre>
 
         <h3><code>/mdd update &lt;feature-id&gt;</code></h3>
         <p>
@@ -1438,6 +1442,181 @@ Proceed with import? [Y/n]</code></pre>
             <strong>All generated docs include a <code>path</code> field.</strong> Import Spec is the primary entry point for establishing the <code>path</code> vocabulary on a new project. The paths chosen during import become the baseline vocabulary that Build Mode, <code>/mdd upgrade</code>, and <code>/mdd scan</code> reuse for all future docs.
           </p>
         </div>
+      </section>
+
+      <!-- ===== CONNECTIONS MAP ===== -->
+      <section id="connections-map">
+        <h2>Connections Map</h2>
+
+        <p>
+          <code>.mdd/connections.md</code> is a committed, always-current pre-computed relationship map for your entire <code>.mdd/docs/</code> corpus. It gives Claude and the dashboard tools an instant, single-file view of how every feature relates to every other — without having to scan all frontmatter on every command invocation.
+        </p>
+
+        <div class="callout">
+          <p>
+            <strong>Why committed to git?</strong> <code>connections.md</code> is never gitignored. It is part of your project's knowledge base — readable at any time without re-running a command. The <code>mdd-dashboard</code> reads it directly to power the dependency graph view, and Claude reads it at the start of sessions to orient itself without loading every feature doc.
+          </p>
+        </div>
+
+        <h3><code>/mdd connect</code></h3>
+        <p>
+          Triggers a manual full rebuild of <code>.mdd/connections.md</code>. Reads every doc in <code>.mdd/docs/*.md</code>, re-derives all relationships, and writes the file from scratch. Run this any time you want to force a fresh map — for example, after a batch of manual edits that bypassed the normal MDD workflow.
+        </p>
+
+        <pre><code class="language-bash">/mdd connect
+
+Rebuilding connections map...
+  Scanned 12 feature docs
+  Detected 8 dependency edges
+  Found 3 source file overlaps
+
+✓ .mdd/connections.md written</code></pre>
+
+        <h3>Contents of <code>connections.md</code></h3>
+        <p>The file has four sections, always rendered in this order:</p>
+
+        <h4>1 — Path Tree</h4>
+        <p>
+          All feature docs grouped by their <code>path</code> field, sorted alphabetically within each level, and formatted with tree characters. Gives an instant product-hierarchy view of every documented feature.
+        </p>
+        <pre><code class="language-bash">## Path Tree
+
+Auth/
+  ├── Login              (02-user-auth)
+  └── Signup             (11-user-registration)
+
+E-commerce/
+  ├── Cart/
+  │   ├── Add Item       (06-cart-add-item)
+  │   └── Checkout       (07-cart-checkout)
+  └── Orders             (09-order-history)
+
+Notifications/
+  ├── Email              (05-email-service)
+  └── Push               (12-push-notifications)
+
+Platform/
+  └── Setup              (01-project-scaffolding)</code></pre>
+
+        <h4>2 — Dependency Graph</h4>
+        <p>
+          A Mermaid diagram of all <code>depends_on</code> relationships across the full doc corpus. Nodes are colour-coded by <code>status</code> using <code>classDef</code> declarations so the graph is readable without opening individual docs.
+        </p>
+        <pre><code class="language-markdown">## Dependency Graph
+
+```mermaid
+graph TD
+  01-project-scaffolding
+  02-user-auth --> 01-project-scaffolding
+  07-cart-checkout --> 02-user-auth
+  09-order-history --> 07-cart-checkout
+
+  classDef complete    fill:#0d9488,color:#fff,stroke:none
+  classDef in_progress fill:#d97706,color:#fff,stroke:none
+  classDef draft       fill:#6b7280,color:#fff,stroke:none
+  classDef deprecated  fill:#374151,color:#9ca3af,stroke:none
+
+  class 01-project-scaffolding,02-user-auth complete
+  class 07-cart-checkout in_progress
+  class 09-order-history draft
+```</code></pre>
+
+        <div class="callout">
+          <p>
+            <strong>Status colour key:</strong> complete = teal, in_progress = amber, draft = grey, deprecated = dark. The <code>classDef</code> block is regenerated on every rebuild so colours always reflect the current doc statuses.
+          </p>
+        </div>
+
+        <h4>3 — Source File Overlap</h4>
+        <p>
+          Lists every source file that is registered in the <code>source_files</code> field of two or more feature docs. Files that appear in multiple docs are co-change risk signals — a commit to that file likely touches multiple documented features and may require doc updates in all of them.
+        </p>
+        <pre><code class="language-bash">## Source File Overlap
+
+Files referenced by 2 or more feature docs:
+
+  src/middleware/requireAuth.ts
+    → 02-user-auth
+    → 07-cart-checkout
+
+  src/utils/jwt.ts
+    → 02-user-auth
+    → 05-email-service
+
+  src/db/client.ts
+    → 01-project-scaffolding
+    → 03-database-layer
+    → 07-cart-checkout</code></pre>
+
+        <h4>4 — Warnings</h4>
+        <p>
+          Issues detected during the rebuild pass. Warnings are informational — they are written to the file and shown in the terminal but do not block the rebuild or fail the command.
+        </p>
+        <table class="scale-table">
+          <thead>
+            <tr>
+              <th>Warning type</th>
+              <th>Meaning</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>Broken <code>depends_on</code> ref</td><td>A doc lists a feature ID in <code>depends_on</code> that does not exist in <code>.mdd/docs/</code></td></tr>
+            <tr><td>Circular dependency</td><td>Two or more docs form a dependency cycle (A depends on B, B depends on A)</td></tr>
+            <tr><td>Missing <code>path</code></td><td>A doc has no <code>path</code> field — it will not appear in the Path Tree section</td></tr>
+          </tbody>
+        </table>
+
+        <pre><code class="language-bash">## Warnings
+
+  ⚠️  Broken depends_on: 08-old-feature references 99-missing-doc (not found)
+  ⚠️  Circular dependency: 04-content-builder ↔ 06-command-system
+  ⚠️  Missing path: 10-legacy-import (no path field — excluded from Path Tree)</code></pre>
+
+        <h3>Ironclad Sync — Automatic Regeneration</h3>
+        <p>
+          You rarely need to run <code>/mdd connect</code> manually. Every doc-mutating operation regenerates <code>connections.md</code> automatically as its final step:
+        </p>
+        <table class="mode-ref-table">
+          <thead>
+            <tr>
+              <th>Command</th>
+              <th>When it regenerates <code>connections.md</code></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td><code>/mdd</code> (Build Mode)</td><td>Phase 7c — after the feature doc is stamped <code>complete</code></td></tr>
+            <tr><td><code>/mdd update &lt;id&gt;</code></td><td>Step U6 — after <code>last_synced</code> is updated</td></tr>
+            <tr><td><code>/mdd deprecate &lt;id&gt;</code></td><td>After the doc is moved to <code>archive/</code></td></tr>
+            <tr><td><code>/mdd rebuild-tags</code></td><td>After <code>.startup.md</code> is rebuilt</td></tr>
+            <tr><td><code>/mdd upgrade</code></td><td>After all docs are patched</td></tr>
+            <tr><td><code>/mdd import-spec</code></td><td>Phase 5 — after <code>.startup.md</code> is rebuilt</td></tr>
+            <tr><td><code>/mdd plan-execute</code></td><td>After each feature in the wave completes</td></tr>
+          </tbody>
+        </table>
+
+        <h3>Staleness Detection</h3>
+        <p>
+          Two commands actively check whether <code>connections.md</code> is present and current:
+        </p>
+        <ul>
+          <li>
+            <strong><code>/mdd status</code></strong> — checks for a missing or stale <code>connections.md</code> and includes it in the status output. A missing file is flagged as broken; a file whose modification timestamp is older than the most recently modified feature doc is flagged as drifted.
+          </li>
+          <li>
+            <strong><code>/mdd scan</code></strong> — checks <code>connections.md</code> freshness as part of its drift detection pass. A missing file appears as a <code>broken</code> entry; a stale file appears as <code>drifted</code>. Both recommend <code>/mdd connect</code> to fix.
+          </li>
+        </ul>
+
+        <pre><code class="language-bash">🔍 MDD Scan — Drift Report
+
+  ✅ 01-project-scaffolding   - in sync
+  ✅ 02-user-auth             - in sync
+  ⚠️  04-content-builder       - DRIFTED (3 commits since last_synced)
+  ❌  connections.md           - BROKEN (file missing — run /mdd connect)
+
+Recommended actions:
+  /mdd update 04   - re-sync content-builder doc with code
+  /mdd connect     - rebuild connections map</code></pre>
       </section>
 
       <!-- ===== PLAN MODES ===== -->
@@ -1983,6 +2162,7 @@ Platform/
 │       ├── agent-2-config.md
 │       └── agent-2-notes.md
 │
+├── connections.md                    # Pre-computed relationship map (committed to git)
 └── .startup.md                       # Auto-generated session context</code></pre>
 
         <h3>What's Gitignored and Why</h3>
