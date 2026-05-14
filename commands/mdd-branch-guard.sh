@@ -26,16 +26,18 @@ if [ "$CHANGES" -eq 0 ]; then
   exit 0
 fi
 
-# Dirty working tree — block to prevent losing work
+# Dirty working tree — block and ask the user what to do
 echo ""
 echo "⛔  MDD BRANCH GUARD"
 echo ""
-echo "    File modification is blocked on branch '${BRANCH}'."
-echo "    You have ${CHANGES} uncommitted change(s). Commit or stash first:"
-echo ""
-echo "      git add -A && git commit -m 'wip: ...' && git checkout -b feat/<name>"
-echo "      — or —"
-echo "      git stash && git checkout -b feat/<name>"
+echo "    Branch '${BRANCH}' has ${CHANGES} uncommitted change(s)."
+echo "    Use AskUserQuestion to ask the user:"
+echo "    Question: 'You have uncommitted changes on ${BRANCH}. How would you like to proceed?'"
+echo "    Options:"
+echo "      1. Commit changes — run: git add -A && git commit -m 'wip: save before branch' && git checkout -b feat/<name>"
+echo "      2. Stash changes — run: git stash && git checkout -b feat/<name>"
+echo "      3. Cancel — do nothing"
+echo "    For options 1 and 2, replace feat/<name> with a branch name derived from the task at hand."
 echo ""
 
 exit 2
