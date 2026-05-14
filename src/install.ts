@@ -70,12 +70,21 @@ export function install(options: InstallOptions): void {
         if (file === 'mdd.md') {
           const srcContent = readFileSync(src, 'utf-8');
           const srcVer = getMddVersion(srcContent);
-          const destVer = getMddVersion(readFileSync(dest, 'utf-8'));
+          const destContent = readFileSync(dest, 'utf-8');
+          const destVer = getMddVersion(destContent);
+          const scope = options.local ? 'local' : 'global';
           if (srcVer <= destVer) {
-            results.push({ file, status: 'skipped', reason: `v${version} already up to date` });
+            // mdd_version unchanged — still re-stamp description if npm version changed
+            const reStamped = stampDescription(destContent, scope, version);
+            if (reStamped !== destContent) {
+              writeFileSync(dest, reStamped, 'utf-8');
+              results.push({ file, status: 'updated', reason: `description stamped ${version}` });
+            } else {
+              results.push({ file, status: 'skipped', reason: `v${version} already up to date` });
+            }
             continue;
           }
-          writeFileSync(dest, stampDescription(srcContent, options.local ? 'local' : 'global', version), 'utf-8');
+          writeFileSync(dest, stampDescription(srcContent, scope, version), 'utf-8');
           results.push({ file, status: 'updated', fromVersion: destVer, toVersion: srcVer });
         } else {
           copyFileSync(src, dest);
