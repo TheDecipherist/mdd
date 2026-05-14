@@ -53,6 +53,11 @@ Framework: (unknown) | DB: (unknown) | Host: (unknown)
 
 ## Features Documented
 (none yet — run /mdd <feature> to create your first doc)
+Format once populated: - <id> (<status>) [tag1, tag2, ...]
+
+## Ops Runbooks
+(none yet — run /mdd ops <description> to create one)
+Format once populated: - <slug> [tag1, tag2, ...]
 
 ## Last Audit
 (no audit run yet — run /mdd audit to generate findings)

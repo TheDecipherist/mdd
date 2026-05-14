@@ -196,11 +196,11 @@ Batch-patches missing frontmatter fields (`last_synced`, `status`, `phase`) acro
 ```
 📋 Upgrade Inventory
 
-Doc                              | last_synced | status | phase
-─────────────────────────────────|─────────────|────────|──────────────
-01-project-scaffolding           | ❌ missing  | ❌     | ❌
-02-profile-system                | ❌ missing  | ✅     | ❌
-03-database-layer                | ✅ present  | ✅     | ✅
+Doc                              | last_synced | status | phase | tags
+─────────────────────────────────|─────────────|────────|───────|──────
+01-project-scaffolding           | ❌ missing  | ❌     | ❌    | ❌
+02-profile-system                | ❌ missing  | ✅     | ❌    | ✅
+03-database-layer                | ✅ present  | ✅     | ✅    | ❌
 ...
 
 Docs needing upgrade: <N> of <total>
@@ -208,6 +208,7 @@ Fields to add:
   last_synced — <N> docs
   status      — <N> docs
   phase       — <N> docs
+  tags        — <N> docs (run /mdd rebuild-tags after upgrade to populate)
 ```
 
 4. If 0 docs need upgrade → report "All docs are up to date. Nothing to patch." and stop.
@@ -308,11 +309,13 @@ data_flow: ...
 last_synced: <new>    ← insert here if missing
 status: <new>         ← insert here if missing
 phase: <new>          ← insert here if missing
+mdd_version: <new>    ← insert here if missing
+tags: <new>           ← insert here if missing (do not generate tags in upgrade — run /mdd rebuild-tags after)
 known_issues: []
 ---
 ```
 
-Insert new fields **before** `known_issues` to keep the canonical order.
+Insert new fields **before** `known_issues` to keep the canonical order. **Do not attempt to generate tag values during upgrade** — tags require reading doc content to produce meaningful keywords. After running upgrade, run `/mdd rebuild-tags` to populate tags on any docs that need them.
 
 Report progress as you go:
 ```
