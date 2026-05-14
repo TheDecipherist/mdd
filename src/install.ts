@@ -32,6 +32,15 @@ export function install(options: InstallOptions): void {
   mkdirSync(destDir, { recursive: true });
   if (modesDestDir !== destDir) mkdirSync(modesDestDir, { recursive: true });
 
+  // Remove starter-kit leftovers that should not coexist with the standalone package
+  const leftovers = ['install-mdd.md'];
+  for (const f of leftovers) {
+    const legacy = join(destDir, f);
+    if (existsSync(legacy)) {
+      try { unlinkSync(legacy); } catch { /* ignore */ }
+    }
+  }
+
   const files = readdirSync(srcDir)
     .filter(f => f.endsWith('.md'))
     .sort((a, b) => {
