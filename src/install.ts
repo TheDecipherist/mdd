@@ -1,4 +1,4 @@
-import { copyFileSync, mkdirSync, existsSync, readdirSync, readFileSync, writeFileSync, appendFileSync, chmodSync } from 'fs';
+import { copyFileSync, mkdirSync, existsSync, readdirSync, readFileSync, writeFileSync, appendFileSync, chmodSync, unlinkSync } from 'fs';
 import { join, resolve, dirname } from 'path';
 import { homedir } from 'os';
 import { fileURLToPath } from 'url';
@@ -8,6 +8,7 @@ const __dirname = dirname(__filename);
 
 interface InstallOptions {
   dir: string;
+  modesDir?: string;
   force?: boolean;
   local?: boolean;
   claudeMdPath?: string;
@@ -24,15 +25,16 @@ interface FileResult {
 
 export function install(options: InstallOptions): void {
   const destDir = resolve(options.dir.replace('~', homedir()));
+  const modesDestDir = options.modesDir ? resolve(options.modesDir.replace('~', homedir())) : destDir;
   const srcDir = join(__dirname, '../commands');
   const version = getPackageVersion();
 
   mkdirSync(destDir, { recursive: true });
+  if (modesDestDir !== destDir) mkdirSync(modesDestDir, { recursive: true });
 
   const files = readdirSync(srcDir)
     .filter(f => f.endsWith('.md'))
     .sort((a, b) => {
-      // mdd.md first, then alphabetical
       if (a === 'mdd.md') return -1;
       if (b === 'mdd.md') return 1;
       return a.localeCompare(b);
@@ -42,7 +44,17 @@ export function install(options: InstallOptions): void {
 
   for (const file of files) {
     const src = join(srcDir, file);
-    const dest = join(destDir, file);
+    const isModeFile = file !== 'mdd.md';
+    const targetDir = isModeFile ? modesDestDir : destDir;
+    const dest = join(targetDir, file);
+
+    // Clean up legacy location: if mode file exists in commands dir but we're now using a separate modesDir, remove it
+    if (isModeFile && modesDestDir !== destDir) {
+      const legacyDest = join(destDir, file);
+      if (existsSync(legacyDest)) {
+        try { unlinkSync(legacyDest); } catch { /* ignore */ }
+      }
+    }
 
     try {
       if (existsSync(dest) && !options.force) {
@@ -56,7 +68,6 @@ export function install(options: InstallOptions): void {
           copyFileSync(src, dest);
           results.push({ file, status: 'updated', fromVersion: destVer, toVersion: srcVer });
         } else {
-          // For mode files: compare modification — just overwrite silently
           copyFileSync(src, dest);
           results.push({ file, status: 'updated' });
         }

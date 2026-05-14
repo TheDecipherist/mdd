@@ -83,19 +83,21 @@ MDD flips this. You write structured documentation first. Then Claude reads **on
 
 ## How It Works
 
-MDD installs 7 Claude command files into `~/.claude/commands/`. The main router (`mdd.md`) reads your arguments and loads **only the mode file needed** - a `/mdd status` loads ~460 tokens instead of the full ~28,000.
+MDD installs one Claude slash command (`mdd.md`) plus six mode files read lazily at runtime. The main router reads your arguments and loads **only the mode file needed** — a `/mdd status` costs ~460 tokens instead of the full ~28,000.
 
 ```
-mdd.md        (~120 lines)  Router - Steps 0/0a/0b, mode dispatch, Branch Guard
-mdd-build.md  (~680 lines)  BUILD MODE - Phases 0–7d
-mdd-audit.md  (~240 lines)  AUDIT MODE - Phases A1–A7
-mdd-manage.md (~340 lines)  STATUS + NOTE + SCAN + UPDATE + DEPRECATE
-mdd-lifecycle.md (~350 lines) REVERSE-ENGINEER + GRAPH + UPGRADE
-mdd-plan.md   (~350 lines)  PLAN-INITIATIVE + PLAN-WAVE + PLAN-EXECUTE + PLAN-SYNC + …
-mdd-ops.md    (~380 lines)  OPS DOCUMENT + OPS EXECUTE + OPS UPDATE + OPS LIST + COMMANDS
+~/.claude/commands/mdd.md          Router — Steps 0/0a/0b, mode dispatch, Branch Guard
+
+~/.claude/mdd/
+  mdd-build.md    (~680 lines)  BUILD MODE - Phases 0–7d
+  mdd-audit.md    (~240 lines)  AUDIT MODE - Phases A1–A7
+  mdd-manage.md   (~340 lines)  STATUS + NOTE + SCAN + UPDATE + DEPRECATE
+  mdd-lifecycle.md (~350 lines) REVERSE-ENGINEER + GRAPH + UPGRADE
+  mdd-plan.md     (~350 lines)  PLAN-INITIATIVE + PLAN-WAVE + PLAN-EXECUTE + PLAN-SYNC + …
+  mdd-ops.md      (~380 lines)  OPS DOCUMENT + OPS EXECUTE + OPS UPDATE + OPS LIST + COMMANDS
 ```
 
-**Lazy loading is the key optimization.** Each invocation pays only for the mode it needs. The full 28,000-token set is always available but never loaded unnecessarily.
+**Lazy loading is the key optimization.** Each invocation pays only for the mode it needs. The full 28,000-token set is always available but never loaded unnecessarily. Mode files live in `~/.claude/mdd/` (not `commands/`) so only `/mdd` appears in the Claude Code command picker.
 
 ---
 
@@ -103,7 +105,7 @@ mdd-ops.md    (~380 lines)  OPS DOCUMENT + OPS EXECUTE + OPS UPDATE + OPS LIST +
 
 ```bash
 npm install -g @thedecipherist/mdd
-mdd install          # copies Claude commands to ~/.claude/commands/
+mdd install          # mdd.md → ~/.claude/commands/  |  mode files → ~/.claude/mdd/
 ```
 
 After installation, `/mdd` is available in every Claude Code session globally - no per-project setup needed.
@@ -120,7 +122,8 @@ mdd install --install-local       # install to .claude/commands/ + injects into 
 
 | What | Where | Purpose |
 |------|-------|---------|
-| 7 command `.md` files | `~/.claude/commands/` | The `/mdd` slash command and all its modes |
+| `mdd.md` (router) | `~/.claude/commands/` | The `/mdd` slash command entry point |
+| 6 mode `.md` files | `~/.claude/mdd/` | Mode files (not exposed as commands) |
 | Branch Guard hook | `~/.claude/hooks/mdd-branch-guard.sh` | Blocks file writes on `main` in any MDD project |
 | Hook registration | `~/.claude/settings.json` | Wires the hook to Claude Code's PreToolUse event |
 | Guidance block | `~/.claude/CLAUDE.md` | Teaches Claude to suggest MDD automatically |
