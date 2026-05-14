@@ -16,9 +16,9 @@ models: []
 test_files: []
 data_flow: greenfield
 last_synced: 2026-05-14
-status: draft
-phase: documentation
-mdd_version: 8
+status: complete
+phase: all
+mdd_version: 9
 tags: [guidance, claude-md, mdd-suggest, install, tags, startup, rebuild-tags, ops, awareness]
 known_issues: []
 ---
