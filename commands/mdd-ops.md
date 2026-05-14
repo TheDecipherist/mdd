@@ -232,6 +232,9 @@ Any service still failing → append entry to `known_issues` in the doc.
 
 ### Phase RO5 — Summary
 
+**Update the runbook frontmatter** — write this field before displaying the summary:
+- `last_synced: <today>`
+
 ```
 runop complete — <slug>
 

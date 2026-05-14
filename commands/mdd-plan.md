@@ -251,6 +251,10 @@ When all features are `complete`:
 2. User confirms → flip wave `status: complete` in both `waves/<slug>.md` AND the waves table in `initiatives/<slug>.md`.
 3. Recompute hashes for both files.
 4. If all waves in initiative are `complete` → ask: *"All waves done. Mark initiative complete? (yes / no)"*
+   - If yes → **Update initiative frontmatter** — write these fields now:
+     - `status: complete`
+     - `last_synced: <today>`
+     - `mdd_version: <current from mdd.md frontmatter>`
 5. Rebuild `.mdd/.startup.md`.
 
 ---
