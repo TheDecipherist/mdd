@@ -8,7 +8,7 @@
   <meta name="keywords" content="MDD, Manual-Driven Development, Claude Code, AI workflow, slash commands, feature documentation" />
   <meta name="author" content="TheDecipherist" />
   <meta property="og:title" content="MDD User Guide - Manual-Driven Development" />
-  <meta property="og:description" content="Complete reference for all 21 MDD modes: Build, Audit, Status, Scan, Update, Plan, Ops, and more." />
+  <meta property="og:description" content="Complete reference for all 23 MDD modes: Build, Audit, Status, Scan, Update, Plan, Ops, and more." />
   <meta property="og:url" content="https://thedecipherist.github.io/mdd/user-guide.html" />
   <meta property="og:type" content="website" />
   <link rel="canonical" href="https://thedecipherist.github.io/mdd/user-guide.html" />
@@ -109,6 +109,7 @@
     <a href="#audit-mode">Audit Mode</a>
     <a href="#manage-modes">Status, Notes, Scan &amp; Update</a>
     <a href="#lifecycle-modes">Lifecycle: Reverse-Engineer, Graph, Upgrade</a>
+    <a href="#import-spec">Import Spec</a>
     <a href="#plan-modes">Initiative &amp; Wave Planning</a>
     <a href="#ops-modes">Ops Runbooks</a>
     <a href="#doc-format">Feature Doc Reference</a>
@@ -140,7 +141,7 @@
     <div class="hero-badge">User Guide - v1.0.0</div>
     <h1>MDD User Guide</h1>
     <p class="hero-subtitle">
-      Complete reference for all 21 modes - Build, Audit, Status, Scan, Update, Plan, Ops, and more.
+      Complete reference for all 23 modes - Build, Audit, Status, Scan, Update, Plan, Ops, and more.
     </p>
     <pre><code class="language-bash">npm install -g @thedecipherist/mdd
 mdd install</code></pre>
@@ -161,9 +162,11 @@ mdd install</code></pre>
         <a href="#audit-mode">Audit Mode</a>
         <a href="#manage-modes">Status, Notes, Scan &amp; Update</a>
         <a href="#lifecycle-modes">Lifecycle Modes</a>
+        <a href="#import-spec" style="padding-left:1.25rem;font-size:0.85em">Import Spec</a>
         <a href="#plan-modes">Initiative &amp; Wave Planning</a>
         <a href="#ops-modes">Ops Runbooks</a>
         <a href="#doc-format">Feature Doc Reference</a>
+        <a href="#path-field" style="padding-left:1.25rem;font-size:0.85em">The path Field</a>
         <a href="#mdd-directory">The .mdd/ Directory</a>
         <a href="#versioning">MDD Versioning</a>
         <a href="#migration">Migrating from Starter Kit</a>
@@ -1269,6 +1272,7 @@ Graph saved: .mdd/audits/graph-2026-05-07.md</code></pre>
           <li><strong><code>status</code></strong> - inferred from <code>phase</code> field if present; defaults to <code>draft</code> if phase is absent</li>
           <li><strong><code>phase</code></strong> - inferred from <code>status</code>; <code>complete</code> status maps to <code>verified</code> phase</li>
           <li><strong><code>mdd_version</code></strong> - stamped with the current MDD version number</li>
+          <li><strong><code>path</code></strong> - inferred by reading each doc's full content and mapping it into the existing <code>path</code> vocabulary found across other docs. Content-aware inference: uses the Purpose and Architecture sections to place the feature in the product tree. Always shows the full plan for confirmation before writing — never assigns paths silently.</li>
         </ul>
 
         <pre><code class="language-bash">/mdd upgrade
@@ -1278,6 +1282,8 @@ Scanning .mdd/docs/ for missing frontmatter fields...
 Upgrade plan (8 files to patch):
   04-content-builder    - add: last_synced (inferred: 2026-04-01), mdd_version
   08-old-feature        - add: last_synced (inferred: 2026-03-15), status, phase, mdd_version
+  05-email-service      - add: path (inferred: Notifications/Email)
+  08-old-feature        - add: path (inferred: Platform/Legacy)
   ...
 
 Apply upgrades? [Y/n]
@@ -1287,6 +1293,149 @@ Apply upgrades? [Y/n]
         <div class="callout green">
           <p>
             <strong>Run <code>/mdd upgrade</code> after every <code>mdd install</code> update.</strong> New MDD versions may add frontmatter fields. Upgrade stamps all existing docs with the new fields so <code>/mdd scan</code> and <code>/mdd graph</code> work correctly.
+          </p>
+        </div>
+      </section>
+
+      <!-- ===== IMPORT SPEC ===== -->
+      <section id="import-spec">
+        <h2><code>/mdd import-spec</code></h2>
+
+        <p>
+          Converts one or more spec documents — the large, free-form markdown files that accumulate during brainstorming, product discovery, or requirements sessions — into properly structured MDD feature docs. Nothing from the spec is lost: every piece of information is preserved and placed into the correct section of the generated docs.
+        </p>
+
+        <h3>Command Syntax</h3>
+        <pre><code class="language-bash"># Convert a single spec file
+/mdd import-spec docs/spec.md
+
+# Convert multiple files — merged and deduplicated before processing
+/mdd import-spec product-brief.md technical-notes.md customer-requirements.md</code></pre>
+
+        <h3>The 5 Phases</h3>
+
+        <div class="step">
+          <div class="step-number">1</div>
+          <div class="step-content">
+            <h3>Read</h3>
+            <p>Loads the full content of each specified file. For multi-file invocations, all files are concatenated into a single corpus before analysis begins. No partial reads — the entire spec is held in context for the grouping pass.</p>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="step-number">2</div>
+          <div class="step-content">
+            <h3>Extract &amp; Group (path grouping pass first)</h3>
+            <p>
+              The spec is analysed in two layers. First, a <strong>path grouping pass</strong> identifies the top-level product areas referenced in the spec (e.g., "Auth", "Checkout", "Notifications"). This pass runs before individual features are extracted, so that every feature is assigned a <code>path</code> value from the product vocabulary that already exists in your <code>.mdd/docs/</code> — or from the vocabulary established within the spec itself if the project is new.
+            </p>
+            <p>
+              After paths are established, individual features are extracted and grouped under their path segments. Overlapping or duplicate sections across multiple input files are semantically merged at this stage — content is combined, not duplicated.
+            </p>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="step-number">3</div>
+          <div class="step-content">
+            <h3>Dry-Run Preview Gate (mandatory)</h3>
+            <p>
+              Before writing a single file, MDD presents a full preview of what it is about to create. This gate is not skippable. You must confirm before any docs are written.
+            </p>
+            <pre><code class="language-bash">Import Spec — Dry-Run Preview
+
+Path tree:
+  Auth/
+    Login              → 03-login.md (new)
+    Signup             → 04-signup.md (new)
+  E-commerce/
+    Cart/
+      Checkout         → 05-cart-checkout.md (new)
+    Orders             → 06-order-history.md (new)
+
+Feature slugs to be created:
+  03-login, 04-signup, 05-cart-checkout, 06-order-history
+
+Content mapping:
+  "Login" section in spec  → 03-login.md (Purpose + Business Rules)
+  "Auth flows" section     → merged into 03-login.md and 04-signup.md
+  "Cart checkout" section  → 05-cart-checkout.md
+
+Merge summary:
+  2 overlapping sections merged (auth flows → login + signup)
+  0 sections discarded — all content preserved
+
+Proceed with import? [Y/n]</code></pre>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="step-number">4</div>
+          <div class="step-content">
+            <h3>Write Docs</h3>
+            <p>Creates each feature doc with full YAML frontmatter (including the inferred <code>path</code> field) and the 8 mandatory body sections. Spec content is distributed into the appropriate sections — business rules go into Business Rules, API shapes go into API Endpoints, data models go into Data Model, and so on. Any spec content that does not fit a standard section is placed in a <code>## Notes from Spec</code> subsection within the closest matching section, so nothing is lost.</p>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="step-number">5</div>
+          <div class="step-content">
+            <h3>Rebuild Startup</h3>
+            <p>After all docs are written, <code>.mdd/.startup.md</code> is rebuilt to include the new features. The new docs appear immediately in subsequent <code>/mdd status</code> output and in the Claude overlap-detection tags that guard against re-building already-planned features.</p>
+          </div>
+        </div>
+
+        <h3>Auto-Detect Structure</h3>
+        <p>
+          Import Spec adapts the output structure to the size and complexity of the spec. The detection logic reads the number of distinct root-level path areas and the total feature count:
+        </p>
+        <table class="mode-ref-table">
+          <thead>
+            <tr>
+              <th>Condition</th>
+              <th>Output structure</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>3+ root path areas <strong>and</strong> 8+ features</td>
+              <td>Creates a full Initiative + Waves + feature docs. Features are grouped into waves by path area. An initiative file is created to tie the waves together.</td>
+            </tr>
+            <tr>
+              <td>4–7 features, 1–2 root areas</td>
+              <td>Creates Waves + feature docs. No initiative file — the waves are standalone without a named initiative container.</td>
+            </tr>
+            <tr>
+              <td>1–3 features</td>
+              <td>Creates flat feature docs only. No wave or initiative structure.</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="callout amber">
+          <p>
+            <strong>The dry-run preview shows which structure will be created</strong> before anything is written. If the auto-detected structure is wrong (e.g., you want waves even for a small import), you can decline the preview and re-invoke with a hint: <code>/mdd import-spec spec.md --waves</code>.
+          </p>
+        </div>
+
+        <h3>Content Preservation Rule</h3>
+        <p>
+          Nothing from the spec is discarded. Every sentence, bullet point, table, and code block from the input files ends up in at least one generated doc. If content does not fit cleanly into one of the 8 mandatory sections, it is placed in a <code>## Notes from Spec</code> subsection. The dry-run preview includes a merge summary that lists every source section and where it maps to in the output.
+        </p>
+
+        <h3>Duplicate Handling (Multi-File)</h3>
+        <p>
+          When multiple files are passed, MDD performs a semantic merge before writing docs. This means:
+        </p>
+        <ul>
+          <li>Sections that cover the same feature from different angles are combined — the output contains the union of both descriptions, not a duplicate.</li>
+          <li>Identical or near-identical paragraphs are deduplicated. One canonical version is kept.</li>
+          <li>Contradictions (e.g., two files specify different timeout values for the same endpoint) are flagged in the dry-run preview and left as a <code>known_issues</code> entry in the generated doc, rather than silently picking one.</li>
+        </ul>
+
+        <div class="callout">
+          <p>
+            <strong>All generated docs include a <code>path</code> field.</strong> Import Spec is the primary entry point for establishing the <code>path</code> vocabulary on a new project. The paths chosen during import become the baseline vocabulary that Build Mode, <code>/mdd upgrade</code>, and <code>/mdd scan</code> reuse for all future docs.
           </p>
         </div>
       </section>
@@ -1637,6 +1786,11 @@ Project (.mdd/ops/):
               <td>Issues discovered during audits or implementation. Append-only - never cleared automatically.</td>
               <td><code>[]</code> or list of strings</td>
             </tr>
+            <tr>
+              <td>path</td>
+              <td>Slash-delimited breadcrumb showing where the feature lives in the product hierarchy. Used by dashboards to group docs into a human-readable tree. Separate from <code>depends_on</code> — this is for navigation, not build order. Title Case, 1–3 levels using product vocabulary (not code paths). Siblings must spell the parent segment identically.</td>
+              <td><code>Auth/Login</code>, <code>E-commerce/Cart/Checkout</code></td>
+            </tr>
           </tbody>
         </table>
 
@@ -1679,6 +1833,106 @@ Project (.mdd/ops/):
         <h3><code>mdd_version</code> Stamping</h3>
         <p>
           Every doc created or last updated by MDD gets the current <code>mdd_version</code> integer stamped in frontmatter. This integer increments with each MDD workflow release. The <code>/mdd status</code> command reads all docs and groups them by version, making it easy to see which docs need to be upgraded.
+        </p>
+
+        <h3 id="path-field">The <code>path</code> Field</h3>
+        <p>
+          The <code>path</code> field is a slash-delimited breadcrumb that places each feature doc in a product-level hierarchy. It exists to answer the question: <em>where does this feature live in the product?</em>
+        </p>
+        <p>
+          It is completely separate from <code>depends_on</code>. <code>depends_on</code> describes build order and runtime requirements. <code>path</code> describes navigation — how a human would browse to this feature in a dashboard, a doc browser, or a tree view. A feature can share a path segment with another feature it has no dependency relationship with at all.
+        </p>
+
+        <h4>Format Rules</h4>
+        <table class="mode-ref-table">
+          <thead>
+            <tr>
+              <th>Rule</th>
+              <th>Good</th>
+              <th>Bad</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Title Case segments</td>
+              <td><code>Auth/Login</code></td>
+              <td><code>auth/login</code></td>
+            </tr>
+            <tr>
+              <td>1 to 3 levels maximum</td>
+              <td><code>E-commerce/Cart/Checkout</code></td>
+              <td><code>E-commerce/Cart/Checkout/Promo/Apply</code></td>
+            </tr>
+            <tr>
+              <td>Product vocabulary, not code paths</td>
+              <td><code>Notifications/Email</code></td>
+              <td><code>src/services/mailer</code></td>
+            </tr>
+            <tr>
+              <td>Siblings spell the parent identically</td>
+              <td><code>Auth/Login</code> and <code>Auth/Signup</code></td>
+              <td><code>Auth/Login</code> and <code>Authentication/Signup</code></td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h4>How Claude Assigns <code>path</code> in Build Mode Phase 3</h4>
+        <p>
+          When writing a new feature doc, Claude follows this sequence to assign <code>path</code>:
+        </p>
+        <ol>
+          <li><strong>Read existing paths</strong> — scans all <code>path:</code> fields in <code>.mdd/docs/*.md</code> to discover the established vocabulary (what segment names already exist).</li>
+          <li><strong>Infer from product mental model</strong> — uses the feature title, purpose, and tech stack context to map the feature into the existing tree. If an obvious parent segment already exists, it is reused.</li>
+          <li><strong>Ask only if ambiguous</strong> — if the feature could plausibly sit under two different parents, Claude presents the two options and asks before writing. It never silently coins a new root segment if an existing one fits.</li>
+        </ol>
+
+        <h4>How <code>/mdd scan</code> Flags Missing <code>path</code></h4>
+        <p>
+          Docs without a <code>path</code> field appear in the scan report under a dedicated section:
+        </p>
+        <pre><code class="language-bash">🔍 MDD Scan — Path Coverage
+
+  ✅ 01-project-scaffolding   - path: Platform/Setup
+  ✅ 02-user-auth             - path: Auth/Login
+  ⚠️  05-email-service         - missing path field
+  ⚠️  08-old-feature           - missing path field
+
+2 docs missing path. Run /mdd upgrade to batch-assign.</code></pre>
+
+        <h4>How <code>/mdd upgrade</code> Batch-Adds <code>path</code></h4>
+        <p>
+          When <code>/mdd upgrade</code> detects docs missing the <code>path</code> field, it reads each doc's full content (not just git history) to infer an appropriate path from the feature's purpose and existing vocabulary. It then presents the full plan for confirmation before writing anything:
+        </p>
+        <pre><code class="language-bash">Path inference plan (2 docs):
+  05-email-service    → Notifications/Email   (inferred from: purpose section, existing Notifications/Push)
+  08-old-feature      → Platform/Legacy       (inferred from: architecture section mentions legacy API)
+
+Apply path assignments? [Y/n]</code></pre>
+
+        <h4>Example Tree View from <code>path</code> Values</h4>
+        <p>
+          Given the following <code>path</code> fields across a project's feature docs, a dashboard would render this tree:
+        </p>
+        <pre><code class="language-bash">Auth/
+  ├── Login           (02-user-auth)
+  ├── Signup          (11-user-registration)
+  └── Password Reset  (14-password-reset)
+
+E-commerce/
+  ├── Cart/
+  │   ├── Add Item    (06-cart-add-item)
+  │   └── Checkout    (07-cart-checkout)
+  └── Orders          (09-order-history)
+
+Notifications/
+  ├── Email           (05-email-service)
+  └── Push            (12-push-notifications)
+
+Platform/
+  └── Setup           (01-project-scaffolding)</code></pre>
+
+        <p>
+          This tree is rendered by <code>mdd-dashboard</code> and <code>mdd-tui</code> as a navigable hierarchy alongside the <code>depends_on</code> graph. The two views are complementary: the tree shows product structure; the graph shows build order.
         </p>
       </section>
 

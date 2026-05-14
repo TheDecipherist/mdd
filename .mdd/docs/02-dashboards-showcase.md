@@ -16,6 +16,7 @@ status: complete
 phase: all
 mdd_version: 8
 tags: [dashboard, tui, showcase, mdd-tui, mdd-dashboard, ui, terminal]
+path: Tooling/Dashboard
 known_issues: []
 ---
 

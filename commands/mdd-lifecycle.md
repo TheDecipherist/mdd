@@ -181,7 +181,7 @@ Save the graph to `.mdd/audits/graph-<date>.md`.
 
 Triggered when arguments start with `upgrade`.
 
-Batch-patches missing frontmatter fields (`last_synced`, `status`, `phase`) across ALL `.mdd/docs/*.md` files without touching doc content. Safe to run multiple times — already-present fields are never overwritten.
+Batch-patches missing frontmatter fields (`last_synced`, `status`, `phase`, `tags`, `path`) across ALL `.mdd/docs/*.md` files without touching doc content. Safe to run multiple times — already-present fields are never overwritten.
 
 **Use case:** projects that used MDD before these fields were introduced, or after importing docs from another project. Running `/mdd upgrade` converts all UNTRACKED docs to IN SYNC in one pass.
 
@@ -196,11 +196,11 @@ Batch-patches missing frontmatter fields (`last_synced`, `status`, `phase`) acro
 ```
 📋 Upgrade Inventory
 
-Doc                              | last_synced | status | phase | tags
-─────────────────────────────────|─────────────|────────|───────|──────
-01-project-scaffolding           | ❌ missing  | ❌     | ❌    | ❌
-02-profile-system                | ❌ missing  | ✅     | ❌    | ✅
-03-database-layer                | ✅ present  | ✅     | ✅    | ❌
+Doc                              | last_synced | status | phase | tags | path
+─────────────────────────────────|─────────────|────────|───────|──────|──────
+01-project-scaffolding           | ❌ missing  | ❌     | ❌    | ❌   | ❌
+02-profile-system                | ❌ missing  | ✅     | ❌    | ✅   | ❌
+03-database-layer                | ✅ present  | ✅     | ✅    | ❌   | ✅
 ...
 
 Docs needing upgrade: <N> of <total>
@@ -209,6 +209,7 @@ Fields to add:
   status      — <N> docs
   phase       — <N> docs
   tags        — <N> docs (run /mdd rebuild-tags after upgrade to populate)
+  path        — <N> docs (Claude reads each doc's title + purpose to infer the value)
 ```
 
 4. If 0 docs need upgrade → report "All docs are up to date. Nothing to patch." and stop.
@@ -247,6 +248,17 @@ The goal is the date the doc was last meaningfully worked on. Try in order:
 3. If `status` resolved to `draft` → `documentation`
 4. If `status` resolved to `deprecated` → `deprecated`
 
+**`path` inference:**
+
+Unlike other fields, `path` cannot be inferred from git history or status — it requires reading the doc's content.
+
+For each doc missing `path`:
+1. Read its `title` frontmatter field and `## Purpose` section body
+2. Read all other docs' existing `path` fields to understand the project's established vocabulary and casing conventions
+3. Propose a `path` value (`Area/Section`, Title Case, 1–3 levels) that reflects where this feature lives in the product — use product terminology, not code module names
+
+**Do not silently write `path` values** — always include the proposed values in the Phase UP3 plan for user review. The user may adjust any proposed path before writing.
+
 ---
 
 ### Phase UP3 — Show Plan + Confirm
@@ -271,6 +283,7 @@ Present the inferred patches to the user before writing anything:
     + last_synced: 2026-01-17   (from git: last commit on this doc)
     + status: complete
     + phase: all
+    + path: Auth/Login           (inferred from purpose: "handles user login flow")
 
   ... (<N> more)
 
@@ -311,11 +324,12 @@ status: <new>         ← insert here if missing
 phase: <new>          ← insert here if missing
 mdd_version: <new>    ← insert here if missing
 tags: <new>           ← insert here if missing (do not generate tags in upgrade — run /mdd rebuild-tags after)
+path: <new>           ← insert here if missing (value inferred from doc content in UP2, confirmed by user in UP3)
 known_issues: []
 ---
 ```
 
-Insert new fields **before** `known_issues` to keep the canonical order. **Do not attempt to generate tag values during upgrade** — tags require reading doc content to produce meaningful keywords. After running upgrade, run `/mdd rebuild-tags` to populate tags on any docs that need them.
+Insert new fields **before** `known_issues` to keep the canonical order. **Do not attempt to generate tag values during upgrade** — tags require reading doc content to produce meaningful keywords; after running upgrade, run `/mdd rebuild-tags` to populate them. **For `path` values**: these ARE inferred by reading doc content during UP2 and confirmed in UP3 — write the user-confirmed values directly.
 
 Report progress as you go:
 ```
@@ -332,7 +346,7 @@ Patching...
 
 After all patches are applied:
 
-1. Re-scan `.mdd/docs/*.md` — confirm 0 docs have missing `last_synced`
+1. Re-scan `.mdd/docs/*.md` — confirm 0 docs have missing `last_synced` or `path`
 2. Trigger the `.mdd/.startup.md` rebuild (same logic as Status Mode)
 3. Report:
 
