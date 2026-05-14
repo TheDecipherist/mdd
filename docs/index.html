@@ -371,8 +371,10 @@ mdd install</code></pre>
 
         <p>
           <code>mdd install</code> copies the command files to your Claude Code global
-          commands directory. After that, <code>/mdd</code> is available in any project,
-          any directory, any session - no per-project setup required.
+          commands directory and injects a guidance block into <code>~/.claude/CLAUDE.md</code>.
+          After that, <code>/mdd</code> is available in any project, any directory, any session —
+          and Claude will automatically suggest the right MDD workflow whenever you make an
+          implementation request without the <code>/mdd</code> flag.
         </p>
 
         <h3>Options</h3>
@@ -415,7 +417,7 @@ mdd install</code></pre>
       </section>
 
       <!-- ===================== -->
-      <!-- Section: All 21 Modes -->
+      <!-- Section: All 22 Modes -->
       <!-- ===================== -->
       <section id="modes">
         <h2>All 21 Modes</h2>
@@ -473,6 +475,7 @@ mdd install</code></pre>
               <li><code>/mdd status</code> - project health summary</li>
               <li><code>/mdd scan</code> - detect drift from docs</li>
               <li><code>/mdd update</code> - update feature docs</li>
+              <li><code>/mdd rebuild-tags</code> - generate tags &amp; rebuild startup</li>
               <li><code>/mdd note</code> - append a project note</li>
               <li><code>/mdd deprecate</code> - mark features retired</li>
             </ul>

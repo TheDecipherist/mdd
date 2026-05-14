@@ -191,6 +191,7 @@ last_synced: <YYYY-MM-DD>
 status: draft
 phase: <last completed phase name, or "all" when fully built>
 mdd_version: <read from mdd.md frontmatter mdd_version field>
+tags: [<4-8 domain-concept keywords — systems touched, technology, feature names. NOT file paths>]
 known_issues: []
 ---
 

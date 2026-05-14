@@ -85,6 +85,7 @@ services:
 status: draft
 last_synced: <YYYY-MM-DD>
 mdd_version: <current>
+tags: [<4-8 keywords — platform, services, environments, operation type. e.g. deploy, dokploy, docker, eu-west, canary>]
 known_issues: []
 ---
 

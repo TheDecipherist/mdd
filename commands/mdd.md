@@ -104,7 +104,7 @@ Find the MDD commands directory by checking `~/.claude/commands/` (global instal
 - If arguments start with `audit` →
   **Read `~/.claude/commands/mdd-audit.md` then follow its AUDIT MODE instructions.**
 
-- If arguments start with `status`, `note`, `scan`, `update`, or `deprecate` →
+- If arguments start with `status`, `note`, `scan`, `update`, `deprecate`, or `rebuild-tags` →
   **Read `~/.claude/commands/mdd-manage.md` then follow the relevant mode instructions.**
 
 - If arguments start with `reverse-engineer`, `reverse`, `graph`, or `upgrade` →

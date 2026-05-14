@@ -63,8 +63,8 @@ After collecting status, rebuild the auto-generated zone of `.mdd/.startup.md`:
    - `Generated: <YYYY-MM-DD>` (date only, no time)
    - `Branch:` from `git branch --show-current`
    - `Stack:` from `CLAUDE.md` or `claude-mastery-project.conf` if detectable, otherwise `(unknown)`
-   - `Features Documented:` sorted list of `.mdd/docs/*.md` filenames with status if detectable from frontmatter
-   - `Ops Runbooks:` sorted list of `.mdd/ops/*.md` filenames with status — omit section entirely if `.mdd/ops/` is empty
+   - `Features Documented:` sorted list of `.mdd/docs/*.md` filenames with status and tags — format: `- <id> (<status>) [tag1, tag2, ...]`. If `tags:` is missing from a doc, omit the bracket section for that entry.
+   - `Ops Runbooks:` sorted list of `.mdd/ops/*.md` filenames with tags — format: `- <slug> [tag1, tag2, ...]`. Omit section entirely if `.mdd/ops/` is empty.
    - `Last Audit:` from the most recent `.mdd/audits/report-*.md` — extract findings/fixed/open counts
    - `Rules Summary:` static block (does not change)
 3. Write the rebuilt auto-generated section + `---` divider + preserved Notes section back to `.mdd/.startup.md`. Update `mdd_version` in the file's frontmatter to current.
@@ -335,6 +335,72 @@ Doc archived: .mdd/docs/archive/<NN>-<feature-name>.md
 Dependents flagged: <N> docs updated with known_issues warning
 Source files: <kept/deleted per user choice>
 Test files: <kept/deleted per user choice>
+```
+
+---
+
+## REBUILD-TAGS MODE — `/mdd rebuild-tags [--force]`
+
+Triggered when arguments start with `rebuild-tags`. Scans all feature docs and ops runbooks, generates `tags:` for any doc missing the field, then rebuilds `.startup.md`.
+
+**Use case:** Migrating existing projects to the tag system. Safe to run multiple times — docs that already have `tags:` are skipped unless `--force` is passed.
+
+### Phase RT1 — Inventory
+
+1. Glob `.mdd/docs/*.md` (excluding `archive/`) and `.mdd/ops/*.md` (excluding `archive/`).
+2. For each doc, check frontmatter for a `tags:` field.
+3. Build an inventory table:
+
+```
+🏷️  Rebuild Tags — Inventory
+
+Doc                              | Has tags?
+─────────────────────────────────|──────────
+01-docs-site                     | ❌ missing
+02-dashboards-showcase           | ❌ missing
+03-install-local-flag            | ✅ present
+swarmk-dokploy (ops)             | ❌ missing
+
+Docs needing tags: <N> of <total>
+```
+
+If 0 docs need tags (and `--force` not passed) → report "All docs already have tags. `.startup.md` will be rebuilt." and jump to Phase RT3.
+
+### Phase RT2 — Generate Tags
+
+For each doc missing `tags:` (or all docs if `--force`):
+
+1. Read the doc's frontmatter and `## Purpose` section (first paragraph only).
+2. Generate 4–8 domain-concept keywords that identify what the doc is about:
+   - Use: title words, purpose concepts, platform/technology names, key system names, operation types
+   - Do NOT use: raw file paths, generic words like "feature" or "system", version numbers
+   - For ops docs: emphasise platform, services, environments, operation type (e.g. `deploy`, `dokploy`, `docker`, `canary`)
+   - For feature docs: emphasise domain concepts, technology, feature names (e.g. `auth`, `cli`, `install`, `flags`)
+3. Write `tags:` to the doc frontmatter, inserting it **before** `known_issues:`.
+4. Report one line per doc: `✅ 01-docs-site — tags: [github-pages, documentation, landing-page, user-guide]`
+
+**`--force` behaviour:** Regenerate and overwrite `tags:` even on docs that already have them. Show old → new for each.
+
+### Phase RT3 — Rebuild Startup
+
+Trigger the `.mdd/.startup.md` rebuild (same logic as Status Mode — rebuild auto-generated zone, preserve Notes zone). The rebuilt startup now reflects tags on every feature and ops line.
+
+### Phase RT4 — Report
+
+```
+✅ Rebuild Tags Complete
+
+Feature docs processed: <N>
+Ops runbooks processed: <N>
+Tags generated:         <N> docs
+Tags skipped (present): <N> docs
+
+.startup.md rebuilt with tag format:
+  - 01-docs-site (complete) [github-pages, documentation, landing-page, user-guide]
+  - 03-install-local-flag (complete) [cli, install, local-install, flags]
+  ...
+
+Run /mdd status to see the full updated startup snapshot.
 ```
 
 ---

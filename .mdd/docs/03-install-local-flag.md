@@ -14,6 +14,7 @@ last_synced: 2026-05-14
 status: complete
 phase: all
 mdd_version: 8
+tags: [cli, install, local-install, --install-local, flags, commands-directory, npm]
 known_issues: []
 ---
 

@@ -15,6 +15,7 @@ last_synced: 2026-05-07
 status: complete
 phase: all
 mdd_version: 8
+tags: [dashboard, tui, showcase, mdd-tui, mdd-dashboard, ui, terminal]
 known_issues: []
 ---
 

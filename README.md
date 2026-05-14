@@ -108,9 +108,12 @@ mdd install          # copies Claude commands to ~/.claude/commands/
 
 After installation, `/mdd` is available in every Claude Code session globally - no per-project setup needed.
 
+`mdd install` also injects a guidance block into `~/.claude/CLAUDE.md` so Claude automatically suggests the right MDD workflow whenever you make an implementation request without the `/mdd` flag.
+
 ```bash
-mdd update           # update to latest installed version
-mdd install --dir /custom/path   # install to a custom directory
+mdd update                        # update to latest installed version
+mdd install --dir /custom/path    # install to a custom directory (skips CLAUDE.md injection)
+mdd install --install-local       # install to .claude/commands/ + injects into ./CLAUDE.md
 ```
 
 **Version safety:** `mdd install` compares `mdd_version` between the installed and available versions before overwriting. If you have a newer version installed, it won't silently downgrade.
@@ -138,7 +141,7 @@ npm install -g @thedecipherist/mdd && mdd install
 
 ---
 
-## All 21 Modes at a Glance
+## All 22 Modes at a Glance
 
 ```
 /mdd <feature description>                 Build Mode - Document, plan, and implement
@@ -146,6 +149,7 @@ npm install -g @thedecipherist/mdd && mdd install
 /mdd status                                Overview: docs, tests, audit state, initiatives
 /mdd scan                                  Detect features whose source files changed
 /mdd update <feature-id>                   Re-sync a feature doc after code changes
+/mdd rebuild-tags [--force]                Generate tags for all docs and rebuild .startup.md
 /mdd note "text"                           Append a timestamped note to .mdd/.startup.md
 /mdd note list                             Print the Notes section
 /mdd note clear                            Wipe all notes (asks for confirmation)
@@ -692,6 +696,7 @@ Every `.mdd/docs/<NN>-<feature-name>.md` file uses this YAML frontmatter:
 | `status` | `draft` → `in_progress` → `complete` → `deprecated` |
 | `phase` | Last completed phase name |
 | `mdd_version` | Version of MDD that created/last updated this doc |
+| `tags` | 4–8 domain-concept keywords surfaced in `.startup.md` so Claude can detect when a prompt relates to this feature (e.g. `[auth, jwt, login, sessions]`) |
 | `known_issues` | Issues discovered during audits or implementation |
 
 **`depends_on` rules:**

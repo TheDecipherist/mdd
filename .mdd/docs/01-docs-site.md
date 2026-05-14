@@ -17,6 +17,7 @@ last_synced: 2026-05-07
 status: complete
 phase: all
 mdd_version: 8
+tags: [documentation, github-pages, landing-page, user-guide, readme, docs-site]
 known_issues: []
 ---
 

@@ -1,4 +1,4 @@
-import { copyFileSync, mkdirSync, existsSync, readdirSync, readFileSync } from 'fs';
+import { copyFileSync, mkdirSync, existsSync, readdirSync, readFileSync, writeFileSync, appendFileSync } from 'fs';
 import { join, resolve } from 'path';
 import { homedir } from 'os';
 import { fileURLToPath } from 'url';
@@ -11,6 +11,7 @@ interface InstallOptions {
   dir: string;
   force?: boolean;
   local?: boolean;
+  claudeMdPath?: string;
 }
 
 interface FileResult {
@@ -96,6 +97,13 @@ export function install(options: InstallOptions): void {
     console.log('  Tip: add .claude/commands/ to your .gitignore to keep these files out of git.\n');
   }
 
+  if (options.claudeMdPath) {
+    const claudeResult = injectClaudeGuidance(resolve(options.claudeMdPath.replace('~', homedir())));
+    const icon = claudeResult.status === 'error' ? '✗' : claudeResult.status === 'skipped' ? '·' : '✓';
+    console.log(`  ${icon} CLAUDE.md — ${claudeResult.message}`);
+    console.log('');
+  }
+
   console.log('Open Claude Code and run /mdd to get started.\n');
 }
 
@@ -110,5 +118,58 @@ function getPackageVersion(): string {
     return pkg.version;
   } catch {
     return 'unknown';
+  }
+}
+
+const CLAUDE_GUIDANCE_MARKER = '## MDD — Manual-First Development';
+
+const CLAUDE_GUIDANCE_BLOCK = `
+## MDD — Manual-First Development
+
+If a \`.mdd/\` directory exists in the current project, apply this logic whenever
+the user asks you to implement, build, modify, deploy, or automate something —
+and they have NOT used \`/mdd\` to initiate the request:
+
+**Step 1 — Does it already exist?**
+Scan \`.mdd/.startup.md\` (Features AND Ops Runbooks sections). Do any tags or
+names match what the user is asking about?
+→ Feature match: "This looks related to \`<NN>-<feature-name>\`. Want to use
+  \`/mdd update <NN>\` to modify it, or \`/mdd audit <NN>\` to review it first?"
+→ Ops match: "You already have a \`<slug>\` runbook for this. Want to run it
+  with \`/mdd runop <slug>\` or update it with \`/mdd update-op <slug>\`?"
+
+**Step 2 — What kind of request is it?**
+
+Infrastructure or ops? (deploy, CI/CD, Docker, commit hooks, pipelines,
+cron jobs, webhooks, DNS, SSL, rollback, health checks, server config)
+→ "This sounds like an ops procedure. Want to document it as a repeatable
+  runbook with \`/mdd ops <description>\`?"
+
+Feature work touching 3+ independent concerns?
+→ "This looks initiative-scale. Want to plan it with \`/mdd plan-initiative\`?"
+
+Single feature or bounded change?
+→ "Want me to use \`/mdd <description>\` to build this with docs and tests first?"
+
+Always ask — never auto-invoke. If the user says no, proceed as normal.
+
+Skip entirely for: bug fixes, typos, config tweaks, single-line changes,
+one-off shell commands.
+`;
+
+function injectClaudeGuidance(claudeMdPath: string): { status: 'injected' | 'skipped' | 'error'; message: string } {
+  try {
+    if (existsSync(claudeMdPath)) {
+      const existing = readFileSync(claudeMdPath, 'utf-8');
+      if (existing.includes(CLAUDE_GUIDANCE_MARKER)) {
+        return { status: 'skipped', message: 'guidance already present' };
+      }
+      appendFileSync(claudeMdPath, CLAUDE_GUIDANCE_BLOCK, 'utf-8');
+    } else {
+      writeFileSync(claudeMdPath, CLAUDE_GUIDANCE_BLOCK.trimStart(), 'utf-8');
+    }
+    return { status: 'injected', message: 'guidance injected' };
+  } catch (err) {
+    return { status: 'error', message: String(err) };
   }
 }

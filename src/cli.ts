@@ -5,6 +5,7 @@ import { readFileSync } from 'fs';
 import { fileURLToPath } from 'url';
 import { join, dirname } from 'path';
 import { cwd } from 'process';
+import { homedir } from 'os';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -28,7 +29,10 @@ program
     const dirExplicit = this.getOptionValueSource('dir') === 'cli';
     const local = options.installLocal && !dirExplicit;
     const effectiveDir = local ? join(cwd(), '.claude/commands') : options.dir;
-    install({ dir: effectiveDir, force: options.force, local });
+    const claudeMdPath = dirExplicit ? undefined
+      : local ? join(cwd(), 'CLAUDE.md')
+      : join(homedir(), '.claude', 'CLAUDE.md');
+    install({ dir: effectiveDir, force: options.force, local, claudeMdPath });
   });
 
 program
@@ -40,7 +44,10 @@ program
     const dirExplicit = this.getOptionValueSource('dir') === 'cli';
     const local = options.installLocal && !dirExplicit;
     const effectiveDir = local ? join(cwd(), '.claude/commands') : options.dir;
-    install({ dir: effectiveDir, force: true, local });
+    const claudeMdPath = dirExplicit ? undefined
+      : local ? join(cwd(), 'CLAUDE.md')
+      : join(homedir(), '.claude', 'CLAUDE.md');
+    install({ dir: effectiveDir, force: true, local, claudeMdPath });
   });
 
 program.parse();

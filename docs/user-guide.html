@@ -197,7 +197,7 @@ mdd --version</code></pre>
 
         <h3>What <code>mdd install</code> Does</h3>
         <p>
-          The install command copies exactly 7 files into <code>~/.claude/commands/</code>:
+          The install command copies exactly 7 files into <code>~/.claude/commands/</code> and injects a guidance block into <code>~/.claude/CLAUDE.md</code> (or the project <code>CLAUDE.md</code> for <code>--install-local</code>). The guidance block tells Claude to detect when a prompt would benefit from MDD and suggest the right command — <code>/mdd</code>, <code>/mdd plan-initiative</code>, <code>/mdd ops</code>, or an update/audit on an existing doc — before proceeding. Injection is idempotent: running <code>mdd install</code> again never duplicates the block.
         </p>
         <div class="commands-grid">
           <div class="command-card">
@@ -455,6 +455,7 @@ last_synced: 2026-05-07
 status: draft
 phase: documentation
 mdd_version: 8
+tags: [auth, jwt, login, sessions, middleware]
 known_issues: []
 ---</code></pre>
 
@@ -1182,6 +1183,34 @@ Issues:
   ℹ️  02-user-auth - orphan (no dependents, no dependencies)
 
 Graph saved: .mdd/audits/graph-2026-05-07.md</code></pre>
+
+        <h3><code>/mdd rebuild-tags [--force]</code></h3>
+        <p>
+          Scans all feature docs (<code>.mdd/docs/*.md</code>) and ops runbooks (<code>.mdd/ops/*.md</code>), generates a <code>tags:</code> field for any doc missing one, then rebuilds <code>.startup.md</code> with the new tag format. Safe to run multiple times — docs that already have <code>tags:</code> are skipped unless <code>--force</code> is passed.
+        </p>
+        <p>
+          Tags are 4–8 domain-concept keywords that identify what a doc is about. They appear in <code>.startup.md</code> next to each feature name, giving Claude a fast way to detect when a prompt relates to an already-documented feature or runbook without loading full docs into context.
+        </p>
+        <pre><code class="language-bash">/mdd rebuild-tags
+
+🏷️  Rebuild Tags — Inventory
+  01-docs-site             ❌ missing
+  02-dashboards-showcase   ❌ missing
+  03-install-local-flag    ✅ present
+
+✅ 01-docs-site — tags: [github-pages, documentation, landing-page, user-guide]
+✅ 02-dashboards-showcase — tags: [dashboard, tui, showcase, mdd-dashboard]
+
+.startup.md rebuilt:
+  - 01-docs-site (complete) [github-pages, documentation, landing-page, user-guide]
+  - 02-dashboards-showcase (complete) [dashboard, tui, showcase, mdd-dashboard]
+  - 03-install-local-flag (complete) [cli, install, local-install, flags]</code></pre>
+
+        <div class="callout green">
+          <p>
+            <strong>Run <code>/mdd rebuild-tags</code> when migrating an existing project to MDD v9+.</strong> All future docs created by <code>/mdd</code> include <code>tags:</code> automatically. The <code>tags:</code> field is also generated automatically at the end of every <code>/mdd audit</code> run for any docs still missing it.
+          </p>
+        </div>
 
         <h3><code>/mdd upgrade</code></h3>
         <p>

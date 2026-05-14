@@ -61,6 +61,7 @@ Draft a complete feature doc following the Phase 3 template. Set:
 - `last_synced: <today>`
 - `status: draft` (since business intent may be incomplete)
 - `phase: reverse-engineered`
+- `tags: [...]` — infer 4–8 domain-concept keywords from the inferred purpose, routes, models, and source file names. NOT raw file paths — use the concept (e.g. `auth`, `api`, `stripe` not `src/handlers/stripe.ts`)
 
 **In regenerate mode:** Show the existing doc alongside the new draft:
 ```
