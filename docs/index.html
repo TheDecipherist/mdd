@@ -414,6 +414,23 @@ mdd install</code></pre>
             across all Claude Code sessions.
           </p>
         </div>
+
+        <h3>Claude Automatically Suggests MDD</h3>
+        <p>
+          <code>mdd install</code> injects a guidance block into <code>~/.claude/CLAUDE.md</code> that teaches Claude to recognise when you're in an MDD project and suggest the right workflow — even when you don't type <code>/mdd</code>.
+        </p>
+        <p>
+          Whenever Claude detects a <code>.mdd/</code> directory in the current project it evaluates your request before responding:
+        </p>
+        <ul>
+          <li><strong>Existing feature match</strong> — scans <code>.startup.md</code> tags and flags overlap: <em>"This looks related to <code>02-user-auth</code>. Want to use <code>/mdd update 02</code>?"</em></li>
+          <li><strong>Ops / infrastructure</strong> — deploy, CI/CD, Docker, commit hooks, cron: <em>"Want to document this as a runbook with <code>/mdd ops</code>?"</em></li>
+          <li><strong>Initiative-scale</strong> — 3+ independent concerns: <em>"Want to plan this with <code>/mdd plan-initiative</code>?"</em></li>
+          <li><strong>Single feature</strong> — <em>"Want me to use <code>/mdd &lt;description&gt;</code> to build this with docs and tests first?"</em></li>
+        </ul>
+        <p>
+          Claude always asks — never auto-invokes. Tag-based detection means no full docs are loaded into context: just the compact tag list in <code>.startup.md</code>.
+        </p>
       </section>
 
       <!-- ===================== -->

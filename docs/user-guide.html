@@ -1719,10 +1719,13 @@ Generated: 2026-05-07 | Branch: feat/user-auth
 Framework: Express + React | DB: PostgreSQL | Host: Dokploy
 
 ## Features Documented
-01-project-scaffolding (complete)
-02-user-auth (in_progress)
-03-database-layer (complete)
-04-content-builder (complete)
+- 01-project-scaffolding (complete) [typescript, express, project-setup, scaffolding]
+- 02-user-auth (in_progress) [auth, jwt, login, sessions, middleware]
+- 03-database-layer (complete) [postgres, drizzle, migrations, schema]
+- 04-content-builder (complete) [markdown, content, cms, rendering]
+
+## Ops Runbooks
+- prod-deploy [deploy, dokploy, docker, eu-west, canary, health-check]
 
 ## Last Audit
 2026-05-01 - 20 findings, 17 fixed, 3 open
@@ -1741,10 +1744,48 @@ auth-system-overhaul - Wave 2: 1/2 features complete
         <p>
           The section above <code>---</code> is fully rebuilt each time. The <code>## Notes</code> section below is append-only and preserved across rebuilds - it is only cleared by <code>/mdd note clear</code>.
         </p>
+        <p>
+          The <code>[tags]</code> on each feature and ops line are populated from the <code>tags:</code> frontmatter field in each doc. They are what allow Claude to detect prompt overlap without loading full doc content — see <a href="#claude-guidance">Claude Automatically Suggests MDD</a> below.
+        </p>
 
         <h3>Auto-Rebuild Behavior</h3>
         <p>
-          <code>.startup.md</code> is rebuilt automatically at the end of these commands: <code>/mdd status</code>, <code>/mdd audit</code>, <code>/mdd note</code>. You never need to manually edit it - MDD keeps it current. If it becomes stale (e.g., you moved files manually), run <code>/mdd status</code> to force a rebuild.
+          <code>.startup.md</code> is rebuilt automatically at the end of these commands: <code>/mdd status</code>, <code>/mdd audit</code>, <code>/mdd note</code>, <code>/mdd rebuild-tags</code>. You never need to manually edit it - MDD keeps it current. If it becomes stale (e.g., you moved files manually), run <code>/mdd status</code> to force a rebuild.
+        </p>
+
+        <h3 id="claude-guidance">Claude Automatically Suggests MDD</h3>
+        <p>
+          <code>mdd install</code> injects a small guidance block into <code>~/.claude/CLAUDE.md</code> (global install) or the project <code>CLAUDE.md</code> (<code>--install-local</code>). This block tells Claude to evaluate every implementation, modification, or infrastructure request before responding — as long as a <code>.mdd/</code> directory exists in the current project.
+        </p>
+        <p>
+          Claude checks four things, in order:
+        </p>
+        <ol>
+          <li>
+            <strong>Does it already exist?</strong> Scans the tags in <code>.startup.md</code> for any feature doc or ops runbook that overlaps with the request.
+            <br><em>"This looks related to <code>02-user-auth</code>. Want to use <code>/mdd update 02</code> to modify it, or <code>/mdd audit 02</code> to review it first?"</em>
+          </li>
+          <li>
+            <strong>Is it ops or infrastructure?</strong> Deploy, CI/CD, Docker, commit hooks, cron jobs, webhooks, DNS, SSL, rollback, health checks.
+            <br><em>"This sounds like an ops procedure. Want to document it as a repeatable runbook with <code>/mdd ops deploy to staging</code>?"</em>
+          </li>
+          <li>
+            <strong>Is it initiative-scale?</strong> Three or more independent features or concerns in one request.
+            <br><em>"This looks initiative-scale. Want to plan it with <code>/mdd plan-initiative</code>?"</em>
+          </li>
+          <li>
+            <strong>Is it a single new feature?</strong>
+            <br><em>"Want me to use <code>/mdd add payment processing</code> to build this with documentation and tests first?"</em>
+          </li>
+        </ol>
+        <p>
+          Claude always <strong>asks</strong> — it never auto-invokes <code>/mdd</code>. If you say no, it proceeds with direct implementation as normal. Bug fixes, typo corrections, config tweaks, and one-off shell commands are never flagged.
+        </p>
+        <p>
+          Overlap detection is lightweight: Claude scans the <code>[tags]</code> in <code>.startup.md</code> — a compact file already injected into every conversation — rather than loading full feature docs into context. No extra tokens, no performance penalty.
+        </p>
+        <p>
+          The injection is <strong>idempotent</strong>: running <code>mdd install</code> or <code>mdd update</code> again never duplicates the guidance block. To populate missing tags on existing docs (so overlap detection works on older projects), run <code>/mdd rebuild-tags</code>.
         </p>
 
         <h3>Global Ops: <code>~/.claude/ops/</code></h3>

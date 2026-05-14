@@ -108,8 +108,6 @@ mdd install          # copies Claude commands to ~/.claude/commands/
 
 After installation, `/mdd` is available in every Claude Code session globally - no per-project setup needed.
 
-`mdd install` also injects a guidance block into `~/.claude/CLAUDE.md` so Claude automatically suggests the right MDD workflow whenever you make an implementation request without the `/mdd` flag.
-
 ```bash
 mdd update                        # update to latest installed version
 mdd install --dir /custom/path    # install to a custom directory (skips CLAUDE.md injection)
@@ -138,6 +136,52 @@ npm install -g @thedecipherist/mdd && mdd install
 # - Implement with a 5-iteration green gate loop
 # - Verify against the real runtime environment
 ```
+
+---
+
+## Claude Automatically Suggests MDD
+
+`mdd install` injects a small guidance block into your `~/.claude/CLAUDE.md` (or the project `CLAUDE.md` for `--install-local`). From that point on, whenever Claude detects a `.mdd/` directory in the current project it automatically evaluates every implementation or infrastructure request and suggests the right MDD workflow — even if you didn't type `/mdd`.
+
+**What Claude checks, in order:**
+
+**1. Does it already exist?**
+Claude scans `.mdd/.startup.md` — which lists every documented feature and ops runbook with their tags. If your prompt overlaps with something already documented, Claude flags it before you duplicate work:
+
+> *"This looks related to `02-user-auth` in your MDD docs. Want to use `/mdd update 02` to modify it, or `/mdd audit 02` to review it first?"*
+
+**2. Is it ops/infrastructure?**
+Deploy procedures, CI/CD pipelines, commit hooks, Docker builds, cron jobs, DNS changes — anything operational gets flagged for a runbook instead of ad-hoc implementation:
+
+> *"This sounds like an ops procedure. Want to document it as a repeatable runbook with `/mdd ops deploy to production`?"*
+
+**3. Is it initiative-scale?**
+Large requests touching three or more independent concerns get routed to initiative/wave planning instead of a single feature doc:
+
+> *"This looks initiative-scale. Want to plan it with `/mdd plan-initiative`?"*
+
+**4. Is it a single new feature?**
+Everything else gets the standard build mode prompt:
+
+> *"Want me to use `/mdd add payment processing` to build this with documentation and tests first?"*
+
+Claude always **asks** — it never auto-invokes `/mdd`. If you say no, it proceeds with direct implementation as normal. The detection is also intentionally narrow: bug fixes, typo corrections, config tweaks, and one-off shell commands are never flagged.
+
+**How it detects overlap without loading full docs:**
+
+Every feature doc and ops runbook has a `tags:` field (4–8 domain-concept keywords). These tags are surfaced in `.mdd/.startup.md` — a compact session-context file that's already injected into every Claude conversation. Claude scans the tag list in milliseconds, with no full-document loading and no context bloat.
+
+```
+## Features Documented
+- 01-project-scaffolding (complete) [typescript, express, project-setup, scaffolding]
+- 02-user-auth (in_progress) [auth, jwt, login, sessions, middleware]
+- 03-payment-flow (draft) [stripe, payments, checkout, webhooks]
+
+## Ops Runbooks
+- prod-deploy [deploy, dokploy, docker, eu-west, canary, health-check]
+```
+
+**The injection is idempotent.** Running `mdd install` or `mdd update` again never duplicates the block.
 
 ---
 
@@ -748,9 +792,12 @@ Generated: 2026-05-07 | Branch: feat/user-auth
 Framework: Express + React | DB: PostgreSQL | Host: Dokploy
 
 ## Features Documented
-01-project-scaffolding (complete)
-02-user-auth (in_progress)
-...
+- 01-project-scaffolding (complete) [typescript, express, project-setup, scaffolding]
+- 02-user-auth (in_progress) [auth, jwt, login, sessions, middleware]
+- 03-payment-flow (draft) [stripe, payments, checkout, webhooks]
+
+## Ops Runbooks
+- prod-deploy [deploy, dokploy, docker, eu-west, canary, health-check]
 
 ## Last Audit
 2026-05-01 - 20 findings, 17 fixed, 3 open
