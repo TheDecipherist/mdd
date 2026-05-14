@@ -283,6 +283,7 @@ last_synced: 2026-05-07
 status: draft
 phase: documentation
 mdd_version: 8
+tags: [auth, jwt, login, sessions, middleware]
 known_issues: []
 ---
 
