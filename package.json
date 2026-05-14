@@ -1,6 +1,6 @@
 {
   "name": "@thedecipherist/mdd",
-  "version": "1.3.6",
+  "version": "1.3.7",
   "description": "MDD — Manual-Driven Development workflow for Claude Code",
   "type": "module",
   "bin": {
@@ -8,12 +8,14 @@
   },
   "files": [
     "dist/",
-    "commands/"
+    "commands/",
+    "scripts/"
   ],
   "scripts": {
     "build": "tsc",
     "dev": "tsc --watch",
-    "prepublishOnly": "pnpm build"
+    "prepublishOnly": "pnpm build",
+    "postinstall": "node scripts/postinstall.mjs"
   },
   "keywords": [
     "mdd",
