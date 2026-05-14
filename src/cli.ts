@@ -32,7 +32,10 @@ program
     const claudeMdPath = dirExplicit ? undefined
       : local ? join(cwd(), 'CLAUDE.md')
       : join(homedir(), '.claude', 'CLAUDE.md');
-    install({ dir: effectiveDir, force: options.force, local, claudeMdPath });
+    const settingsPath = dirExplicit ? undefined
+      : local ? join(cwd(), '.claude', 'settings.json')
+      : join(homedir(), '.claude', 'settings.json');
+    install({ dir: effectiveDir, force: options.force, local, claudeMdPath, settingsPath });
   });
 
 program
@@ -47,7 +50,10 @@ program
     const claudeMdPath = dirExplicit ? undefined
       : local ? join(cwd(), 'CLAUDE.md')
       : join(homedir(), '.claude', 'CLAUDE.md');
-    install({ dir: effectiveDir, force: true, local, claudeMdPath });
+    const settingsPath = dirExplicit ? undefined
+      : local ? join(cwd(), '.claude', 'settings.json')
+      : join(homedir(), '.claude', 'settings.json');
+    install({ dir: effectiveDir, force: true, local, claudeMdPath, settingsPath });
   });
 
 program.parse();

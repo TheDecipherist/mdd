@@ -2,6 +2,20 @@
 
 Triggered when arguments start with `plan-initiative`. Creates a new initiative doc.
 
+### Phase PI0 — Branch Guard
+
+Run before any file creation:
+
+```bash
+BRANCH=$(git branch --show-current)
+DIRTY=$(git status --porcelain)
+```
+
+- **On `main` or `master` with uncommitted changes** → STOP. Show the Scenario A prompt from mdd.md Branch Guard.
+- **On `main` or `master`, clean** → auto-branch to `feat/init-<initiative-slug>`. If the slug is not yet known (title not asked), use `feat/mdd-initiative` as a temporary name and rename the branch after the title is collected.
+- **On a feature branch** → working dirty is fine. Proceed — initiative planning docs belong on whatever branch is current.
+- **Never proceed on main.** Hard block.
+
 ### Phase PI1 — Mode choice
 
 Ask the user:
@@ -86,6 +100,18 @@ Triggered when arguments start with `plan-wave`. Takes a wave slug (e.g. `auth-s
 
 ### Phase PW1 — Load and validate
 
+**Step 0 — Branch guard:**
+
+```bash
+BRANCH=$(git branch --show-current)
+DIRTY=$(git status --porcelain)
+```
+
+- **On `main` or `master` with uncommitted changes** → STOP. Show Scenario A from mdd.md Branch Guard.
+- **On `main` or `master`, clean** → auto-branch to `feat/<wave-slug>`.
+- **On a feature branch** → proceed (planning docs belong on this branch).
+- **Never proceed on main.** Hard block.
+
 1. Parse `<wave-slug>` from arguments — hard stop *"Wave slug required. Usage: /mdd plan-wave <wave-slug>"* if missing.
 2. Derive initiative slug: everything before `-wave-N` (e.g. `auth-system-wave-2` → `auth-system`).
 3. Read `initiatives/<initiative-slug>.md` fresh from disk — hard stop *"Initiative does not exist: `initiatives/<slug>.md`"* if not found.
@@ -159,6 +185,30 @@ If yes → run Phase PW1 inline for the next wave slug.
 Triggered when arguments start with `plan-execute`. Runs the full MDD build flow for each feature in the wave.
 
 ### Phase PE1 — Load and validate
+
+**Step 0 — Branch guard (runs before everything else):**
+
+```bash
+BRANCH=$(git branch --show-current)
+DIRTY=$(git status --porcelain)
+```
+
+- **On `main` or `master` with uncommitted changes** → STOP. Show the Scenario A prompt from the Branch Guard in mdd.md. Do not proceed until resolved.
+- **On `main` or `master`, clean** → auto-branch to `feat/<wave-slug>` immediately. Report: `✅ Branched to feat/<wave-slug>`.
+- **On a feature branch that doesn't match `<wave-slug>`** → mismatch. Show:
+  ```
+  ⚠️  Branch mismatch for wave execution.
+
+  Current branch: <branch-name>
+  Expected:       feat/<wave-slug>
+
+  MDD expects one wave per branch. What would you like to do?
+    (a) Commit, merge to main, and branch fresh to feat/<wave-slug>
+    (b) Continue on this branch (not recommended — mixes work)
+    (c) Abort
+  ```
+  Follow the same (a)/(b)/(c) logic as mdd-build.md Phase 0.
+- **Never proceed on main.** This is a hard block regardless of clean/dirty state.
 
 1. Parse `<wave-slug>` — hard stop *"Wave does not exist"* if `waves/<wave-slug>.md` not found.
 2. Read the wave doc.

@@ -156,6 +156,7 @@ mdd install</code></pre>
       <div class="toc-header">On this page</div>
       <nav id="toc" aria-label="Table of contents">
         <a href="#getting-started">Getting Started</a>
+        <a href="#branch-guard" style="padding-left:1.25rem;font-size:0.85em">Branch Guard</a>
         <a href="#build-mode">Build Mode - 7 Phases</a>
         <a href="#audit-mode">Audit Mode</a>
         <a href="#manage-modes">Status, Notes, Scan &amp; Update</a>
@@ -200,12 +201,53 @@ mdd --version</code></pre>
 
         <h3>What <code>mdd install</code> Does</h3>
         <p>
-          The install command copies exactly 7 files into <code>~/.claude/commands/</code> and injects a guidance block into <code>~/.claude/CLAUDE.md</code> (or the project <code>CLAUDE.md</code> for <code>--install-local</code>). The guidance block tells Claude to detect when a prompt would benefit from MDD and suggest the right command — <code>/mdd</code>, <code>/mdd plan-initiative</code>, <code>/mdd ops</code>, or an update/audit on an existing doc — before proceeding. Injection is idempotent: running <code>mdd install</code> again never duplicates the block.
+          The install command sets up four things in one pass:
+        </p>
+        <table>
+          <thead><tr><th>What</th><th>Where</th><th>Purpose</th></tr></thead>
+          <tbody>
+            <tr><td>7 command <code>.md</code> files</td><td><code>~/.claude/commands/</code></td><td>The <code>/mdd</code> slash command and all its modes</td></tr>
+            <tr><td>Branch Guard hook</td><td><code>~/.claude/hooks/mdd-branch-guard.sh</code></td><td>Blocks file writes on <code>main</code> in any MDD project</td></tr>
+            <tr><td>Hook registration</td><td><code>~/.claude/settings.json</code></td><td>Wires the hook to Claude Code's <code>PreToolUse</code> event</td></tr>
+            <tr><td>Guidance block</td><td><code>~/.claude/CLAUDE.md</code></td><td>Teaches Claude to suggest MDD automatically</td></tr>
+          </tbody>
+        </table>
+        <p>All four are idempotent — running <code>mdd install</code> or <code>mdd update</code> again never duplicates any of them.</p>
+
+        <h3 id="branch-guard">Branch Guard — Never Work on <code>main</code></h3>
+        <p>
+          <code>mdd install</code> registers a <strong>Claude Code <code>PreToolUse</code> hook</strong> that fires before every file write (<code>Write</code>, <code>Edit</code>, <code>NotebookEdit</code>) in any project with a <code>.mdd/</code> directory. If the current git branch is <code>main</code> or <code>master</code>, the hook blocks the operation and explains what to do:
+        </p>
+        <pre><code>⛔  MDD BRANCH GUARD
+
+    File modification is blocked on branch 'main'.
+    MDD never writes files directly on main or master.
+
+    Create a feature branch, then re-run your /mdd command:
+      git checkout -b feat/&lt;feature-name&gt;</code></pre>
+
+        <p>
+          <strong>Why a hook and not just instructions?</strong> Claude's context compaction summarises earlier conversation turns when a session grows long. Instruction-based branch checks can be compacted away — the hook fires at the OS level on every tool call regardless of conversation length. The two layers work together: instructions guide Claude's decisions, the hook enforces the rule even when context is stale.
+        </p>
+
+        <p><strong>Branch naming MDD uses automatically:</strong></p>
+        <table>
+          <thead><tr><th>Mode</th><th>Branch created</th></tr></thead>
+          <tbody>
+            <tr><td><code>/mdd &lt;feature&gt;</code></td><td><code>feat/&lt;feature-slug&gt;</code></td></tr>
+            <tr><td><code>/mdd audit</code></td><td><code>fix/mdd-audit-&lt;YYYY-MM-DD&gt;</code></td></tr>
+            <tr><td><code>/mdd plan-initiative</code></td><td><code>feat/init-&lt;initiative-slug&gt;</code></td></tr>
+            <tr><td><code>/mdd plan-wave</code></td><td><code>feat/&lt;wave-slug&gt;</code></td></tr>
+            <tr><td><code>/mdd plan-execute</code></td><td><code>feat/&lt;wave-slug&gt;</code></td></tr>
+          </tbody>
+        </table>
+        <p>
+          When on a clean <code>main</code>, MDD creates the branch automatically without prompting. When on <code>main</code> with uncommitted changes, MDD stops and offers to commit or stash first before branching.
         </p>
         <div class="commands-grid">
           <div class="command-card">
             <h3><code>mdd.md</code></h3>
-            <p class="command-desc">Router - reads your arguments and loads only the mode file needed. Contains the auto-branch logic and the bootstrap check.</p>
+            <p class="command-desc">Router - reads your arguments and loads only the mode file needed. Contains the Branch Guard (enforces no-work-on-main) and the bootstrap check.</p>
           </div>
           <div class="command-card">
             <h3><code>mdd-build.md</code></h3>

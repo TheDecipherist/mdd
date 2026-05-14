@@ -131,21 +131,73 @@ Use whichever path contains `mdd-audit.md`. Store it as `$MDD_DIR` and use it fo
 
 ---
 
-## Auto-Branch (All Modes)
+## Branch Guard (All Modes)
 
-**If the user already chose a worktree in Step 0, skip auto-branch entirely** — the worktree was created with its own dedicated branch.
+**This guard is mandatory. MDD never creates or modifies files directly on `main` or `master`. No exceptions — not even for documentation, planning, or ops files.**
 
-Otherwise, before creating or modifying any files, check the current branch:
+**If the user already chose a worktree in Step 0, skip entirely** — the worktree has its own dedicated branch.
+
+Otherwise, before creating or modifying any files, run:
 
 ```bash
-git branch --show-current
+BRANCH=$(git branch --show-current)
+DIRTY=$(git status --porcelain)
 ```
 
-**Default behavior** (`auto_branch = true` in `claude-mastery-project.conf`):
-- If on `main` or `master`:
-  - Build mode: `git checkout -b feat/<feature-name>`
-  - Audit mode: `git checkout -b fix/mdd-audit-<date>`
-- If already on a feature branch: proceed
+---
+
+### Scenario A — On `main` or `master`, working tree has uncommitted changes
+
+**STOP. Do not create or modify any file.**
+
+```
+🚫 MDD Branch Guard — cannot proceed on main with uncommitted changes.
+
+Branch:   main
+Dirty:    <N> file(s) modified / untracked
+
+MDD never works directly on main, and uncommitted changes must be
+resolved before branching safely.
+
+Choose:
+  (a) Commit now  — stage all changes and commit, then MDD auto-branches
+  (b) Stash now   — git stash, then MDD auto-branches
+  (c) Abort       — handle git manually, then re-run /mdd
+```
+
+- **(a) Commit:** `git add -A`, generate a short conventional commit message from the changed files, commit, then proceed to Scenario B.
+- **(b) Stash:** `git stash`, then proceed to Scenario B.
+- **(c) Abort:** stop entirely — do not create any files.
+
+---
+
+### Scenario B — On `main` or `master`, clean working tree
+
+Auto-branch immediately — no user prompt. Derive the branch name from the active mode:
+
+| Mode | Branch name |
+|------|-------------|
+| Build (`/mdd <feature>`) | `feat/<feature-slug>` |
+| Audit (`/mdd audit`) | `fix/mdd-audit-<YYYY-MM-DD>` |
+| plan-initiative | `feat/init-<initiative-slug>` |
+| plan-wave | `feat/<wave-slug>` |
+| plan-execute | `feat/<wave-slug>` |
+| Any other mode | `feat/<slug-from-arguments>` |
+
+Run `git checkout -b <branch-name>` and report:
+```
+✅ Branched to <branch-name> — proceeding with MDD.
+```
+
+---
+
+### Scenario C — Already on a feature or fix branch
+
+Working tree dirty (in-progress changes) is **expected and fine** — that work belongs on this branch.
+
+Each mode's Phase 0 handles mismatch detection (does the new task belong on this branch?). See mdd-build.md Phase 0 and mdd-plan.md for details.
+
+**One hard rule:** A branch starting with `fix/mdd-audit-` is an audit branch. Build and plan modes must not reuse it — fall through to Scenario B naming instead.
 
 ---
 

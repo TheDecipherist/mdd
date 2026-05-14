@@ -434,6 +434,30 @@ mdd install</code></pre>
         <p>
           Claude always asks — never auto-invokes. Tag-based detection means no full docs are loaded into context: just the compact tag list in <code>.startup.md</code>.
         </p>
+
+        <h3>Branch Guard — Never Work on <code>main</code></h3>
+        <p>
+          <code>mdd install</code> also registers a <strong>Claude Code <code>PreToolUse</code> hook</strong> — a shell script that fires before every file write in any MDD project. If the current branch is <code>main</code> or <code>master</code>, the hook blocks the operation:
+        </p>
+        <pre><code>⛔  MDD BRANCH GUARD
+
+    File modification is blocked on branch 'main'.
+    MDD never writes files directly on main or master.
+
+    Create a feature branch, then re-run your /mdd command:
+      git checkout -b feat/&lt;feature-name&gt;</code></pre>
+        <p>
+          Unlike instruction-based checks, hooks fire at the OS level on every tool call — they cannot be compacted away or forgotten by Claude. MDD instructions and the hook work together: instructions guide Claude's decisions, the hook enforces the rule even if earlier context is lost.
+        </p>
+        <table>
+          <thead><tr><th>Mode</th><th>Auto-created branch</th></tr></thead>
+          <tbody>
+            <tr><td><code>/mdd &lt;feature&gt;</code></td><td><code>feat/&lt;feature-slug&gt;</code></td></tr>
+            <tr><td><code>/mdd audit</code></td><td><code>fix/mdd-audit-&lt;date&gt;</code></td></tr>
+            <tr><td><code>/mdd plan-initiative</code></td><td><code>feat/init-&lt;initiative-slug&gt;</code></td></tr>
+            <tr><td><code>/mdd plan-execute</code></td><td><code>feat/&lt;wave-slug&gt;</code></td></tr>
+          </tbody>
+        </table>
       </section>
 
       <!-- ===================== -->

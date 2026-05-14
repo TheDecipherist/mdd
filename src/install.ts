@@ -1,8 +1,7 @@
-import { copyFileSync, mkdirSync, existsSync, readdirSync, readFileSync, writeFileSync, appendFileSync } from 'fs';
-import { join, resolve } from 'path';
+import { copyFileSync, mkdirSync, existsSync, readdirSync, readFileSync, writeFileSync, appendFileSync, chmodSync } from 'fs';
+import { join, resolve, dirname } from 'path';
 import { homedir } from 'os';
 import { fileURLToPath } from 'url';
-import { dirname } from 'path';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -12,6 +11,7 @@ interface InstallOptions {
   force?: boolean;
   local?: boolean;
   claudeMdPath?: string;
+  settingsPath?: string;
 }
 
 interface FileResult {
@@ -104,6 +104,21 @@ export function install(options: InstallOptions): void {
     console.log('');
   }
 
+  if (options.settingsPath) {
+    const hookScriptSrc = join(srcDir, 'mdd-branch-guard.sh');
+    const hooksDir = join(resolve(options.settingsPath.replace('~', homedir()), '..'), 'hooks');
+    const hookScriptDest = join(hooksDir, 'mdd-branch-guard.sh');
+    const hookResult = installHook({
+      hookScriptSrc,
+      hookScriptDest,
+      settingsPath: resolve(options.settingsPath.replace('~', homedir())),
+      local: options.local ?? false,
+    });
+    const icon = hookResult.status === 'error' ? '✗' : hookResult.status === 'skipped' ? '·' : '✓';
+    console.log(`  ${icon} Branch Guard hook — ${hookResult.message}`);
+    console.log('');
+  }
+
   console.log('Open Claude Code and run /mdd to get started.\n');
 }
 
@@ -156,6 +171,67 @@ Always ask — never auto-invoke. If the user says no, proceed as normal.
 Skip entirely for: bug fixes, typos, config tweaks, single-line changes,
 one-off shell commands.
 `;
+
+interface HookInstallOptions {
+  hookScriptSrc: string;
+  hookScriptDest: string;
+  settingsPath: string;
+  local: boolean;
+}
+
+function installHook(opts: HookInstallOptions): { status: 'installed' | 'skipped' | 'error'; message: string } {
+  try {
+    // Install the hook script
+    mkdirSync(dirname(opts.hookScriptDest), { recursive: true });
+    copyFileSync(opts.hookScriptSrc, opts.hookScriptDest);
+    chmodSync(opts.hookScriptDest, 0o755);
+
+    // Derive hook command — local uses relative path, global uses $HOME
+    const hookCommand = opts.local
+      ? 'bash .claude/hooks/mdd-branch-guard.sh'
+      : 'bash $HOME/.claude/hooks/mdd-branch-guard.sh';
+
+    const HOOK_MARKER = 'mdd-branch-guard';
+
+    // Read existing settings.json or start fresh
+    let settings: Record<string, unknown> = {};
+    if (existsSync(opts.settingsPath)) {
+      try {
+        settings = JSON.parse(readFileSync(opts.settingsPath, 'utf-8')) as Record<string, unknown>;
+      } catch {
+        // Unparseable settings — leave existing file alone to avoid corruption
+        return { status: 'error', message: `could not parse ${opts.settingsPath}` };
+      }
+    }
+
+    // Check if hook already registered
+    const hooksSection = settings['hooks'] as Record<string, unknown[]> | undefined;
+    const preToolUse = (hooksSection?.['PreToolUse'] ?? []) as Array<Record<string, unknown>>;
+    const alreadyInstalled = preToolUse.some(group => {
+      const hooks = group['hooks'] as Array<Record<string, unknown>> | undefined;
+      return hooks?.some(h => String(h['command'] ?? '').includes(HOOK_MARKER));
+    });
+
+    if (alreadyInstalled) {
+      return { status: 'skipped', message: 'already registered in settings.json' };
+    }
+
+    // Merge hook entry into PreToolUse
+    const newEntry = {
+      matcher: 'Write|Edit|NotebookEdit',
+      hooks: [{ type: 'command', command: hookCommand }],
+    };
+    settings['hooks'] = {
+      ...(hooksSection ?? {}),
+      PreToolUse: [...preToolUse, newEntry],
+    };
+
+    writeFileSync(opts.settingsPath, JSON.stringify(settings, null, 2) + '\n', 'utf-8');
+    return { status: 'installed', message: `hook registered in ${opts.settingsPath}` };
+  } catch (err) {
+    return { status: 'error', message: String(err) };
+  }
+}
 
 function injectClaudeGuidance(claudeMdPath: string): { status: 'injected' | 'skipped' | 'error'; message: string } {
   try {

@@ -9,7 +9,7 @@ After completing any change that adds, removes, or modifies a CLI flag, command,
 > "Do you want to update the documentation? This change may affect `README.md`, `docs/index.html`, and/or `docs/user-guide.html`."
 
 If yes, update whichever of these three files are affected before staging the commit:
-- `README.md` — installation instructions, command reference table, mode descriptions
+- `README.md` — installation instructions, command reference table, mode descriptions - AND publish the updated NPM package
 - `docs/index.html` — the GitHub Pages landing page
 - `docs/user-guide.html` — the full command and mode reference
 
@@ -54,20 +54,27 @@ Two files only:
 Seven Markdown files that become Claude slash commands. This is the product:
 
 ```
-mdd.md           Router — ~120 lines. Handles worktree check, bootstrap, mode dispatch, auto-branch.
-mdd-build.md     BUILD MODE — Phases 0–7d (understand, document, test skeletons, plan, implement, verify)
-mdd-audit.md     AUDIT MODE — multi-agent parallel audit with manifest-based resume
-mdd-manage.md    STATUS, NOTE, SCAN, UPDATE, DEPRECATE modes
-mdd-lifecycle.md REVERSE-ENGINEER, GRAPH, UPGRADE modes
-mdd-plan.md      PLAN-INITIATIVE, PLAN-WAVE, PLAN-EXECUTE, PLAN-SYNC, PLAN-REMOVE-FEATURE, PLAN-CANCEL-INITIATIVE
-mdd-ops.md       OPS DOCUMENT, OPS EXECUTE (runop), OPS UPDATE, OPS LIST, COMMANDS modes
+mdd.md                Router — ~120 lines. Handles worktree check, bootstrap, mode dispatch, Branch Guard.
+mdd-build.md          BUILD MODE — Phases 0–7d (understand, document, test skeletons, plan, implement, verify)
+mdd-audit.md          AUDIT MODE — multi-agent parallel audit with manifest-based resume
+mdd-manage.md         STATUS, NOTE, SCAN, UPDATE, DEPRECATE modes
+mdd-lifecycle.md      REVERSE-ENGINEER, GRAPH, UPGRADE modes
+mdd-plan.md           PLAN-INITIATIVE, PLAN-WAVE, PLAN-EXECUTE, PLAN-SYNC, PLAN-REMOVE-FEATURE, PLAN-CANCEL-INITIATIVE
+mdd-ops.md            OPS DOCUMENT, OPS EXECUTE (runop), OPS UPDATE, OPS LIST, COMMANDS modes
+mdd-branch-guard.sh   PreToolUse hook — blocks Write/Edit/NotebookEdit on main/master in .mdd projects
 ```
 
 **Why split:** Each invocation of `/mdd` loads only the router + the one mode file needed. A `/mdd status` costs ~460 tokens; loading the full set would cost ~28,000. Never consolidate these files back into one.
 
+### Branch Guard hook
+
+`mdd-branch-guard.sh` is a Claude Code `PreToolUse` hook installed to `~/.claude/hooks/` (or `.claude/hooks/` for local installs). It fires before every `Write`, `Edit`, and `NotebookEdit` tool call. If the current branch is `main` or `master` and the project has a `.mdd/` directory, the hook exits with code `2`, blocking the tool call with a clear message. Exit `0` everywhere else (non-MDD projects, non-main branches).
+
+`install.ts` also merges a hook entry into `settings.json` (`~/.claude/settings.json` or `.claude/settings.json`) with an idempotency check: if any existing PreToolUse entry's command already contains `mdd-branch-guard`, the merge is skipped.
+
 ### Install flag priority
 
-`--install-local` sets the destination to `<cwd>/.claude/commands/`. If `--dir` is also provided, `--dir` wins. The CLI detects this via Commander's `getOptionValueSource('dir') === 'cli'` — a returned value of `'default'` means the user did not explicitly pass `--dir`.
+`--install-local` sets the destination to `<cwd>/.claude/commands/`. If `--dir` is also provided, `--dir` wins. The CLI detects this via Commander's `getOptionValueSource('dir') === 'cli'` — a returned value of `'default'` means the user did not explicitly pass `--dir`. The `settingsPath` follows the same logic: local → `.claude/settings.json`, global → `~/.claude/settings.json`, `--dir` explicit → `undefined` (skips hook install).
 
 ### Version safety
 

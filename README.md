@@ -86,7 +86,7 @@ MDD flips this. You write structured documentation first. Then Claude reads **on
 MDD installs 7 Claude command files into `~/.claude/commands/`. The main router (`mdd.md`) reads your arguments and loads **only the mode file needed** - a `/mdd status` loads ~460 tokens instead of the full ~28,000.
 
 ```
-mdd.md        (~120 lines)  Router - Steps 0/0a/0b, mode dispatch, auto-branch
+mdd.md        (~120 lines)  Router - Steps 0/0a/0b, mode dispatch, Branch Guard
 mdd-build.md  (~680 lines)  BUILD MODE - Phases 0–7d
 mdd-audit.md  (~240 lines)  AUDIT MODE - Phases A1–A7
 mdd-manage.md (~340 lines)  STATUS + NOTE + SCAN + UPDATE + DEPRECATE
@@ -115,6 +115,54 @@ mdd install --install-local       # install to .claude/commands/ + injects into 
 ```
 
 **Version safety:** `mdd install` compares `mdd_version` between the installed and available versions before overwriting. If you have a newer version installed, it won't silently downgrade.
+
+### What `mdd install` sets up
+
+| What | Where | Purpose |
+|------|-------|---------|
+| 7 command `.md` files | `~/.claude/commands/` | The `/mdd` slash command and all its modes |
+| Branch Guard hook | `~/.claude/hooks/mdd-branch-guard.sh` | Blocks file writes on `main` in any MDD project |
+| Hook registration | `~/.claude/settings.json` | Wires the hook to Claude Code's PreToolUse event |
+| Guidance block | `~/.claude/CLAUDE.md` | Teaches Claude to suggest MDD automatically |
+
+---
+
+## Branch Guard — Never Work on `main`
+
+`mdd install` registers a **Claude Code `PreToolUse` hook** that fires before every file write (`Write`, `Edit`, `NotebookEdit`) in any project with a `.mdd/` directory. If the current branch is `main` or `master`, the hook blocks the operation:
+
+```
+⛔  MDD BRANCH GUARD
+
+    File modification is blocked on branch 'main'.
+    MDD never writes files directly on main or master.
+
+    Create a feature branch, then re-run your /mdd command:
+
+      git checkout -b feat/<feature-name>
+```
+
+**Why a hook and not just instructions?**
+
+Instruction-based branch checks can be lost through Claude's context compaction (when a conversation grows very long, earlier context is summarised). A `PreToolUse` hook fires at the OS level on every tool call — it cannot be compacted away, forgotten, or bypassed by stale context.
+
+**How it works end-to-end:**
+
+1. MDD instructions enforce branch hygiene in every command file (Branch Guard in `mdd.md`, Phase 0 in `mdd-build.md`, Phase PE1 in `mdd-plan.md`).
+2. The hook acts as a permanent failsafe. If Claude is about to write a file on `main`, the hook fires before the write happens, exits with code `2`, and the operation is blocked.
+3. The hook is a no-op outside `.mdd` projects and on any non-`main`/`master` branch.
+
+**MDD branch naming conventions:**
+
+| Mode | Auto-created branch |
+|------|---------------------|
+| `/mdd <feature>` | `feat/<feature-slug>` |
+| `/mdd audit` | `fix/mdd-audit-<YYYY-MM-DD>` |
+| `/mdd plan-initiative` | `feat/init-<initiative-slug>` |
+| `/mdd plan-wave` | `feat/<wave-slug>` |
+| `/mdd plan-execute` | `feat/<wave-slug>` |
+
+When on a clean `main`, MDD creates the branch automatically. When on `main` with uncommitted changes, MDD stops and offers to commit or stash first.
 
 ---
 
