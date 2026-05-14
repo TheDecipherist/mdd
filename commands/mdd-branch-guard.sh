@@ -13,26 +13,31 @@ BRANCH=$(git branch --show-current 2>/dev/null)
 # Only block on main/master
 [[ "$BRANCH" == "main" || "$BRANCH" == "master" ]] || exit 0
 
-# Count uncommitted changes for context
+# Check for uncommitted changes
 CHANGES=$(git status --porcelain 2>/dev/null | wc -l | tr -d ' ')
 
+# Clean working tree — auto-create a branch and allow the write
+if [ "$CHANGES" -eq 0 ]; then
+  AUTO_BRANCH="mdd/session-$(date +%Y%m%d-%H%M%S)"
+  git checkout -b "$AUTO_BRANCH" 2>/dev/null
+  echo ""
+  echo "  MDD Branch Guard: auto-created branch '${AUTO_BRANCH}' (was on ${BRANCH})"
+  echo ""
+  exit 0
+fi
+
+# Dirty working tree — block and ask the user what to do
 echo ""
 echo "⛔  MDD BRANCH GUARD"
 echo ""
-echo "    File modification is blocked on branch '${BRANCH}'."
-echo "    MDD never writes files directly on main or master."
-echo ""
-if [ "$CHANGES" -gt 0 ]; then
-  echo "    You have ${CHANGES} uncommitted change(s). Commit or stash first:"
-  echo ""
-  echo "      git add -A && git commit -m 'wip: ...' && git checkout -b feat/<name>"
-  echo "      — or —"
-  echo "      git stash && git checkout -b feat/<name>"
-else
-  echo "    Create a feature branch, then re-run your /mdd command:"
-  echo ""
-  echo "      git checkout -b feat/<feature-name>"
-fi
+echo "    Branch '${BRANCH}' has ${CHANGES} uncommitted change(s)."
+echo "    Use AskUserQuestion to ask the user:"
+echo "    Question: 'You have uncommitted changes on ${BRANCH}. How would you like to proceed?'"
+echo "    Options:"
+echo "      1. Commit changes — run: git add -A && git commit -m 'wip: save before branch' && git checkout -b feat/<name>"
+echo "      2. Stash changes — run: git stash && git checkout -b feat/<name>"
+echo "      3. Cancel — do nothing"
+echo "    For options 1 and 2, replace feat/<name> with a branch name derived from the task at hand."
 echo ""
 
 exit 2

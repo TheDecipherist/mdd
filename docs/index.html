@@ -373,11 +373,11 @@
 mdd install</code></pre>
 
         <p>
-          <code>mdd install</code> copies the command files to your Claude Code global
-          commands directory and injects a guidance block into <code>~/.claude/CLAUDE.md</code>.
-          After that, <code>/mdd</code> is available in any project, any directory, any session —
-          and Claude will automatically suggest the right MDD workflow whenever you make an
-          implementation request without the <code>/mdd</code> flag.
+          <code>mdd install</code> copies <code>mdd.md</code> to <code>~/.claude/commands/</code> (so <code>/mdd</code>
+          appears as a slash command) and the six mode files to <code>~/.claude/mdd/</code> (so they
+          don't clutter the command picker). It also injects a guidance block into
+          <code>~/.claude/CLAUDE.md</code>. After that, <code>/mdd</code> is available in any project,
+          any directory, any session.
         </p>
 
         <h3>Options</h3>

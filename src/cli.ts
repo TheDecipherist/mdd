@@ -21,7 +21,7 @@ program
 
 program
   .command('install')
-  .description('Install MDD Claude commands to ~/.claude/commands/')
+  .description('Install MDD — mdd.md to ~/.claude/commands/, mode files to ~/.claude/mdd/')
   .option('--dir <path>', 'Custom install directory (default: ~/.claude/commands)', '~/.claude/commands')
   .option('--install-local', 'Install to .claude/commands/ in the current project directory', false)
   .option('--force', 'Overwrite existing files even if already up to date', false)
@@ -29,13 +29,16 @@ program
     const dirExplicit = this.getOptionValueSource('dir') === 'cli';
     const local = options.installLocal && !dirExplicit;
     const effectiveDir = local ? join(cwd(), '.claude/commands') : options.dir;
+    const modesDir = dirExplicit ? undefined
+      : local ? join(cwd(), '.claude/mdd')
+      : join(homedir(), '.claude', 'mdd');
     const claudeMdPath = dirExplicit ? undefined
       : local ? join(cwd(), 'CLAUDE.md')
       : join(homedir(), '.claude', 'CLAUDE.md');
     const settingsPath = dirExplicit ? undefined
       : local ? join(cwd(), '.claude', 'settings.json')
       : join(homedir(), '.claude', 'settings.json');
-    install({ dir: effectiveDir, force: options.force, local, claudeMdPath, settingsPath });
+    install({ dir: effectiveDir, modesDir, force: options.force, local, claudeMdPath, settingsPath });
   });
 
 program
@@ -47,13 +50,16 @@ program
     const dirExplicit = this.getOptionValueSource('dir') === 'cli';
     const local = options.installLocal && !dirExplicit;
     const effectiveDir = local ? join(cwd(), '.claude/commands') : options.dir;
+    const modesDir = dirExplicit ? undefined
+      : local ? join(cwd(), '.claude/mdd')
+      : join(homedir(), '.claude', 'mdd');
     const claudeMdPath = dirExplicit ? undefined
       : local ? join(cwd(), 'CLAUDE.md')
       : join(homedir(), '.claude', 'CLAUDE.md');
     const settingsPath = dirExplicit ? undefined
       : local ? join(cwd(), '.claude', 'settings.json')
       : join(homedir(), '.claude', 'settings.json');
-    install({ dir: effectiveDir, force: true, local, claudeMdPath, settingsPath });
+    install({ dir: effectiveDir, modesDir, force: true, local, claudeMdPath, settingsPath });
   });
 
 program.parse();

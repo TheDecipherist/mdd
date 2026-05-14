@@ -3,7 +3,7 @@ description: "MDD workflow — Document → Audit → Fix → Verify. Build feat
 scope: project
 argument-hint: "<feature-description> or audit [section]"
 allowed-tools: Read, Write, Edit, Grep, Glob, Bash, AskUserQuestion, Agent
-mdd_version: 8
+mdd_version: 9
 ---
 
 # MDD — Manual-Driven Development Workflow
@@ -104,9 +104,11 @@ The user's full arguments are: **$ARGUMENTS**
 
 Parse these arguments to determine the mode. **Before doing anything else, read the appropriate mode file listed below.** The mode file contains the complete instructions for that mode. When mode file instructions reference `$ARGUMENTS`, treat it as the arguments stated above.
 
-Find the MDD commands directory by checking in this order:
-1. `.claude/commands/` in the current project (local install via `mdd install --install-local`)
-2. `~/.claude/commands/` (global install via `npm install -g @thedecipherist/mdd && mdd install`)
+Find the MDD mode files directory by checking in this order:
+1. `.claude/mdd/` in the current project (local install)
+2. `~/.claude/mdd/` (global install)
+3. `.claude/commands/` in the current project (legacy local install)
+4. `~/.claude/commands/` (legacy global install)
 
 Use whichever path contains `mdd-audit.md`. Store it as `$MDD_DIR` and use it for all mode file reads below.
 

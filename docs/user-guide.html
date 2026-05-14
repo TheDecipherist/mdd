@@ -185,7 +185,7 @@ mdd install</code></pre>
         <pre><code class="language-bash"># Install globally
 npm install -g @thedecipherist/mdd
 
-# Copy the 7 Claude command files to ~/.claude/commands/
+# Install: mdd.md → ~/.claude/commands/  |  mode files → ~/.claude/mdd/
 mdd install
 
 # Optional: install to a custom directory
@@ -206,7 +206,8 @@ mdd --version</code></pre>
         <table>
           <thead><tr><th>What</th><th>Where</th><th>Purpose</th></tr></thead>
           <tbody>
-            <tr><td>7 command <code>.md</code> files</td><td><code>~/.claude/commands/</code></td><td>The <code>/mdd</code> slash command and all its modes</td></tr>
+            <tr><td><code>mdd.md</code> (router)</td><td><code>~/.claude/commands/</code></td><td>The <code>/mdd</code> slash command entry point</td></tr>
+            <tr><td>6 mode <code>.md</code> files</td><td><code>~/.claude/mdd/</code></td><td>Mode files — read lazily, not exposed as commands</td></tr>
             <tr><td>Branch Guard hook</td><td><code>~/.claude/hooks/mdd-branch-guard.sh</code></td><td>Blocks file writes on <code>main</code> in any MDD project</td></tr>
             <tr><td>Hook registration</td><td><code>~/.claude/settings.json</code></td><td>Wires the hook to Claude Code's <code>PreToolUse</code> event</td></tr>
             <tr><td>Guidance block</td><td><code>~/.claude/CLAUDE.md</code></td><td>Teaches Claude to suggest MDD automatically</td></tr>
@@ -1864,7 +1865,7 @@ auth-system-overhaul - Wave 2: 1/2 features complete
 
         <h3><code>mdd install</code> Version Safety</h3>
         <p>
-          Before overwriting any file in <code>~/.claude/commands/</code>, <code>mdd install</code> reads the <code>mdd_version</code> field from the installed file and compares it against the version bundled in the npm package.
+          Before overwriting <code>mdd.md</code> in <code>~/.claude/commands/</code>, <code>mdd install</code> reads its <code>mdd_version</code> field and compares it against the version bundled in the npm package. Mode files in <code>~/.claude/mdd/</code> are always overwritten silently.
         </p>
         <ul>
           <li>If the installed version is <strong>older</strong> - overwrite is allowed. New file is written.</li>
@@ -1873,17 +1874,20 @@ auth-system-overhaul - Wave 2: 1/2 features complete
         </ul>
 
         <pre><code class="language-bash">$ mdd install
-Comparing versions...
-  mdd.md          installed: v8  available: v8  - up to date
-  mdd-build.md    installed: v8  available: v8  - up to date
-  mdd-audit.md    installed: v7  available: v8  - will update
-  mdd-manage.md   installed: v8  available: v8  - up to date
-  mdd-lifecycle.md installed: v8 available: v8  - up to date
-  mdd-plan.md     installed: v8  available: v8  - up to date
-  mdd-ops.md      installed: v8  available: v8  - up to date
 
-Updating 1 file. Proceed? [Y/n]
-✓ mdd-audit.md updated to v8</code></pre>
+MDD v1.3.0 — Claude Code workflow installer
+Install directory: ~/.claude/commands
+
+  ✓ mdd.md
+
+  ✓ mdd-audit.md
+  ✓ mdd-build.md
+  ✓ mdd-lifecycle.md
+  ✓ mdd-manage.md
+  ✓ mdd-ops.md
+  ✓ mdd-plan.md
+
+  7 file(s) installed/updated</code></pre>
 
         <h3><code>/mdd status</code> Version Breakdown</h3>
         <p>

@@ -1,4 +1,4 @@
-import { copyFileSync, mkdirSync, existsSync, readdirSync, readFileSync, writeFileSync, appendFileSync, chmodSync } from 'fs';
+import { copyFileSync, mkdirSync, existsSync, readdirSync, readFileSync, writeFileSync, appendFileSync, chmodSync, unlinkSync } from 'fs';
 import { join, resolve, dirname } from 'path';
 import { homedir } from 'os';
 import { fileURLToPath } from 'url';
@@ -8,6 +8,7 @@ const __dirname = dirname(__filename);
 
 interface InstallOptions {
   dir: string;
+  modesDir?: string;
   force?: boolean;
   local?: boolean;
   claudeMdPath?: string;
@@ -24,15 +25,25 @@ interface FileResult {
 
 export function install(options: InstallOptions): void {
   const destDir = resolve(options.dir.replace('~', homedir()));
+  const modesDestDir = options.modesDir ? resolve(options.modesDir.replace('~', homedir())) : destDir;
   const srcDir = join(__dirname, '../commands');
   const version = getPackageVersion();
 
   mkdirSync(destDir, { recursive: true });
+  if (modesDestDir !== destDir) mkdirSync(modesDestDir, { recursive: true });
+
+  // Remove starter-kit leftovers that should not coexist with the standalone package
+  const leftovers = ['install-mdd.md'];
+  for (const f of leftovers) {
+    const legacy = join(destDir, f);
+    if (existsSync(legacy)) {
+      try { unlinkSync(legacy); } catch { /* ignore */ }
+    }
+  }
 
   const files = readdirSync(srcDir)
     .filter(f => f.endsWith('.md'))
     .sort((a, b) => {
-      // mdd.md first, then alphabetical
       if (a === 'mdd.md') return -1;
       if (b === 'mdd.md') return 1;
       return a.localeCompare(b);
@@ -42,26 +53,41 @@ export function install(options: InstallOptions): void {
 
   for (const file of files) {
     const src = join(srcDir, file);
-    const dest = join(destDir, file);
+    const isModeFile = file !== 'mdd.md';
+    const targetDir = isModeFile ? modesDestDir : destDir;
+    const dest = join(targetDir, file);
+
+    // Clean up legacy location: if mode file exists in commands dir but we're now using a separate modesDir, remove it
+    if (isModeFile && modesDestDir !== destDir) {
+      const legacyDest = join(destDir, file);
+      if (existsSync(legacyDest)) {
+        try { unlinkSync(legacyDest); } catch { /* ignore */ }
+      }
+    }
 
     try {
       if (existsSync(dest) && !options.force) {
         if (file === 'mdd.md') {
-          const srcVer = getMddVersion(readFileSync(src, 'utf-8'));
+          const srcContent = readFileSync(src, 'utf-8');
+          const srcVer = getMddVersion(srcContent);
           const destVer = getMddVersion(readFileSync(dest, 'utf-8'));
           if (srcVer <= destVer) {
-            results.push({ file, status: 'skipped', reason: `v${destVer} already up to date` });
+            results.push({ file, status: 'skipped', reason: `v${version} already up to date` });
             continue;
           }
-          copyFileSync(src, dest);
+          writeFileSync(dest, stampDescription(srcContent, options.local ? 'local' : 'global', version), 'utf-8');
           results.push({ file, status: 'updated', fromVersion: destVer, toVersion: srcVer });
         } else {
-          // For mode files: compare modification — just overwrite silently
           copyFileSync(src, dest);
           results.push({ file, status: 'updated' });
         }
       } else {
-        copyFileSync(src, dest);
+        if (file === 'mdd.md') {
+          const srcContent = readFileSync(src, 'utf-8');
+          writeFileSync(dest, stampDescription(srcContent, options.local ? 'local' : 'global', version), 'utf-8');
+        } else {
+          copyFileSync(src, dest);
+        }
         results.push({ file, status: existsSync(dest) ? 'updated' : 'installed' });
       }
     } catch (err) {
@@ -120,6 +146,13 @@ export function install(options: InstallOptions): void {
   }
 
   console.log('Open Claude Code and run /mdd to get started.\n');
+}
+
+function stampDescription(content: string, scope: 'global' | 'local', version: string): string {
+  return content.replace(
+    /^(description:\s*"?)(?:\((?:global|local) v[^)]+\) )?/m,
+    `$1(${scope} v${version}) `
+  );
 }
 
 function getMddVersion(content: string): number {
