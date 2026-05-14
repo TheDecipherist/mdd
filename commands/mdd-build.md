@@ -192,6 +192,7 @@ status: draft
 phase: <last completed phase name, or "all" when fully built>
 mdd_version: <read from mdd.md frontmatter mdd_version field>
 tags: [<4-8 domain-concept keywords — systems touched, technology, feature names. NOT file paths>]
+path: <Area/Section>
 known_issues: []
 ---
 
@@ -233,6 +234,8 @@ known_issues: []
 **CRITICAL:** This documentation is the source of truth. Everything that follows is generated FROM this doc. Take time to make it complete and accurate.
 
 **Always set `last_synced` to today's date** when writing or updating a feature doc. This is what SCAN MODE uses to detect drift. Set `status: draft` for new docs; update to `in_progress` when implementation begins, `complete` when Phase 7 is done.
+
+**Determine the `path` field** before writing the doc. Read the `path` values of all existing docs in `.mdd/docs/` to understand established product vocabulary and category names. Then ask: "What would a user navigate to in order to reach this feature?" — answer in their mental model of the product, not the code structure. Use 1–3 segments, Title Case, product vocabulary (e.g. `Auth/Login`, `E-commerce/Cart`, `Dashboard/Analytics`). Siblings must use identical parent spelling — if `Auth/Login` exists, use `Auth` not `Authentication`. If you can infer the path from context with confidence, set it and show the user. If genuinely ambiguous (feature could belong in 2+ places), ask: "Where does this feature live in the product? (e.g. `Auth/Login` or `Dashboard/Reports`)"
 
 **After writing the feature doc**, trigger the `.mdd/.startup.md` rebuild (same logic as in Status Mode — rebuild auto-generated zone, preserve Notes zone) so the Features list stays current.
 

@@ -4,7 +4,7 @@
 
 # MDD - Manual-Driven Development for Claude Code
 
-> **One command. Twenty-one modes. Complete feature lifecycle from documentation to verified deployment.**
+> **One command. Twenty-three modes. Complete feature lifecycle from documentation to verified deployment.**
 
 <p align="center">
   <a href="https://thedecipherist.github.io/mdd">
@@ -249,6 +249,7 @@ Every feature doc and ops runbook has a `tags:` field (4–8 domain-concept keyw
 /mdd note list                             Print the Notes section
 /mdd note clear                            Wipe all notes (asks for confirmation)
 /mdd deprecate <feature-id>                Archive a feature and flag all dependents
+/mdd import-spec <file> [file...]           Convert a spec doc into MDD feature docs
 /mdd reverse-engineer [path|feature-id]   Generate MDD docs from existing source code
 /mdd graph                                 Render the full cross-feature dependency map
 /mdd upgrade                               Batch-patch missing frontmatter across all docs
@@ -624,6 +625,39 @@ Re-syncs a feature doc after its code has changed:
 
 ---
 
+## Import Spec Mode
+
+### `/mdd import-spec <file> [file...]`
+
+Converts one or more large spec or prompt documents — the kind produced by extended brainstorming sessions — into properly structured MDD feature docs. Nothing from the original spec is lost.
+
+```bash
+/mdd import-spec ~/specs/my-app-prompt.md
+/mdd import-spec spec-v1.md spec-v2.md spec-notes.md
+```
+
+**How it works:**
+
+1. **Read** — loads all spec files, merges content if multiple are provided
+2. **Extract + Group** — identifies distinct features and assigns each a `path` value (e.g. `Auth/Login`, `E-commerce/Cart`) before anything else
+3. **Auto-detect structure** — decides whether to create initiatives + waves + docs, waves + docs, or flat feature docs, based on path diversity and feature count:
+
+| Signal | Output |
+|--------|--------|
+| 3+ distinct root path areas AND 8+ features | Initiative → Waves → Feature docs |
+| 4–7 features in a coherent domain | Waves → Feature docs |
+| 1–3 focused features | Flat feature docs only |
+
+4. **Dry-run preview** — shows the complete proposed tree (paths, slugs, titles, content mapping, merge summary) before writing a single file. You can adjust or abort.
+5. **Write docs** — creates all feature docs with full frontmatter, populated sections, tags, and `path` fields
+6. **Rebuild** — updates `.mdd/.startup.md` to reflect the new docs
+
+**Content preservation:** Every decision, constraint, and edge case in the spec maps somewhere in the output. If something doesn't fit cleanly into a standard section, it goes into Business Rules or a Known Constraints note.
+
+**Duplicate handling:** Specs often revisit the same topic multiple times. Import-spec detects overlapping sections semantically, merges them into the best doc, and shows you exactly what was merged and why in the dry-run summary.
+
+---
+
 ## Feature Lifecycle
 
 ### `/mdd deprecate <feature-id>`
@@ -677,9 +711,9 @@ Saved to `.mdd/audits/graph-<date>.md`.
 
 ### `/mdd upgrade`
 
-Batch-patches missing frontmatter fields (`last_synced`, `status`, `phase`) across all `.mdd/docs/*.md` files. Safe to run multiple times - already-present fields are never overwritten.
+Batch-patches missing frontmatter fields (`last_synced`, `status`, `phase`, `tags`, `path`) across all `.mdd/docs/*.md` files. Safe to run multiple times — already-present fields are never overwritten.
 
-Infers sensible defaults from git history, existing field values, and archive status. Shows a plan before writing anything.
+Infers sensible defaults from git history, existing field values, and archive status. For the `path` field, Claude reads each doc's title and purpose to propose a value — always shows a plan for confirmation before writing. After upgrade, run `/mdd rebuild-tags` to populate any empty `tags` fields.
 
 ---
 
@@ -793,12 +827,21 @@ Every `.mdd/docs/<NN>-<feature-name>.md` file uses this YAML frontmatter:
 | `phase` | Last completed phase name |
 | `mdd_version` | Version of MDD that created/last updated this doc |
 | `tags` | 4–8 domain-concept keywords surfaced in `.startup.md` so Claude can detect when a prompt relates to this feature (e.g. `[auth, jwt, login, sessions]`) |
+| `path` | Slash-delimited breadcrumb showing where this feature lives in the product (e.g. `Auth/Login`, `E-commerce/Cart/Checkout`). Used by dashboards and listing tools to group docs into a human-readable tree. Distinct from `depends_on` — this is for navigation, not build order. |
 | `known_issues` | Issues discovered during audits or implementation |
 
 **`depends_on` rules:**
 - Feature docs only - never list task docs (one-off, frozen, no ongoing contract)
 - IDs must reference existing docs - `/mdd graph` detects broken references
 - Only add, never remove without discussion - removing breaks the dependency chain
+
+**`path` rules:**
+- Format: `Area/Section` or `Area/Section/Detail` — Title Case, slash-separated, 1–3 levels
+- Use product vocabulary, not code paths: `Auth/Login` not `src/handlers/auth`
+- Siblings must use identical parent spelling: if `Auth/Login` exists, new auth docs use `Auth` not `Authentication`
+- Set automatically by Claude in Build Mode Phase 3 (inferred from context, confirmed by user if ambiguous)
+- Missing `path` fields are detected by `/mdd scan` and batch-fixed by `/mdd upgrade`
+- Dashboards and listing tools use `path` to group docs into a human-readable tree view
 
 ---
 

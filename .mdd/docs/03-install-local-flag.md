@@ -15,6 +15,7 @@ status: complete
 phase: all
 mdd_version: 8
 tags: [cli, install, local-install, --install-local, flags, commands-directory, npm]
+path: Tooling/Install
 known_issues: []
 ---
 

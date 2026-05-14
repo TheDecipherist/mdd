@@ -20,6 +20,7 @@ status: complete
 phase: all
 mdd_version: 9
 tags: [guidance, claude-md, mdd-suggest, install, tags, startup, rebuild-tags, ops, awareness]
+path: Tooling/Claude Guidance
 known_issues: []
 ---
 

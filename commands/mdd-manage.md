@@ -153,6 +153,7 @@ A classification table — one row per feature:
 
 **Classifications:**
 - **untracked** — `last_synced` missing from frontmatter
+- **no-path** — `path` field missing from frontmatter (run `/mdd upgrade` to add)
 - **broken** — one or more `source_files` not found on disk
 - **drifted** — `last_synced` exists, files exist, commits found after `last_synced`
 - **in_sync** — `last_synced` exists, all files exist, no commits after `last_synced`
@@ -176,11 +177,13 @@ Generated: <YYYY-MM-DD>
   ❓  09-integrations           — untracked (no last_synced field)
 
 Summary: 1 in sync · 1 drifted · 1 broken · 1 untracked
+Missing path: <N> docs — run /mdd upgrade to populate  ← omit this line when N = 0
 
 Recommended actions:
   /mdd update 04   — re-sync content-builder doc with code
   /mdd update 07   — fix broken file reference
   /mdd update 09   — add last_synced by running update mode
+  /mdd upgrade     — add path field to <N> docs missing it  ← omit this line when there are no docs missing path
 ```
 
 **Initiative/wave drift check** (only shown if `.mdd/initiatives/` exists):
@@ -266,6 +269,7 @@ After rewriting, update frontmatter:
 - `last_synced: <today's date>`
 - `status:` — ask the user if they want to update the status (e.g., draft → complete)
 - `phase:` — update to reflect current state
+- `path:` — if the doc is missing a `path` field, offer to add it: "This doc is missing a `path` field. Where does this feature live in the product? (e.g. `Auth/Login`)" — if the user provides a value, write it between `tags` and `known_issues` in the frontmatter.
 
 ### Phase U6 — Regenerate test skeletons for new behaviors
 

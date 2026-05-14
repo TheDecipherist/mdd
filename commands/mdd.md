@@ -118,6 +118,9 @@ Use whichever path contains `mdd-audit.md`. Store it as `$MDD_DIR` and use it fo
 - If arguments start with `status`, `note`, `scan`, `update`, `deprecate`, or `rebuild-tags` →
   **Read `$MDD_DIR/mdd-manage.md` then follow the relevant mode instructions.**
 
+- If arguments start with `import-spec` →
+  **Read `$MDD_DIR/mdd-import-spec.md` then follow its IMPORT SPEC MODE instructions.**
+
 - If arguments start with `reverse-engineer`, `reverse`, `graph`, or `upgrade` →
   **Read `$MDD_DIR/mdd-lifecycle.md` then follow the relevant mode instructions.**
 
