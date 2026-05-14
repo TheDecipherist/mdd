@@ -59,20 +59,26 @@ export function install(options: InstallOptions): void {
     try {
       if (existsSync(dest) && !options.force) {
         if (file === 'mdd.md') {
-          const srcVer = getMddVersion(readFileSync(src, 'utf-8'));
+          const srcContent = readFileSync(src, 'utf-8');
+          const srcVer = getMddVersion(srcContent);
           const destVer = getMddVersion(readFileSync(dest, 'utf-8'));
           if (srcVer <= destVer) {
-            results.push({ file, status: 'skipped', reason: `v${destVer} already up to date` });
+            results.push({ file, status: 'skipped', reason: `v${version} already up to date` });
             continue;
           }
-          copyFileSync(src, dest);
+          writeFileSync(dest, stampDescription(srcContent, options.local ? 'local' : 'global', version), 'utf-8');
           results.push({ file, status: 'updated', fromVersion: destVer, toVersion: srcVer });
         } else {
           copyFileSync(src, dest);
           results.push({ file, status: 'updated' });
         }
       } else {
-        copyFileSync(src, dest);
+        if (file === 'mdd.md') {
+          const srcContent = readFileSync(src, 'utf-8');
+          writeFileSync(dest, stampDescription(srcContent, options.local ? 'local' : 'global', version), 'utf-8');
+        } else {
+          copyFileSync(src, dest);
+        }
         results.push({ file, status: existsSync(dest) ? 'updated' : 'installed' });
       }
     } catch (err) {
@@ -131,6 +137,13 @@ export function install(options: InstallOptions): void {
   }
 
   console.log('Open Claude Code and run /mdd to get started.\n');
+}
+
+function stampDescription(content: string, scope: 'global' | 'local', version: string): string {
+  return content.replace(
+    /^(description:\s*"?)(?:\((?:global|local) v[^)]+\) )?/m,
+    `$1(${scope} v${version}) `
+  );
 }
 
 function getMddVersion(content: string): number {
