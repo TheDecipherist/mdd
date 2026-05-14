@@ -239,7 +239,7 @@ For each feature in the wave's feature table, in dependency order, skipping `com
 3. Update the wave doc's `Doc` column with the feature doc path (once created in MDD Phase 3).
 4. Run full MDD Build Mode (Phases 1–7) for the feature, at the chosen interaction level.
    - Feature doc is auto-numbered from `.mdd/docs/` and gets `initiative`, `wave`, `wave_status` fields added.
-5. After Phase 7 verify: flip `wave_status: complete` in wave doc.
+5. After Phase 7 verify: flip `wave_status: complete` in wave doc AND confirm `status: complete` is written to the feature doc frontmatter (Phase 7c should have done this — verify it, write it if missing).
 6. Ask: *"Feature N done ✓. Start Feature N+1? (yes / pause here)"*
 
 **Resume behaviour (Gap 2):** if re-run on a partially complete wave, read each feature's `wave_status`. Skip `complete`. Resume at first `active` or `planned`. If `active` but no doc exists → restart from Phase 1.
@@ -249,13 +249,18 @@ For each feature in the wave's feature table, in dependency order, skipping `com
 When all features are `complete`:
 1. Show the demo-state: *"Wave complete. Demo-state: '<demo-state>'. Have you verified this?"*
 2. User confirms → flip wave `status: complete` in both `waves/<slug>.md` AND the waves table in `initiatives/<slug>.md`.
-3. Recompute hashes for both files.
-4. If all waves in initiative are `complete` → ask: *"All waves done. Mark initiative complete? (yes / no)"*
+3. **Cascade status to feature docs** — for every feature listed in this wave, read its `.mdd/docs/<NN>-<slug>.md` and check `status:`. For any doc that is NOT already `complete` or `deprecated`, write:
+   - `status: complete`
+   - `last_synced: <today>`
+   - `mdd_version: <current from mdd.md frontmatter>`
+   This is the authoritative completion signal — a wave being marked complete means all its features are done regardless of whether Phase 7c ran correctly during build.
+4. Recompute hashes for both wave and initiative files.
+5. If all waves in initiative are `complete` → ask: *"All waves done. Mark initiative complete? (yes / no)"*
    - If yes → **Update initiative frontmatter** — write these fields now:
      - `status: complete`
      - `last_synced: <today>`
      - `mdd_version: <current from mdd.md frontmatter>`
-5. Rebuild `.mdd/.startup.md`.
+6. Rebuild `.mdd/.startup.md`.
 
 ---
 
