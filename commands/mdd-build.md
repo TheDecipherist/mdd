@@ -600,6 +600,14 @@ where the agent patches the wrong thing because it accepted an external excuse t
 #### Phase 7c — Completion Signal
 
 **If integration verified:**
+
+1. **Update the feature doc frontmatter** — write these fields now, before displaying the signal:
+   - `status: complete`
+   - `phase: all`
+   - `last_synced: <today>`
+   - `mdd_version: <current from mdd.md frontmatter>`
+
+2. Display the completion signal:
 ```
 ✅ MDD Complete: <Feature Name>
 
@@ -611,8 +619,6 @@ Tests: <N>/<N> passing
 Integration: verified (<feature type> — real environment)
 Typecheck: clean
 
-Update doc: status → complete, phase → all, last_synced → <today>, mdd_version → <current from mdd.md frontmatter>
-
 New patterns established: <any new rules worth adding to CLAUDE.md>
 
 Branch: feat/<feature-name>
@@ -620,6 +626,14 @@ Ready for review — run `git diff main...HEAD` to see all changes.
 ```
 
 **If integration NOT verified (external condition blocked it):**
+
+1. **Update the feature doc frontmatter** — write these fields now, before displaying the signal:
+   - `status: in_progress`
+   - `phase: integration-pending`
+   - `last_synced: <today>`
+   - `mdd_version: <current from mdd.md frontmatter>`
+
+2. Display the blocked signal:
 ```
 ⏸️  MDD Blocked: <Feature Name>
 
@@ -630,7 +644,6 @@ Next step:   <concrete action to unblock — e.g. "Add STRIPE_API_KEY to .env, t
 
 Code is complete. All <N> tests pass. Typecheck clean.
 Feature is NOT marked done until Phase 7b passes.
-Update doc: status → in_progress, phase → integration-pending, mdd_version → <current from mdd.md frontmatter>
 
 When unblocked: resume at Phase 7b only. No re-implementation needed.
 ```
