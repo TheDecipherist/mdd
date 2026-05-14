@@ -10,6 +10,7 @@ const __dirname = dirname(__filename);
 interface InstallOptions {
   dir: string;
   force?: boolean;
+  local?: boolean;
 }
 
 interface FileResult {
@@ -91,7 +92,11 @@ export function install(options: InstallOptions): void {
     console.log(`  ${installed} file(s) installed/updated${skipped > 0 ? `, ${skipped} skipped` : ''}`);
   }
 
-  console.log('\nOpen Claude Code and run /mdd to get started.\n');
+  if (options.local) {
+    console.log('  Tip: add .claude/commands/ to your .gitignore to keep these files out of git.\n');
+  }
+
+  console.log('Open Claude Code and run /mdd to get started.\n');
 }
 
 function getMddVersion(content: string): number {

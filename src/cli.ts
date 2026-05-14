@@ -4,6 +4,7 @@ import { install } from './install.js';
 import { readFileSync } from 'fs';
 import { fileURLToPath } from 'url';
 import { join, dirname } from 'path';
+import { cwd } from 'process';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -21,13 +22,25 @@ program
   .command('install')
   .description('Install MDD Claude commands to ~/.claude/commands/')
   .option('--dir <path>', 'Custom install directory (default: ~/.claude/commands)', '~/.claude/commands')
+  .option('--install-local', 'Install to .claude/commands/ in the current project directory', false)
   .option('--force', 'Overwrite existing files even if already up to date', false)
-  .action(install);
+  .action(function (this: Command, options: { dir: string; installLocal: boolean; force?: boolean }) {
+    const dirExplicit = this.getOptionValueSource('dir') === 'cli';
+    const local = options.installLocal && !dirExplicit;
+    const effectiveDir = local ? join(cwd(), '.claude/commands') : options.dir;
+    install({ dir: effectiveDir, force: options.force, local });
+  });
 
 program
   .command('update')
   .description('Update MDD commands to latest version (alias for install --force)')
   .option('--dir <path>', 'Custom install directory', '~/.claude/commands')
-  .action((options: { dir: string }) => install({ ...options, force: true }));
+  .option('--install-local', 'Update the local project install instead of global', false)
+  .action(function (this: Command, options: { dir: string; installLocal: boolean }) {
+    const dirExplicit = this.getOptionValueSource('dir') === 'cli';
+    const local = options.installLocal && !dirExplicit;
+    const effectiveDir = local ? join(cwd(), '.claude/commands') : options.dir;
+    install({ dir: effectiveDir, force: true, local });
+  });
 
 program.parse();
