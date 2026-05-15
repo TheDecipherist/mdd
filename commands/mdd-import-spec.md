@@ -12,9 +12,34 @@ Parse file path(s) from the arguments following `import-spec`. Multiple files ma
 
 For each file path:
 1. Verify the file exists. If a path does not exist, stop and report clearly: "File not found: `<path>`"
-2. Read the full content.
+2. Count the file's lines: `wc -l <path>`
+3. Read the full content using the strategy below.
 
-If multiple files are provided, merge all content into a single working document. Tag each section internally with its source filename (e.g. `<!-- source: rawpg-prompt-driver.md -->`) for traceability — these tags are used in the merge summary and content mapping display but are never written to output docs.
+**Reading strategy — always read the full file, never stop early:**
+
+Files under 2,000 lines: read in a single call.
+
+Files over 2,000 lines: read in sequential chunks of 2,000 lines each.
+
+```
+chunk 1: offset 0,    limit 2000
+chunk 2: offset 2000, limit 2000
+chunk 3: offset 4000, limit 2000
+... continue until offset >= total line count
+```
+
+After each chunk, append its headings and content to a running working document. Do not begin IS2 analysis until the final chunk has been read and the full working document is assembled. Report progress as you read:
+
+```
+Reading <filename> (<N> lines)...
+  chunk 1/N  (lines 1–2000)   ✓
+  chunk 2/N  (lines 2001–4000) ✓
+  ...
+  chunk N/N  (lines <X>–<end>) ✓
+Full file read. Proceeding to feature extraction.
+```
+
+If multiple files are provided, merge all content into a single working document after all files are fully read. Tag each section internally with its source filename (e.g. `<!-- source: rawpg-prompt-driver.md -->`) for traceability — these tags are used in the merge summary and content mapping display but are never written to output docs.
 
 ---
 
