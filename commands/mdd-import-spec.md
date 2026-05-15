@@ -47,20 +47,21 @@ If multiple files are provided, merge all content into a single working document
 
 This phase runs in four steps. Build-order classification (IS2c) always precedes structure determination (IS2d) because the correct numbering depends on understanding what you build vs. what you reference.
 
-#### Step IS2a — Extract features
+#### Step IS2a — Extract features + record source line ranges
 
 Read the entire merged working document. Identify every distinct feature, system, subsystem, or bounded capability described. A "feature" is any topic that could become a standalone MDD doc — something with a purpose, decisions, constraints, and a clear scope.
 
-For each identified feature, capture:
+For each identified feature, record:
 - Name / title
-- Core purpose — full description, as detailed as needed. Do NOT artificially limit this to a sentence count. Capture everything the spec says about what this feature is and does.
-- All key decisions, constraints, business rules, edge cases, and design rationale mentioned anywhere in the spec for this feature
-- AST types, data structures, config schemas, error formats, and TypeScript interfaces if described
+- **The exact line ranges in the source file(s) that cover this feature.** Record every range, including secondary ranges where the feature is discussed again (e.g. a directive mentioned in the syntax section AND in the security section AND in the changelog). Format: `lines 254–340, 2401–2450, 4725–4741`
+- A brief extraction note: what types of content are in those ranges (e.g. "syntax section: options table, processing pipeline, scope model; security section: filesystem confinement rules; changelog: file resolution model decisions")
 - Dependencies on other features identified in the same spec
 
-Track which spec sections contribute to each feature. When multiple spec sections cover the same concept (same feature re-discussed with refinements), **merge them** — do not create duplicate docs. When versions of the same decision conflict, keep the most specific or most recent version and note the discarded variant.
+This line-range map is used in IS4 to re-read the source before writing each doc. It is the most important output of IS2a. Do not skip or estimate ranges — check your chunk boundaries if unsure.
 
-**Changelog and review-pass sections** (sections titled "v1.0 Review", "Changelog", "Decision Log", or similar retrospective formats) are not features — they are design decision records. For each decision in such a section, identify which feature it belongs to and add it to that feature's content. Do not create a standalone "Changelog" feature doc.
+Track which spec sections contribute to each feature. When multiple spec sections cover the same concept (same feature re-discussed with refinements), **merge them** — do not create duplicate docs. Record all contributing ranges. When versions of the same decision conflict, keep the most specific or most recent version and note the discarded variant.
+
+**Changelog and review-pass sections** (sections titled "v1.0 Review", "Changelog", "Decision Log", or similar retrospective formats) are not standalone features — they are design decision records. For each decision in such a section, identify which feature it belongs to and add its line range to that feature's source ranges. Do not create a standalone "Changelog" feature doc.
 
 #### Step IS2b — Assign paths
 
@@ -321,7 +322,32 @@ Compute and write the `hash:` field after writing.
 For each feature in the approved plan, in wave order:
 
 1. Auto-number continuing from the highest existing doc number in `.mdd/docs/`
-2. Write `.mdd/docs/<NN>-<slug>.md`:
+
+2. **Re-read the source before writing.** Look up the line ranges recorded for this feature in IS2a. Re-read each range from the original spec file now — do not write from the IS2a extraction summary alone. The summary identified what exists; the re-read provides the actual content. Use the same chunked read strategy as IS1 if a range is large.
+
+   ```
+   Re-reading source for <slug>...
+     lines <X>–<Y>  (<section name>)  ✓
+     lines <X>–<Y>  (<section name>)  ✓
+   Writing doc...
+   ```
+
+3. **Run the completeness checklist against the freshly-read source before writing the doc.** For each item present in the source, it must appear in the doc:
+
+   - [ ] Every options / parameters table — every row, every column, every default value
+   - [ ] Every CLI subcommand and its flags (including rare/advanced flags)
+   - [ ] Every config JSON structure — exact keys, types, nesting, defaults
+   - [ ] Every TypeScript interface and type alias defined in the spec
+   - [ ] Every AST node type and its fields
+   - [ ] Every error message format and the exact condition that triggers it
+   - [ ] Every behavioral table (evaluation tables, state tables, format tables, platform tables)
+   - [ ] Every "always" / "never" / "must not" / "only valid when" rule
+   - [ ] Every example that illustrates an edge case or non-obvious behaviour
+   - [ ] Every named distinction where two similar things behave differently (e.g. `column` singular vs `columns` plural)
+
+   If any item is present in the source but not yet captured in your notes, add it now before writing the doc. Do not skip this step.
+
+4. Write `.mdd/docs/<NN>-<slug>.md`:
 
 ```markdown
 ---
