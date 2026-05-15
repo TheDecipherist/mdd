@@ -8,6 +8,21 @@ Reads one or more large spec or prompt documents — the kind produced by extend
 
 ### Phase IS1 — Read Spec Files
 
+**Stale job detection (runs first):** Check `.mdd/jobs/` for any existing `import-*/` folder.
+- If found: read its `MANIFEST.md` and count written vs total files. Present to user:
+  ```
+  Found interrupted import job from <date>.
+  MANIFEST shows <done>/<total> files written.
+  Written: <list of [x] paths>
+  Remaining: <list of [ ] paths>
+
+    [R] Resume — skip already-written files, continue from where it left off
+    [D] Discard — delete job, start the full import from scratch
+  ```
+  - **Resume:** skip IS1–IS3, go directly to IS4 writing only the `[ ]` entries. IS5 runs normally after.
+  - **Discard:** delete the `import-<date>/` folder, proceed normally.
+- If no stale job: proceed normally.
+
 Parse file path(s) from the arguments following `import-spec`. Multiple files may be space-separated or specified as a glob.
 
 For each file path:
@@ -316,6 +331,31 @@ Is the build order correct? Does each wave's demo-state make sense?
 
 **Do not proceed to IS4 until the user explicitly approves.**
 
+**After approval — create the job folder and MANIFEST before writing any file:**
+
+Create `.mdd/jobs/import-<YYYY-MM-DD>/MANIFEST.md`:
+
+```markdown
+# Import Spec Job Manifest
+# Job: import-<YYYY-MM-DD>
+# Source: <filename(s)>
+# Started: <ISO timestamp>
+# Files: <N total>
+# Status: IN PROGRESS
+#
+# States: [ ] pending  [~] writing  [x] written  [!] error
+
+## Files to create
+[ ] .mdd/initiatives/<slug>.md
+[ ] .mdd/waves/<slug>-wave-1.md
+[ ] .mdd/waves/<slug>-wave-2.md
+[ ] .mdd/docs/01-<slug>.md
+[ ] .mdd/docs/02-<slug>.md
+...
+```
+
+List every file that will be written in the order it will be written. Nothing proceeds until this file exists on disk.
+
 ---
 
 ### Phase IS4 — Write Files
@@ -518,6 +558,8 @@ known_issues: []
 3. Tags: 4–8 domain-concept keywords. NOT file paths or spec section names.
 4. `depends_on`: populate from the build order analysis. COMPONENT docs list the SPEC docs they implement. SPEC docs list other SPECs they depend on (e.g. the expression system spec is depended on by the filter spec).
 
+**For every file written:** mark it `[~]` in MANIFEST before writing, then `[x]` immediately after. If writing fails, mark `[!]` with a one-line error note. This ensures the MANIFEST is always an accurate snapshot of what exists on disk — a resume after interruption will never re-write a file that was already successfully written.
+
 **Progress report as you write:**
 ```
 Writing files...
@@ -550,6 +592,8 @@ Read all `.mdd/docs/*.md` (excluding `archive/`) — frontmatter only (id, title
 - **Warnings:** broken `depends_on` refs (target doesn't exist), circular dependencies, docs missing `path`.
 - **Write** `.mdd/connections.md` with YAML frontmatter (`generated: <today>`, `doc_count: <N>`, `connection_count: <N>`, `overlap_count: <N>`) and four sections: Path Tree, Dependency Graph (Mermaid), Source File Overlap, Warnings.
 
+**Clean up job folder:** Delete `.mdd/jobs/import-<date>/` entirely — the written files are the authoritative record.
+
 Then report:
 
 ```
@@ -569,6 +613,7 @@ Structure:
 
 Startup:     .mdd/.startup.md rebuilt
 Connections: .mdd/connections.md updated
+Job:         .mdd/jobs/import-<date>/ deleted
 
 Next steps:
   /mdd plan-execute <slug>-wave-1   — start building Wave 1

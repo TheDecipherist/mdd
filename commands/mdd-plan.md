@@ -210,14 +210,28 @@ DIRTY=$(git status --porcelain)
   Follow the same (a)/(b)/(c) logic as mdd-build.md Phase 0.
 - **Never proceed on main.** This is a hard block regardless of clean/dirty state.
 
-1. Parse `<wave-slug>` — hard stop *"Wave does not exist"* if `waves/<wave-slug>.md` not found.
+1. Parse `<wave-slug>` — hard stop *"Wave does not exist"* if `.mdd/waves/<wave-slug>.md` not found.
 2. Read the wave doc.
 3. Derive and read the parent initiative — hard stop if not found.
 4. **Hash check:** verify both initiative and wave file hashes. Hard stop on any mismatch: *"File has been manually edited since last sync. Run `/mdd plan-sync` first."*
 5. **Depends-on gate:** if wave's `depends_on` is not `none`, verify that wave is `complete`. Hard stop if not.
-6. **Feature ordering check (Gap 4):** build dependency graph of features within the wave. If any ordering violation found → hard stop, explain exact conflict, offer auto-reorder.
+6. **Feature ordering check:** build dependency graph of features within the wave. If any ordering violation found → hard stop, explain exact conflict, offer auto-reorder.
+7. **Stale job detection:** Check `.mdd/jobs/` for any existing `wave-<wave-slug>/` folder.
+   - If found: read its `MANIFEST.md` and count entries by state (`[ ]`, `[~]`, `[x]`, `[!]`). Present to user:
+     ```
+     Found interrupted wave job from <date>.
+     MANIFEST shows <done>/<total> features complete.
+     Features done: <list of [x] slugs>
+     Remaining:     <list of [ ] and [~] slugs>
 
-### Phase PE2 — Interaction mode
+       [R] Resume — continue from where it left off
+       [D] Discard — delete job and start wave from scratch
+     ```
+   - **Resume:** skip PE2, skip to PE3 starting from the first `[ ]` or `[~]` entry. Features marked `[x]` are already complete — do not re-run them.
+   - **Discard:** delete the `wave-<wave-slug>/` folder, proceed to PE2 normally.
+   - If no stale job exists: proceed to PE2 normally.
+
+### Phase PE2 — Interaction mode + Job Setup
 
 Ask:
 ```
@@ -230,24 +244,51 @@ How do you want to run this wave?
 
 **Interactive:** full Phase 2 gate, Phase 5 plan confirmation, green gate iteration prompts on every feature.
 
+**After the interaction mode is chosen — create the job folder and MANIFEST (nothing proceeds until this exists on disk):**
+
+Create `.mdd/jobs/wave-<wave-slug>/MANIFEST.md`:
+
+```markdown
+# Wave Job Manifest
+# Job: wave-<wave-slug>
+# Wave: .mdd/waves/<wave-slug>.md
+# Initiative: <initiative-slug>
+# Started: <ISO timestamp>
+# Mode: <automated | interactive>
+# Features: <N>
+# Status: IN PROGRESS
+#
+# States: [ ] planned  [~] in_progress  [x] complete  [!] error
+
+## Features (in build order)
+[ ] <feature-slug-1>    .mdd/docs/<NN>-<slug>.md
+[ ] <feature-slug-2>    .mdd/docs/<NN>-<slug>.md
+[ ] <feature-slug-3>    .mdd/docs/<NN>-<slug>.md
+```
+
+List every feature from the wave's Features table in order. Features already marked `complete` in the wave doc get `[x]` from the start.
+
 ### Phase PE3 — Execute features
 
 For each feature in the wave's feature table, in dependency order, skipping `complete` features:
 
 1. Tell user: *"Starting Feature N: <feature-slug>"*
-2. Flip `wave_status: active` for this feature in the wave doc immediately.
-3. Update the wave doc's `Doc` column with the feature doc path (once created in MDD Phase 3).
-4. Run full MDD Build Mode (Phases 1–7) for the feature, at the chosen interaction level.
+2. Mark the feature `[~]` in `MANIFEST.md` immediately (before any other work).
+3. Flip `wave_status: active` for this feature in the wave doc immediately.
+4. Update the wave doc's `Doc` column with the feature doc path (once created in MDD Phase 3).
+5. Run full MDD Build Mode (Phases 1–7) for the feature, at the chosen interaction level.
    - Feature doc is auto-numbered from `.mdd/docs/` and gets `initiative`, `wave`, `wave_status` fields added.
-5. After Phase 7 verify: flip `wave_status: complete` in wave doc AND confirm `status: complete` is written to the feature doc frontmatter (Phase 7c should have done this — verify it, write it if missing).
-6. Ask: *"Feature N done ✓. Start Feature N+1? (yes / pause here)"*
+6. After Phase 7 verify: flip `wave_status: complete` in wave doc AND confirm `status: complete` is written to the feature doc frontmatter (Phase 7c should have done this — verify it, write it if missing).
+7. Mark the feature `[x]` in `MANIFEST.md`. If an error occurred that prevented completion, mark `[!]` with a one-line note.
+8. Ask: *"Feature N done ✓. Start Feature N+1? (yes / pause here)"*
 
-**Resume behaviour (Gap 2):** if re-run on a partially complete wave, read each feature's `wave_status`. Skip `complete`. Resume at first `active` or `planned`. If `active` but no doc exists → restart from Phase 1.
+**Resume behaviour:** if re-run on a partially complete wave, stale job detection in PE1 handles resume. MANIFEST is the authoritative progress record — it is always written before and after each feature so an interrupted session can pick up at the exact right point.
 
 ### Phase PE4 — Wave completion
 
 When all features are `complete`:
-1. Show the demo-state: *"Wave complete. Demo-state: '<demo-state>'. Have you verified this?"*
+1. Update `MANIFEST.md` — set `# Status: COMPLETE` in the header.
+2. Show the demo-state: *"Wave complete. Demo-state: '<demo-state>'. Have you verified this?"*
 2. User confirms → flip wave `status: complete` in both `waves/<slug>.md` AND the waves table in `initiatives/<slug>.md`.
 3. **Cascade status to feature docs** — for every feature listed in this wave, read its `.mdd/docs/<NN>-<slug>.md` and check `status:`. For any doc that is NOT already `complete` or `deprecated`, write:
    - `status: complete`
@@ -271,6 +312,8 @@ Read all `.mdd/docs/*.md` (excluding `archive/`) — frontmatter only (id, title
 - **Source overlap:** build map of source_file → docs that reference it. Include only files with 2+ docs.
 - **Warnings:** broken `depends_on` refs (target doesn't exist), circular dependencies, docs missing `path`.
 - **Write** `.mdd/connections.md` with YAML frontmatter (`generated: <today>`, `doc_count: <N>`, `connection_count: <N>`, `overlap_count: <N>`) and four sections: Path Tree, Dependency Graph (Mermaid), Source File Overlap, Warnings.
+
+**Clean up job folder:** Delete `.mdd/jobs/wave-<wave-slug>/` entirely. The wave doc and feature docs are the authoritative completion record — the job folder is ephemeral tracking only.
 
 ---
 
