@@ -72,45 +72,131 @@ For each identified feature, determine its `path` value:
 - Title Case, 1–3 levels, `/`-separated
 - Siblings must use identical parent spelling (if `Auth/Login` exists, new auth docs use `Auth`, not `Authentication`)
 
-#### Step IS2c — Build-order classification
+#### Step IS2c — Project type detection + wave ordering
 
-This is the most important step. Features are numbered in the order a developer would actually build them — not the order they appear in the spec.
+This is the most important step. Features are numbered in the order a developer would actually build them — not the order they appear in the spec. The correct order depends entirely on what type of project is being built.
 
-**Classify every feature as one of two types:**
+**Step 1 — Detect project type from the spec.**
 
-**COMPONENT** — Something that results in code: a module, class, package, service, server, or runtime. The thing you sit down and write. Examples: Parser, Template Engine, Renderer, MCP Server, CLI.
+Read the spec for these signals:
 
-**SPEC** — Something that describes behaviour a COMPONENT must implement: a directive definition, an API contract, a security rule, a caching rule, a language feature. You consult a SPEC doc while building the COMPONENT that implements it. Examples: `@include` directive spec, Security Config spec, Cache Modes spec.
+| Project type | Signals |
+|---|---|
+| **Language / Toolchain** | Has a Parser, AST, or grammar section. Describes directives, syntax, or a runtime. Has a CLI section. Describes an interpreter, compiler, or processing pipeline. |
+| **Web API / Backend** | Describes endpoints, routes, REST, or GraphQL. Has auth/authorization sections. Describes DB models and migrations. |
+| **Frontend / UI App** | Describes components, pages, or routing. Describes user interactions, forms, and layouts. Has a state management section. |
+| **Library / SDK** | Describes a public API surface with exported types. Has integration or plugin sections. No server or UI sections. |
+| **Extension / Plugin** | Spec is adding features to an existing product. Most features assume a host system already exists. |
 
-**Order COMPONENT features by build dependency:**
+If signals from multiple types appear, pick the dominant one and note the mix.
 
-Start from the foundation (the component everything else depends on) and work outward. Ask: "What must exist before I can build this?" The component with no dependencies comes first. The component that depends on everything comes last.
+**Step 2 — Apply the wave ordering template for the detected type.**
 
-Example for a language toolchain:
+**Language / Toolchain:**
 ```
-Parser         — foundation, no deps, must exist first
-Stripper       — depends on Parser AST
-Renderer       — depends on Parser AST, no connection deps
-Template Engine — depends on Parser + Renderer
-MCP Server     — depends on Template Engine
-Hook           — depends on MCP Server
-CLI            — depends on all of the above
+Wave 1 — Infrastructure Skeleton
+  Goal: a working program that can accept input and produce output, even if incomplete.
+  Build: Parser + AST types + core shared types + minimal CLI entry point
+  Demo-state: "can parse a source file and print the AST to stdout"
+
+Wave 2 — First Shippable Artifact
+  Goal: the first thing an end user can actually use.
+  Build: Stripper / Renderer / Compiler — whatever produces the first real output
+  Demo-state: "can take a source file and produce correct output for the simplest case"
+
+Wave 3 — Language Features
+  Goal: full language coverage. All directives, all syntax, all semantics.
+  Build: SPEC docs for every language feature + the Template Engine / Resolver that implements them
+  Demo-state: "all static features work correctly end to end"
+
+Wave 4 — Dynamic / Live Features
+  Goal: features that require external connections (DB, HTTP, shell, AI client).
+  Build: MCP Server, Hook, live directive execution
+  Demo-state: "live data directives execute and return real results"
+
+Wave 5 — Security, Hardening, Extras
+  Goal: production-safe. Sandboxed execution, audit logging, edge case handling.
+  Build: Security system, caching, graceful degradation
+  Demo-state: "untrusted documents are safe to run; audit log captures all executions"
+
+Wave 6 — CLI, Distribution, Packaging
+  Goal: installable and usable by someone who has never seen the codebase.
+  Build: Full CLI, npm package, CI integration, documentation
+  Demo-state: "npm install -g, run against a real file, get correct output"
 ```
 
-**Assign SPEC features to waves:** A SPEC feature belongs in the wave of the COMPONENT that implements it. The SPEC doc gets created alongside its implementing COMPONENT's wave so that both exist when building begins. The COMPONENT doc lists SPEC docs in its `depends_on`.
-
-**Determine wave breakdown:** Group COMPONENTs (and their associated SPECs) into waves by build phase. Each wave should have a clear demo-state — a thing you can actually demonstrate when the wave is done.
-
-Example wave structure for a language toolchain:
+**Web API / Backend:**
 ```
-Wave 1 — Foundation:    Parser + all language directive SPECs
-Wave 2 — Static Output: Stripper + Renderer
-Wave 3 — Engine:        Template Engine + Caching SPECs
-Wave 4 — Live Data:     MCP Server + Hook + Security SPECs
-Wave 5 — CLI:           CLI + Distribution
+Wave 1 — Project scaffold + DB + core models
+  Demo-state: "server starts, DB connects, migrations run"
+
+Wave 2 — Auth
+  Demo-state: "can register, login, receive a JWT, access a protected route"
+
+Wave 3 — Core endpoints
+  Demo-state: "core CRUD for the main resource works end to end"
+
+Wave 4 — Business logic features
+  Demo-state: "main product workflow works end to end"
+
+Wave 5 — Integrations, webhooks, external APIs
+  Demo-state: "third-party integrations work in staging"
+
+Wave 6 — Admin, analytics, hardening
+  Demo-state: "production-ready: rate limiting, logging, admin panel live"
 ```
 
-**If no COMPONENT/SPEC distinction applies** (e.g. a feature-extension spec for an existing product), order features by: user-facing value first, infrastructure last. Earlier features should be shippable without later features.
+**Frontend / UI App:**
+```
+Wave 1 — Routing + layout shell
+  Demo-state: "app loads, all routes navigate without error"
+
+Wave 2 — Auth + core state
+  Demo-state: "can log in and see the main dashboard"
+
+Wave 3 — Core features
+  Demo-state: "primary user workflow works end to end"
+
+Wave 4 — Secondary features + integrations
+  Demo-state: "all documented features work"
+
+Wave 5 — Polish, performance, accessibility
+  Demo-state: "passes lighthouse audit, all a11y checks green"
+```
+
+**Library / SDK:**
+```
+Wave 1 — Core types + core algorithm
+  Demo-state: "library installs, core function produces correct output"
+
+Wave 2 — Full public API
+  Demo-state: "all documented methods work, test suite passes"
+
+Wave 3 — Extensions, plugins, advanced options
+  Demo-state: "extension points work, plugin example runs"
+
+Wave 4 — Distribution, docs, examples
+  Demo-state: "published to registry, README example runs from a fresh install"
+```
+
+**Extension / Plugin:**
+```
+Order by user-facing value — the most impactful feature first. Each wave should be independently usable without later waves. Infrastructure last.
+```
+
+**Step 3 — Classify every feature.**
+
+With the wave structure determined, classify each feature:
+
+**COMPONENT** — results in code files: a module, class, package, service, server, or runtime. The thing you sit down and write.
+
+**SPEC** — describes behaviour a COMPONENT must implement: a directive definition, an API contract, a security rule, a protocol. You consult a SPEC while building the COMPONENT. SPEC docs belong in the same wave as their implementing COMPONENT.
+
+**Step 4 — Assign features to waves.**
+
+Place each feature in the wave where it logically gets built. Ask: "At which wave would a developer need this?" Not: "In which section does the spec describe it?"
+
+SPEC docs and their implementing COMPONENT always go in the same wave. The COMPONENT `depends_on` the SPECs it implements.
 
 #### Step IS2d — Determine output structure
 
@@ -234,6 +320,19 @@ Is the build order correct? Does each wave's demo-state make sense?
 
 ### Phase IS4 — Write Files
 
+**First — ensure the MDD directory structure exists.** Run these before writing any file:
+
+```bash
+mkdir -p .mdd/initiatives
+mkdir -p .mdd/waves
+mkdir -p .mdd/docs
+```
+
+These are the exact directories MDD uses. Do not write initiative or wave files anywhere else. Full paths on disk:
+- Initiatives: `.mdd/initiatives/<slug>.md`
+- Waves: `.mdd/waves/<slug>-wave-N.md`
+- Feature docs: `.mdd/docs/<NN>-<slug>.md`
+
 Write in this order: CLAUDE.md (if approved) → initiative → waves → feature docs.
 
 #### CLAUDE.md (if approved in IS2.5)
@@ -319,6 +418,10 @@ Compute and write the `hash:` field after writing.
 
 #### Feature docs
 
+**Critical framing — these are build instructions, not reference documentation.**
+
+When a developer runs `/mdd NN`, Claude reads this doc and uses it to write code. That is the only reader that matters. Write every section as if answering the question: "What exactly do I build, and how do I know when it's done?" Not: "What does this feature do?" — a passive description is useless to a builder.
+
 For each feature in the approved plan, in wave order:
 
 1. Auto-number continuing from the highest existing doc number in `.mdd/docs/`
@@ -375,29 +478,37 @@ known_issues: []
 
 # <NN> — <Feature Title>
 
-## Purpose
+## What to Build
 
-<Full description of what this feature is and does. Include the core design rationale — the "why" behind the decisions. Do not limit this to a sentence count. If the spec says a lot about this feature, capture it all here. A developer reading only this doc should fully understand what they are building.>
+<Answer: "What exactly am I being asked to create?" For a COMPONENT: name the files/modules to create, what they take as input, what they produce as output, and what they must never do. For a SPEC: describe the exact behaviour contract the implementing COMPONENT must satisfy — what inputs it must accept, what output it must produce, what errors it must raise. Be concrete. "A parser that reads .md files" is too vague. "A parser that reads a .md source file and produces an array of ASTNode objects, one per directive" is correct.>
 
 ## Architecture
 
-<How this feature fits into the system. For a COMPONENT: describe its responsibilities, inputs, outputs, and what it must never do. For a SPEC: describe the behaviour contract the implementing COMPONENT must satisfy. Include TypeScript interfaces, AST node types, and data structures if the spec defines them.>
+<How this feature fits into the system and what it depends on. For a COMPONENT: its place in the pipeline, what calls it, what it calls, what it must never reach into directly. For a SPEC: which COMPONENT implements this spec and how. Include TypeScript interfaces, AST node types, and data structures exactly as defined in the spec — copy them verbatim, do not paraphrase.>
+
+## Implementation Notes
+
+<Key decisions Claude must follow when implementing this feature. This is not boilerplate — write only what is non-obvious or constraining. Examples: "use a single-pass regex scanner, not a recursive descent parser"; "never buffer the full file in memory"; "the AST must be immutable after construction". If the spec gives explicit implementation guidance, it belongs here.>
 
 ## Data Model
 
-<Data structures, schemas, config formats described in the spec. Include the exact field names, types, and constraints. Omit section only if the spec truly defines no data structures for this feature.>
+<Data structures, schemas, config formats. Include exact field names, types, nesting, and defaults. Copy JSON examples from the spec verbatim. Omit only if the spec truly defines no data structures for this feature.>
 
 ## API / Interface
 
-<Public interface this feature exposes: function signatures, tool names, command syntax, config keys. Omit if not applicable.>
+<The exact public interface this feature exposes. Function signatures, exported types, CLI commands and flags, config keys, MCP tool names. Every option, every flag, every subcommand — do not omit rare or advanced ones. A developer should be able to write the module's index.ts exports from this section alone.>
 
 ## Business Rules
 
-<Every decision, constraint, validation rule, edge case, error behaviour, and "never do X" described in the spec for this feature. This section should be exhaustive — if it is in the spec, it is here. Use bullet points or numbered lists for clarity.>
+<Every constraint, validation rule, edge case, error behaviour, platform difference, and "always/never/only valid when" rule from the spec. Exhaustive. If it is in the spec for this feature, it is here. Use a numbered or bulleted list. Include exact error message formats and the conditions that trigger them.>
+
+## Acceptance Criteria
+
+<How do you know this feature is done? Write concrete, verifiable statements. Each criterion should be something Claude can check with a test or a manual run. Examples: "mai strip input.md produces output with zero @ directives remaining"; "parsing a file with a circular @include chain throws CIRCULAR_REFERENCE_ERROR with the full chain in the message"; "all 11 content masking patterns fire correctly on the test fixtures".>
 
 ## Dependencies
 
-<Other feature docs this one requires. List by ID and title. For SPECs, name the COMPONENT that implements this spec.>
+<Other feature docs this one requires, by ID and title. For SPECs, state which COMPONENT implements this spec.>
 
 ## Known Issues
 
@@ -411,12 +522,12 @@ known_issues: []
 ```
 Writing files...
   ✅ CLAUDE.md
-  ✅ initiatives/markdownai.md
-  ✅ waves/markdownai-wave-1.md  (Wave 1 — Foundation)
-  ✅ waves/markdownai-wave-2.md  (Wave 2 — Static Pipeline)
+  ✅ .mdd/initiatives/<slug>.md
+  ✅ .mdd/waves/<slug>-wave-1.md  (Wave 1 — <name>)
+  ✅ .mdd/waves/<slug>-wave-2.md  (Wave 2 — <name>)
   ...
-  ✅ docs/01-<slug>.md   [COMPONENT]  <path>
-  ✅ docs/02-<slug>.md   [SPEC]       <path>
+  ✅ .mdd/docs/01-<slug>.md   [COMPONENT]  <path>
+  ✅ .mdd/docs/02-<slug>.md   [SPEC]       <path>
   ...
 ```
 
