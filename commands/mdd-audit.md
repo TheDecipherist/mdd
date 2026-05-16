@@ -140,6 +140,7 @@ Manifest:    .mdd/jobs/audit-<date>/MANIFEST.md
 - CLI command missing any of the universal flags (--env, --cwd, --verbose, --strict, --silent) — check all commands against the CLI feature doc's universal flags requirement
 - `file.*` filesystem helpers or path-resolving functions accept arbitrary paths without confinement to a documented jailRoot
 - Silent error swallow: catch block returns empty/undefined without pushing to warnings array
+- Template/substitution function matches `{{varname}}` without spaces but not `{{ varname }}` with spaces — spec uses spaced form; use regex `\s*` not exact string
 
 ### P4 Low
 - Code style inconsistencies
