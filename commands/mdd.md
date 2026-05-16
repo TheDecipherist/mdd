@@ -3,7 +3,7 @@ description: "MDD workflow — Document → Audit → Fix → Verify. Build feat
 scope: project
 argument-hint: "<feature-description> or audit [section]"
 allowed-tools: Read, Write, Edit, Grep, Glob, Bash, AskUserQuestion, Agent
-mdd_version: 10
+mdd_version: 11
 ---
 
 # MDD — Manual-Driven Development Workflow
@@ -129,6 +129,9 @@ Use whichever path contains `mdd-audit.md`. Store it as `$MDD_DIR` and use it fo
 
 - If arguments start with `ops`, `runop`, `update-op`, or `commands` →
   **Read `$MDD_DIR/mdd-ops.md` then follow the relevant OPS/COMMANDS mode instructions.**
+
+- If arguments start with `manual` →
+  **Read `$MDD_DIR/mdd-manual.md` then follow MANUAL MODE instructions.**
 
 - If arguments are empty → ask the user what they want to do (build a feature, run an audit, check status, etc.)
 

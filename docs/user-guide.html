@@ -110,6 +110,7 @@
     <a href="#manage-modes">Status, Notes, Scan &amp; Update</a>
     <a href="#lifecycle-modes">Lifecycle: Reverse-Engineer, Graph, Upgrade</a>
     <a href="#import-spec">Import Spec</a>
+    <a href="#manual-mode">Manual Mode</a>
     <a href="#connections-map">Connections Map</a>
     <a href="#plan-modes">Initiative &amp; Wave Planning</a>
     <a href="#ops-modes">Ops Runbooks</a>
@@ -1441,6 +1442,47 @@ Proceed with import? [Y/n]</code></pre>
           <p>
             <strong>All generated docs include a <code>path</code> field.</strong> Import Spec is the primary entry point for establishing the <code>path</code> vocabulary on a new project. The paths chosen during import become the baseline vocabulary that Build Mode, <code>/mdd upgrade</code>, and <code>/mdd scan</code> reuse for all future docs.
           </p>
+        </div>
+      </section>
+
+      <!-- ===== MANUAL MODE ===== -->
+      <section id="manual-mode">
+        <h2><code>/mdd manual</code></h2>
+
+        <p>Generates a comprehensive, print-ready user manual at <code>.mdd/manual/manual.md</code> from all MDD feature docs and ops runbooks. Uses content hashes so only changed sections are regenerated — running it repeatedly is fast and cheap.</p>
+
+        <pre><code class="language-bash">/mdd manual           # incremental — only regenerate changed sections
+/mdd manual --force   # regenerate everything from scratch</code></pre>
+
+        <h3>What It Produces</h3>
+        <p>A single <code>manual.md</code> with everything MDD knows about the project:</p>
+        <ul>
+          <li><strong>Table of Contents</strong> — auto-generated with anchor links, always rebuilt</li>
+          <li><strong>Project Overview</strong> — synthesized from <code>.mdd/.startup.md</code> and <code>README.md</code></li>
+          <li><strong>Feature sections</strong> — one per feature doc, written in plain English. Each covers: what it does, how to use it, commands, API endpoints, configuration, and examples</li>
+          <li><strong>Operations chapter</strong> — runbooks from <code>.mdd/ops/</code> as step-by-step procedures</li>
+          <li><strong>Command Reference</strong> — aggregated table of all CLI commands across all features</li>
+          <li><strong>API Reference</strong> — aggregated endpoint table (omitted if none)</li>
+          <li><strong>Configuration</strong> — aggregated options table (omitted if none)</li>
+        </ul>
+
+        <h3>Hash-Based Incremental Updates</h3>
+        <p>On each run, MDD computes SHA256 of every doc and compares against <code>.mdd/manual/.hashes.json</code>. Sections backed by unchanged docs are left as-is. Only changed, new, or deleted docs trigger section regeneration. Use <code>--force</code> to bypass and rebuild everything.</p>
+        <table>
+          <thead><tr><th>Doc state</th><th>Action</th></tr></thead>
+          <tbody>
+            <tr><td><code>unchanged</code></td><td>Section preserved exactly</td></tr>
+            <tr><td><code>changed</code></td><td>Section replaced with regenerated content</td></tr>
+            <tr><td><code>new</code></td><td>Section added to appropriate chapter</td></tr>
+            <tr><td><code>deleted</code></td><td>Section removed cleanly</td></tr>
+          </tbody>
+        </table>
+
+        <h3>Designed for Publishing</h3>
+        <p>The output is clean markdown with no internal file paths, no unexplained jargon, active voice, and real usage examples. Export to PDF, paste into a blog post, or feed into a docs site generator. Planned features are clearly marked <em>(planned — not yet implemented)</em> so the manual is always accurate.</p>
+
+        <div class="callout">
+          <p><strong>Section markers</strong> (<code>&lt;!-- mdd-section: id --&gt;</code> / <code>&lt;!-- /mdd-section: id --&gt;</code>) delimit generated content. Any preface or intro you write above the first marker is preserved across runs — MDD never touches it.</p>
         </div>
       </section>
 
