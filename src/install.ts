@@ -227,14 +227,14 @@ authoritative source of truth for what to build. Read it fully before writing an
 **Learning from mistakes**
 All code in this project is built via the MDD workflow. Whenever a bug, flaw, or gap
 is found — or if a feature doc changes or gains new frontmatter fields — document why
-it happened and how it could have been prevented. When a fix is made, patch the MDD
-workflow itself (\`~/projects/mdd\`) so the same issue cannot recur in future projects
+it happened and how it could have been prevented. When a fix is identified, open a
+GitHub issue at https://github.com/TheDecipherist/mdd/issues with a clear description
+of the problem and a suggested fix so it can be patched in the workflow for all users
 (best practices, security hardening, performance optimization).
 
-**After patching MDD**
-From \`~/projects/mdd\`, run \`pnpm release\` — this builds, publishes the npm package,
-and runs \`mdd update\` globally in one step. Then check if \`mdd update --install-local\`
-is needed for any active projects.
+**After an MDD patch is published**
+Run \`mdd update\` (global) or \`mdd update --install-local\` (project) to sync this
+project to the latest version.
 `;
 
 interface HookInstallOptions {
