@@ -259,7 +259,7 @@ Estimated fix time: <N> hours (traditional) → <N> minutes (MDD)
 Fix all now? (yes / review report first / fix only P1+P2)
 ```
 
-**After the report is written**, run a tag pass before the startup rebuild: for any `.mdd/docs/*.md` or `.mdd/ops/*.md` file missing a `tags:` field, generate and write tags now (same logic as Phase RT2 in REBUILD-TAGS MODE). Docs that already have `tags:` are untouched. Then trigger the `.mdd/.startup.md` rebuild (same logic as in Status Mode — rebuild auto-generated zone, preserve Notes zone) so the Last Audit block and tag-enriched feature list are both current.
+**After the report is written**, run a tag pass before the startup rebuild: for any `.mdd/docs/*.md` or `.mdd/ops/*.md` file missing a `tags:` field, generate and write tags now (same logic as Phase RT2 in REBUILD-TAGS MODE). Docs that already have `tags:` are untouched. Then regenerate `.mdd/connections.md` (same logic as Phase 7c in BUILD MODE — path tree, Mermaid graph, source overlap, warnings). Then trigger the `.mdd/.startup.md` rebuild (same logic as in Status Mode — rebuild auto-generated zone, preserve Notes zone) so the Last Audit block, connections graph, and tag-enriched feature list are all current.
 
 If user says yes (or selects a subset):
 
@@ -271,7 +271,7 @@ If user says yes (or selects a subset):
 
 Report progress per finding. Update documentation `known_issues` to remove fixed items. Update `mdd_version` to current on every `.mdd/docs/*.md` file that is edited during fixes.
 
-**After fixes are complete and results are written to `.mdd/audits/results-<date>.md`**, run the same tag pass (generate missing tags for any doc still lacking them), then trigger the `.mdd/.startup.md` rebuild so the Last Audit block and tag list both reflect the final state.
+**After fixes are complete and results are written to `.mdd/audits/results-<date>.md`**, run the same tag pass (generate missing tags for any doc still lacking them), regenerate `.mdd/connections.md`, then trigger the `.mdd/.startup.md` rebuild so the Last Audit block, connections graph, and tag list all reflect the final state.
 
 ---
 
