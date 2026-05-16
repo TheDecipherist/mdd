@@ -219,7 +219,10 @@ const PROJECT_CLAUDE_GUIDANCE_BLOCK = `
 ## MDD — Build Approach
 
 This project uses MDD (Manual-Driven Development). Always start a session with \`/mdd\`
-to load project context. Features are built in wave order — do not skip waves.
+to load project context. Each feature is documented before it is built — use
+\`/mdd <description>\` for a single feature, or \`/mdd plan-initiative\` to coordinate
+multiple features in waves. When an initiative is active, build in wave order and
+do not skip waves.
 
 The \`.mdd/docs/\` directory contains one feature doc per feature. Each doc is the
 authoritative source of truth for what to build. Read it fully before writing any code.
