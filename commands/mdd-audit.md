@@ -31,9 +31,17 @@ A completed audit exists from <date>.
 
   [F] Full audit — regenerate manifest from all source files
       Use when: significant new code added, want a clean baseline, or last audit was >2 weeks ago
-  [I] Incremental — manifest contains only files modified since <date>
+  [I] Incremental — manifest contains only files whose content changed since last audit
       Use when: applied fixes and want to verify them, or auditing only a new feature
 ```
+
+For incremental scope, use git to detect truly changed files — not mtime, which is unreliable:
+```bash
+git diff --name-only <last-audit-commit>   # files changed since audit commit
+git ls-files --others --exclude-standard   # untracked new files
+```
+If no audit commit is recorded, fall back to files modified after `audits/MANIFEST-<date>.md` mtime.
+Store the current HEAD commit in the job folder (`job-commit.txt`) so future incremental audits have an exact reference point. Files modified and then reverted will NOT appear in the diff — correct behaviour.
 
 **Agent scaling:**
 
@@ -129,6 +137,9 @@ Manifest:    .mdd/jobs/audit-<date>/MANIFEST.md
 - Feature has `depends_on` entries with `integration_contracts` but `satisfies_contracts` is empty
 - Security module's `integration_contracts` specifies a caller that has no `satisfies_contracts` entry
 - Missing test cases for documented business rules
+- CLI command missing any of the universal flags (--env, --cwd, --verbose, --strict, --silent) — check all commands against the CLI feature doc's universal flags requirement
+- `file.*` filesystem helpers or path-resolving functions accept arbitrary paths without confinement to a documented jailRoot
+- Silent error swallow: catch block returns empty/undefined without pushing to warnings array
 
 ### P4 Low
 - Code style inconsistencies
@@ -263,11 +274,22 @@ Fix all now? (yes / review report first / fix only P1+P2)
 
 If user says yes (or selects a subset):
 
-**Fix loop:** Read the findings report. For each finding to fix:
-1. Read the specific source files
+**Fix loop:**
+
+Detect test runner once from `package.json` scripts (look for `test:unit`, `test`, `vitest`, `jest`, `pytest`, `go test`). Identify the file-scope flag for that runner:
+- Vitest / Jest: `pnpm test:unit -- <path/to/file.test.ts>`
+- pytest: `pytest <path/to/test_file.py>`
+- Go: `go test ./<package>/...`
+
+For each finding to fix:
+1. Read the specific source file(s)
 2. Apply the fix
-3. Write or update tests
-4. Run tests after each fix group
+3. Write or update the corresponding test file(s)
+4. Run ONLY the test file(s) that cover the changed source — not the full suite.
+   Derive test path from source path by convention (e.g. `src/foo/bar.ts` → `tests/unit/foo/bar.test.ts`).
+   If the mapping is ambiguous, grep for imports of the changed file to find the right test.
+
+After ALL findings are fixed: run the full test suite once as a regression check.
 
 Report progress per finding. Update documentation `known_issues` to remove fixed items. Update `mdd_version` to current on every `.mdd/docs/*.md` file that is edited during fixes.
 
