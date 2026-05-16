@@ -13,6 +13,7 @@ interface InstallOptions {
   local?: boolean;
   claudeMdPath?: string;
   settingsPath?: string;
+  selfImprovement?: boolean;
 }
 
 interface FileResult {
@@ -143,14 +144,22 @@ export function install(options: InstallOptions): void {
     const hookScriptSrc = join(srcDir, 'mdd-branch-guard.sh');
     const hooksDir = join(resolve(options.settingsPath.replace('~', homedir()), '..'), 'hooks');
     const hookScriptDest = join(hooksDir, 'mdd-branch-guard.sh');
+    const resolvedSettingsPath = resolve(options.settingsPath.replace('~', homedir()));
     const hookResult = installHook({
       hookScriptSrc,
       hookScriptDest,
-      settingsPath: resolve(options.settingsPath.replace('~', homedir())),
+      settingsPath: resolvedSettingsPath,
       local: options.local ?? false,
     });
     const icon = hookResult.status === 'error' ? '✗' : hookResult.status === 'skipped' ? '·' : '✓';
     console.log(`  ${icon} Branch Guard hook — ${hookResult.message}`);
+
+    if (options.selfImprovement !== undefined) {
+      const siResult = writeSelfImprovementPref(resolvedSettingsPath, options.selfImprovement);
+      const siIcon = siResult.status === 'error' ? '✗' : siResult.status === 'skipped' ? '·' : '✓';
+      console.log(`  ${siIcon} Self-improvement — ${siResult.message}`);
+    }
+
     console.log('');
   }
 
@@ -373,4 +382,43 @@ function findLegacyBlockEnd(content: string, markerIdx: number): number {
   const after = content.slice(markerIdx + 1);
   const match = after.match(/\n## /);
   return match?.index !== undefined ? markerIdx + 1 + match.index : content.length;
+}
+
+function writeSelfImprovementPref(
+  settingsPath: string,
+  value: boolean,
+): { status: 'written' | 'skipped' | 'error'; message: string } {
+  try {
+    let settings: Record<string, unknown> = {};
+    if (existsSync(settingsPath)) {
+      try {
+        settings = JSON.parse(readFileSync(settingsPath, 'utf-8')) as Record<string, unknown>;
+      } catch {
+        return { status: 'error', message: `could not parse ${settingsPath}` };
+      }
+    }
+    const mdd = (settings['mdd'] ?? {}) as Record<string, unknown>;
+    if (mdd['selfImprovement'] !== undefined) {
+      const current = mdd['selfImprovement'] ? 'opted in' : 'opted out';
+      return { status: 'skipped', message: `already ${current}` };
+    }
+    settings['mdd'] = { ...mdd, selfImprovement: value };
+    writeFileSync(settingsPath, JSON.stringify(settings, null, 2) + '\n', 'utf-8');
+    return { status: 'written', message: value ? 'opted in — audit will offer GitHub issues' : 'opted out — audit will never ask' };
+  } catch (err) {
+    return { status: 'error', message: String(err) };
+  }
+}
+
+export function getSelfImprovementPref(settingsPath: string): boolean | null {
+  try {
+    if (!existsSync(settingsPath)) return null;
+    const settings = JSON.parse(readFileSync(settingsPath, 'utf-8')) as Record<string, unknown>;
+    const mdd = settings['mdd'] as Record<string, unknown> | undefined;
+    if (mdd?.['selfImprovement'] === true) return true;
+    if (mdd?.['selfImprovement'] === false) return false;
+    return null;
+  } catch {
+    return null;
+  }
 }

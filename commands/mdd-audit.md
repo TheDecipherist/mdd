@@ -307,6 +307,11 @@ Report progress per finding. Update documentation `known_issues` to remove fixed
 
 Runs at the end of every audit, after fixes (or immediately after A7 if user chose not to fix now).
 
+**Opt-in gate — check before doing anything else:**
+Read `.claude/settings.json` (local install) or `~/.claude/settings.json` (global install).
+- If `mdd.selfImprovement === false`: skip Phase A8 entirely. Do not log, do not ask, do not mention it.
+- If `mdd.selfImprovement === true` or the key is absent: proceed normally.
+
 **Step 1 — Extract self-improvement items**
 
 Read the "MDD Workflow Self-Improvement" section from `audits/report-<date>.md`. If there are zero items, skip to Step 3 with a one-line note.
