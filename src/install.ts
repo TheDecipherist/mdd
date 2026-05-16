@@ -133,7 +133,7 @@ export function install(options: InstallOptions): void {
   }
 
   if (options.claudeMdPath) {
-    const claudeResult = injectClaudeGuidance(resolve(options.claudeMdPath.replace('~', homedir())));
+    const claudeResult = injectClaudeGuidance(resolve(options.claudeMdPath.replace('~', homedir())), options.local);
     const icon = claudeResult.status === 'error' ? '✗' : claudeResult.status === 'skipped' ? '·' : '✓';
     console.log(`  ${icon} CLAUDE.md — ${claudeResult.message}`);
     console.log('');
@@ -179,6 +179,7 @@ function getPackageVersion(): string {
 }
 
 const CLAUDE_GUIDANCE_MARKER = '## MDD — Manual-First Development';
+const PROJECT_CLAUDE_GUIDANCE_MARKER = '## MDD — Build Approach';
 
 const CLAUDE_GUIDANCE_BLOCK = `
 ## MDD — Manual-First Development
@@ -212,6 +213,28 @@ Always ask — never auto-invoke. If the user says no, proceed as normal.
 
 Skip entirely for: bug fixes, typos, config tweaks, single-line changes,
 one-off shell commands.
+`;
+
+const PROJECT_CLAUDE_GUIDANCE_BLOCK = `
+## MDD — Build Approach
+
+This project uses MDD (Manual-Driven Development). Always start a session with \`/mdd\`
+to load project context. Features are built in wave order — do not skip waves.
+
+The \`.mdd/docs/\` directory contains one feature doc per feature. Each doc is the
+authoritative source of truth for what to build. Read it fully before writing any code.
+
+**Learning from mistakes**
+All code in this project is built via the MDD workflow. Whenever a bug, flaw, or gap
+is found — or if a feature doc changes or gains new frontmatter fields — document why
+it happened and how it could have been prevented. When a fix is made, patch the MDD
+workflow itself (\`~/projects/mdd\`) so the same issue cannot recur in future projects
+(best practices, security hardening, performance optimization).
+
+**After patching MDD**
+From \`~/projects/mdd\`, run \`pnpm release\` — this builds, publishes the npm package,
+and runs \`mdd update\` globally in one step. Then check if \`mdd update --install-local\`
+is needed for any active projects.
 `;
 
 interface HookInstallOptions {
@@ -275,18 +298,21 @@ function installHook(opts: HookInstallOptions): { status: 'installed' | 'skipped
   }
 }
 
-function injectClaudeGuidance(claudeMdPath: string): { status: 'injected' | 'skipped' | 'error'; message: string } {
+function injectClaudeGuidance(claudeMdPath: string, local?: boolean): { status: 'injected' | 'skipped' | 'error'; message: string } {
   try {
+    const marker = local ? PROJECT_CLAUDE_GUIDANCE_MARKER : CLAUDE_GUIDANCE_MARKER;
+    const block = local ? PROJECT_CLAUDE_GUIDANCE_BLOCK : CLAUDE_GUIDANCE_BLOCK;
+
     if (existsSync(claudeMdPath)) {
       const existing = readFileSync(claudeMdPath, 'utf-8');
-      if (existing.includes(CLAUDE_GUIDANCE_MARKER)) {
+      if (existing.includes(CLAUDE_GUIDANCE_MARKER) || existing.includes(PROJECT_CLAUDE_GUIDANCE_MARKER)) {
         return { status: 'skipped', message: 'guidance already present' };
       }
-      appendFileSync(claudeMdPath, CLAUDE_GUIDANCE_BLOCK, 'utf-8');
+      appendFileSync(claudeMdPath, block, 'utf-8');
     } else {
-      writeFileSync(claudeMdPath, CLAUDE_GUIDANCE_BLOCK.trimStart(), 'utf-8');
+      writeFileSync(claudeMdPath, block.trimStart(), 'utf-8');
     }
-    return { status: 'injected', message: 'guidance injected' };
+    return { status: 'injected', message: `${marker} injected` };
   } catch (err) {
     return { status: 'error', message: String(err) };
   }
