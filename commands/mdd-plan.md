@@ -278,8 +278,20 @@ For each feature in the wave's feature table, in dependency order, skipping `com
 4. Update the wave doc's `Doc` column with the feature doc path (once created in MDD Phase 3).
 5. Run full MDD Build Mode (Phases 1–7) for the feature, at the chosen interaction level.
    - Feature doc is auto-numbered from `.mdd/docs/` and gets `initiative`, `wave`, `wave_status` fields added.
-6. After Phase 7 verify: flip `wave_status: complete` in wave doc AND confirm `status: complete` is written to the feature doc frontmatter (Phase 7c should have done this — verify it, write it if missing).
-7. Mark the feature `[x]` in `MANIFEST.md`. If an error occurred that prevented completion, mark `[!]` with a one-line note.
+6. **PE3 Completion Gate** — run these checks BEFORE marking `[x]`. This is a hard gate, not advisory.
+
+   **a. source_files existence check** — read `source_files` from the feature doc. For each file listed, verify it exists on disk:
+   ```bash
+   # For each file in source_files:
+   test -f <path> && echo "OK: <path>" || echo "MISSING: <path>"
+   ```
+   If any file is missing: mark the feature `[!]` in MANIFEST with the list of missing files. Do NOT proceed to step 7 — implement the missing files or explicitly document them as deferred in `known_issues`.
+
+   **b. satisfies_contracts verification** — read `satisfies_contracts` from the feature doc. If any entry is still `status: pending`, the security/integration contract was never wired. Find the call site, wire it, update to `verified: <file>:<line>`. A feature cannot be `[x]` with pending contracts.
+
+   **c. Doc status write** — confirm `status: complete` is in the feature doc frontmatter. Phase 7c should have written this. If it is missing (still `draft` or `in_progress`), write it now along with `last_synced: <today>` and `phase: all`. This is NOT optional — a missing status write means the doc audit will flag the feature as incomplete on the next run.
+
+7. Mark the feature `[x]` in `MANIFEST.md`. If the completion gate blocked (step 6a or 6b failed), mark `[!]` with a one-line note listing what was missing.
 8. Ask: *"Feature N done ✓. Start Feature N+1? (yes / pause here)"*
 
 **Resume behaviour:** if re-run on a partially complete wave, stale job detection in PE1 handles resume. MANIFEST is the authoritative progress record — it is always written before and after each feature so an interrupted session can pick up at the exact right point.

@@ -638,6 +638,18 @@ Quality gates passing does not mean the feature works. This phase verifies actua
 □ Confirm no unintended side effects on unrelated files or state
 ```
 
+**Spec invariants — applies when the feature doc references spec language like "cannot be overridden", "always blocked", "immutable", "confinement", or "required":**
+```
+□ Every spec-stated invariant must be verifiably enforced in code:
+    "cannot be overridden" → Object.freeze() on arrays/objects + readonly type
+    "always blocked" → the block path runs BEFORE any allow logic
+    "confinement" → an actual path check exists at every entry point, not just a gate module
+    "required" → ParseError or equivalent thrown for missing values (no silent empty string)
+□ Run grep for the invariant keyword in source — verify it appears in a test assertion, not just prose
+□ If the spec says module X enforces Y, verify X is actually CALLED at the relevant call site
+    (building a security module is not the same as wiring it)
+```
+
 **Ownership Default — applies to ALL feature types:**
 
 ```
