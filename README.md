@@ -42,7 +42,7 @@ Then in Claude Code:
 - [How It Works](#how-it-works)
 - [Installation](#installation)
 - [Quick Start](#quick-start)
-- [All 24 Modes at a Glance](#all-24-modes-at-a-glance)
+- [All 25 Modes at a Glance](#all-25-modes-at-a-glance)
 - [Build Mode - Feature Development](#build-mode--feature-development)
 - [Audit Mode - Code Review](#audit-mode--code-review)
 - [Status & Notes](#status--notes)
@@ -236,10 +236,11 @@ Every feature doc and ops runbook has a `tags:` field (4–8 domain-concept keyw
 
 ---
 
-## All 24 Modes at a Glance
+## All 25 Modes at a Glance
 
 ```
 /mdd <feature description>                 Build Mode - Document, plan, and implement
+/mdd manual [--force]                      Manual Mode - Generate a print-ready user manual
 /mdd audit [section]                       Audit Mode - Scan code for violations and drift
 /mdd status                                Overview: docs, tests, audit state, initiatives
 /mdd scan                                  Detect features whose source files changed
@@ -656,6 +657,38 @@ Converts one or more large spec or prompt documents — the kind produced by ext
 **Content preservation:** Every decision, constraint, and edge case in the spec maps somewhere in the output. If something doesn't fit cleanly into a standard section, it goes into Business Rules or a Known Constraints note.
 
 **Duplicate handling:** Specs often revisit the same topic multiple times. Import-spec detects overlapping sections semantically, merges them into the best doc, and shows you exactly what was merged and why in the dry-run summary.
+
+---
+
+## Manual Mode
+
+### `/mdd manual [--force]`
+
+Generates a comprehensive, print-ready user manual at `.mdd/manual/manual.md` from all MDD feature docs and ops runbooks. Uses content hashes so only changed sections are regenerated — running it repeatedly is fast.
+
+```bash
+/mdd manual           # incremental — only regenerate changed sections
+/mdd manual --force   # regenerate everything from scratch
+```
+
+**What it produces:**
+
+A single `manual.md` file with:
+- **Table of Contents** — auto-generated with anchor links
+- **Project Overview** — synthesized from `.mdd/.startup.md` and `README.md`
+- **Feature sections** — one per MDD feature doc, written in plain English for a non-technical reader. Each section includes: what it does, how to use it, commands, API endpoints, configuration options, and examples.
+- **Operations chapter** — runbooks from `.mdd/ops/` formatted as step-by-step procedures
+- **Command Reference** — aggregated table of all CLI commands across all features
+- **API Reference** — aggregated table of all HTTP endpoints (omitted if none)
+- **Configuration** — aggregated table of all env vars and options (omitted if none)
+
+**How the hash check works:**
+
+On each run, MDD computes SHA256 of every doc file and compares against `.mdd/manual/.hashes.json`. Sections backed by unchanged docs are left as-is. Only changed, new, or deleted docs trigger section regeneration. `--force` bypasses this and rebuilds everything.
+
+**Designed for publishing:** The output is clean markdown with no internal file paths, no jargon without definition, active voice, and real examples. Export to PDF, paste into a blog post, or use as source material for docs sites.
+
+**Handles deletions:** If a feature doc is removed between runs, its section is cleanly removed from `manual.md` and its hash entry is dropped.
 
 ---
 
