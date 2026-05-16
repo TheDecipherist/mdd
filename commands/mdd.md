@@ -3,7 +3,7 @@ description: "MDD workflow — Document → Audit → Fix → Verify. Build feat
 scope: project
 argument-hint: "<feature-description> or audit [section]"
 allowed-tools: Read, Write, Edit, Grep, Glob, Bash, AskUserQuestion, Agent
-mdd_version: 9
+mdd_version: 10
 ---
 
 # MDD — Manual-Driven Development Workflow

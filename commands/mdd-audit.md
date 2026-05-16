@@ -101,6 +101,40 @@ Manifest:    .mdd/jobs/audit-<date>/MANIFEST.md
 - Clear context after every single file — no exceptions.
 - On every startup (including post-clear): follow STARTUP SEQUENCE below.
 
+## Standard Audit Criteria (apply to every file)
+
+### P1 Critical
+- `eval()` used anywhere — only `vm.runInNewContext` is permitted
+- Cloud metadata endpoints (169.254.169.254, 169.254.170.2, fd00:ec2::254, metadata.google.internal) reachable without block
+- Secrets, API keys, or credentials hardcoded in source
+- Security enforcement function exists in a dependency but is NOT called at this call site (check dependency docs for `integration_contracts`)
+- "Immutable" rule arrays exported as plain mutable arrays — not `Object.freeze()` + `readonly`
+- Untrusted MCP/API/CLI input used without validation or sanitization
+- Data cached or stored without masking applied first
+- `satisfies_contracts` entry is `status: pending` — contract was acknowledged but never wired
+
+### P2 High
+- TypeScript `any` used — must use `unknown` with narrowing
+- Missing `.js` extension on ESM imports in src/ files (NodeNext resolution)
+- `console.log` in library code (should use logger)
+- File exceeds 300 lines
+- Function exceeds 50 lines
+- Feature's `source_files` lists a file that does not exist on disk
+- Transformation/substitution function handles some but not all AST/domain types (silent fallthrough for unhandled types)
+- MCP-exposed function accepts untrusted params with no explicit validation
+
+### P3 Medium
+- TypeScript strict mode not enabled in tsconfig
+- Missing error handling at system/user-input boundaries
+- Feature has `depends_on` entries with `integration_contracts` but `satisfies_contracts` is empty
+- Security module's `integration_contracts` specifies a caller that has no `satisfies_contracts` entry
+- Missing test cases for documented business rules
+
+### P4 Low
+- Code style inconsistencies
+- Dead code / unused imports
+- Minor spec divergences
+
 ## Startup Sequence
 1. Read this config file
 2. Read shard-<N>.md to know your file list
@@ -185,6 +219,17 @@ Read ONLY `audits/notes-<date>.md` (NOT source code again). Produce `audits/repo
 3. Findings by severity (P1 Critical / P2 High / P3 Medium / P4 Low)
 4. Test coverage summary
 5. Fix plan with effort estimates and affected files per finding
+6. Root Cause Analysis — for each cluster of findings, explain WHY the code writer made the mistake (not just what is wrong). Common root causes: "security module built in isolation without integration contracts," "immutability described in spec but not enforced at the code level," "MCP tool written without a threat model," "node type added after transformation function was written."
+7. Prevention Rules — derive concrete, actionable rules that would have prevented each finding cluster. Format: "When implementing X, always Y. Never Z. Reasoning: [which finding caused this]." These rules are proposed for addition to CLAUDE.md at the end of the audit.
+
+**Integration contract cross-check (in addition to per-file analysis):**
+After per-file analysis is complete, read all `.mdd/docs/*.md` and:
+- For each feature with `integration_contracts` entries: verify that every listed `caller_feature` has a matching `satisfies_contracts` entry referencing back to this feature
+- For each feature with `satisfies_contracts` entries still `status: pending`: flag as P1 — the wiring was documented but never implemented
+- For each feature doc where `satisfies_contracts` is empty but `depends_on` includes a feature with `integration_contracts`: flag as P2 — missing acknowledgment of mandatory contracts
+- For each source file flagged `[!]` where the finding is "security function not called at call site": cross-reference against `integration_contracts` of dependencies — these are contract violations, not just code quality issues
+
+Report these as a separate "Contract Violations" section before the standard findings table.
 
 **Once `audits/report-<date>.md` is confirmed written and non-empty:**
 1. Copy `jobs/audit-<date>/MANIFEST.md` → `audits/MANIFEST-<date>.md`

@@ -193,6 +193,8 @@ phase: <last completed phase name, or "all" when fully built>
 mdd_version: <read from mdd.md frontmatter mdd_version field>
 tags: [<4-8 domain-concept keywords — systems touched, technology, feature names. NOT file paths>]
 path: <Area/Section>
+integration_contracts: []
+satisfies_contracts: []
 known_issues: []
 ---
 
@@ -226,6 +228,14 @@ known_issues: []
 
 <What this feature requires from other features. List by documentation ID.>
 
+## Security
+
+<Only required when this feature: provides a security enforcement function, accepts external/user/MCP input, stores or caches data, spawns processes, or makes network calls. Leave empty otherwise.>
+
+<For security enforcement features: list integration_contracts — which call sites must invoke which functions.>
+<For input-accepting features: document trusted vs untrusted input boundary, sanitization requirements, and what a malicious caller could attempt.>
+<For caching features: document what masking or sanitization runs before storage.>
+
 ## Known Issues
 
 <Empty for new features. Will be populated by future audits.>
@@ -234,6 +244,50 @@ known_issues: []
 **CRITICAL:** This documentation is the source of truth. Everything that follows is generated FROM this doc. Take time to make it complete and accurate.
 
 **Always set `last_synced` to today's date** when writing or updating a feature doc. This is what SCAN MODE uses to detect drift. Set `status: draft` for new docs; update to `in_progress` when implementation begins, `complete` when Phase 7 is done.
+
+#### Phase 3a — Integration Contract Resolution (mandatory when `depends_on` is non-empty)
+
+After writing the feature doc, resolve integration obligations from dependencies:
+
+1. For each feature ID in `depends_on`, read its `.mdd/docs/*.md` file
+2. Check whether it has `integration_contracts` entries
+3. For each contract that applies to the current feature, add it to `satisfies_contracts` as a **placeholder** showing what must be wired:
+
+```yaml
+satisfies_contracts:
+  - from: <dependency-feature-id>
+    function: <function-name>(<args>)
+    when: <condition — e.g. "before any file read in executeInclude">
+    status: pending  ← change to "verified: <file>:<line>" during Phase 6
+```
+
+**Leaving `satisfies_contracts` empty when a dependency has mandatory `integration_contracts` is a build error.** Do not proceed past Phase 3a until all applicable contracts are acknowledged.
+
+**Cross-cutting concerns that always require contract resolution:**
+- Any dependency tagged with `security`, `auth`, `masking`, `filesystem`, `audit`, `immutable` — its contracts are always mandatory
+- Any dependency that provides a "check before X" or "enforce Y" function — that function must be in your `satisfies_contracts`
+
+During Phase 6 implementation, update each `satisfies_contracts` entry from `status: pending` to `verified: <file>:<line>` as each call site is wired. Phase 7c will verify all entries are `verified` before marking the feature complete.
+
+#### Phase 3b — Special Case Rules
+
+These rules apply regardless of what the feature doc says. They are not optional.
+
+**Immutability rule:** Any spec language describing values as "immutable," "cannot be overridden," "always enforced," or "built-in" requires both:
+- `readonly string[]` (or `as const`) TypeScript typing
+- `Object.freeze()` applied at definition
+
+Using a plain `const` array is not sufficient and will fail audit.
+
+**MCP and external-caller threat model:** Any feature that exposes functions to MCP clients, CLI users, API callers, or any untrusted external party must include a Security section in its doc that explicitly:
+- Lists which inputs are untrusted
+- States what a malicious caller could send
+- Specifies validation/sanitization required before use
+- States what the function is NOT permitted to expose (e.g., full `process.env`, raw credentials, unrestricted filesystem paths)
+
+**Node substitution completeness rule:** Any function that transforms, substitutes, or dispatches across AST node types must handle ALL node types defined in `types.ts` — either explicitly or with a documented explicit-skip decision. An unhandled node type that silently falls through is a bug, not a design choice.
+
+**Existence gate for source_files:** When marking `status: complete`, all files listed in `source_files` must exist on disk. Missing files block completion. Add missing files to `known_issues` with a TODO, or implement them before closing the feature.
 
 **Determine the `path` field** before writing the doc. Read the `path` values of all existing docs in `.mdd/docs/` to understand established product vocabulary and category names. Then ask: "What would a user navigate to in order to reach this feature?" — answer in their mental model of the product, not the code structure. Use 1–3 segments, Title Case, product vocabulary (e.g. `Auth/Login`, `E-commerce/Cart`, `Dashboard/Analytics`). Siblings must use identical parent spelling — if `Auth/Login` exists, use `Auth` not `Authentication`. If you can infer the path from context with confidence, set it and show the user. If genuinely ambiguous (feature could belong in 2+ places), ask: "Where does this feature live in the product? (e.g. `Auth/Login` or `Dashboard/Reports`)"
 
@@ -604,7 +658,15 @@ where the agent patches the wrong thing because it accepted an external excuse t
 
 **If integration verified:**
 
-1. **Update the feature doc frontmatter** — write these fields now, before displaying the signal:
+1. **Contract verification gate** — before marking complete, check the feature doc's `satisfies_contracts`:
+   - Any entry still `status: pending` means the integration was never wired
+   - For each pending entry: locate the call site in the implementation, verify it exists, update to `verified: <file>:<line>`
+   - If the call site is missing: implement it now (do not mark complete without it)
+   - **A feature with any `pending` contract cannot be marked `status: complete`**
+
+   Also check that all files in `source_files` exist on disk. Any missing file must be implemented or moved to `known_issues` with explicit documentation of why it was deferred.
+
+2. **Update the feature doc frontmatter** — write these fields now, before displaying the signal:
    - `status: complete`
    - `phase: all`
    - `last_synced: <today>`
