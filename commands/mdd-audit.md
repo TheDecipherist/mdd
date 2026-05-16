@@ -232,6 +232,12 @@ Read ONLY `audits/notes-<date>.md` (NOT source code again). Produce `audits/repo
 5. Fix plan with effort estimates and affected files per finding
 6. Root Cause Analysis — for each cluster of findings, explain WHY the code writer made the mistake (not just what is wrong). Common root causes: "security module built in isolation without integration contracts," "immutability described in spec but not enforced at the code level," "MCP tool written without a threat model," "node type added after transformation function was written."
 7. Prevention Rules — derive concrete, actionable rules that would have prevented each finding cluster. Format: "When implementing X, always Y. Never Z. Reasoning: [which finding caused this]." These rules are proposed for addition to CLAUDE.md at the end of the audit.
+8. MDD Workflow Self-Improvement — for each finding, ask: "Could the MDD audit criteria, build phase requirements, or doc field definitions have caught or prevented this?" Only flag patterns that would recur across different projects — skip purely project-specific issues (business logic, naming, one-off mistakes). Classify each as:
+   - `[criteria-gap]` — not covered by current audit criteria; suggest exact wording for a new P1/P2/P3/P4 rule
+   - `[criteria-ambiguous]` — covered in criteria but wording too vague to reliably catch; suggest sharper wording or a concrete example
+   - `[build-gap]` — the build phase doc or test requirements should have forced something that would have prevented this; suggest the exact addition to mdd-build.md
+   - `[doc-field-gap]` — a new feature doc frontmatter field would have surfaced this earlier; suggest the field name and schema
+   For each item, name the exact MDD file and section that needs changing.
 
 **Integration contract cross-check (in addition to per-file analysis):**
 After per-file analysis is complete, read all `.mdd/docs/*.md` and:
@@ -294,6 +300,70 @@ After ALL findings are fixed: run the full test suite once as a regression check
 Report progress per finding. Update documentation `known_issues` to remove fixed items. Update `mdd_version` to current on every `.mdd/docs/*.md` file that is edited during fixes.
 
 **After fixes are complete and results are written to `.mdd/audits/results-<date>.md`**, run the same tag pass (generate missing tags for any doc still lacking them), regenerate `.mdd/connections.md`, then trigger the `.mdd/.startup.md` rebuild so the Last Audit block, connections graph, and tag list all reflect the final state.
+
+---
+
+### Phase A8 — MDD Self-Review
+
+Runs at the end of every audit, after fixes (or immediately after A7 if user chose not to fix now).
+
+**Step 1 — Extract self-improvement items**
+
+Read the "MDD Workflow Self-Improvement" section from `audits/report-<date>.md`. If there are zero items, skip to Step 3 with a one-line note.
+
+**Step 2 — Append to persistent learnings log**
+
+Append to `.mdd/audits/mdd-learnings.md` (create if it does not exist):
+
+```markdown
+## <date> — <audit-scope> (<N> workflow items)
+
+### [<classification>] <short title>
+- **Finding**: <what was found in the project>
+- **Severity**: <P1/P2/P3/P4> — <N> instance(s)
+- **Why MDD missed it**: <one sentence>
+- **Suggested MDD change**: <exact rule wording or field name to add>
+- **Affects**: `<mdd-file.md>` — <section name>
+- **Status**: pending
+```
+
+Classifications: `criteria-gap` | `criteria-ambiguous` | `build-gap` | `doc-field-gap`
+
+Never overwrite existing entries. Each audit appends its own dated block. Entries with `Status: pending` are unactioned improvements waiting for a GitHub issue or patch.
+
+**Step 3 — Present to user**
+
+```
+🔧 MDD Workflow Self-Review
+
+<N> patterns found that MDD could prevent in future projects:
+
+  1. [criteria-gap]    <short title> — add P2 rule to mdd-audit.md
+  2. [build-gap]       <short title> — update Phase 3 docs in mdd-build.md
+  3. [criteria-ambiguous] <short title> — sharpen P1 wording in mdd-audit.md
+  ...
+
+Logged to: .mdd/audits/mdd-learnings.md
+
+Open a GitHub issue for these improvements?
+  [Y] Yes — open issue at https://github.com/TheDecipherist/mdd/issues
+  [D] Draft — show me the issue text first
+  [N] No — skip for now
+```
+
+**If user selects [Y] or [D]:**
+
+Compose a GitHub issue with:
+- **Title**: `Audit self-review: <N> workflow gaps found (<date>)`
+- **Body**:
+  - One paragraph summary of the audit context (project type, scope)
+  - Numbered list of each improvement item with classification, the exact MDD file/section, and the suggested fix
+  - A "Proposed changes" section with ready-to-apply rule wording for each `criteria-gap` and `criteria-ambiguous` item
+
+If [D]: display the draft and ask "Open this issue? (yes / edit / cancel)".
+If [Y]: open the issue immediately using `gh issue create`.
+
+After the issue is opened, update the `Status` field of each logged entry in `mdd-learnings.md` from `pending` to `issue: #<number>`.
 
 ---
 
