@@ -133,7 +133,7 @@ export function install(options: InstallOptions): void {
   }
 
   if (options.claudeMdPath) {
-    const claudeResult = injectClaudeGuidance(resolve(options.claudeMdPath.replace('~', homedir())), options.local);
+    const claudeResult = injectClaudeGuidance(resolve(options.claudeMdPath.replace('~', homedir())), options.local, options.force);
     const icon = claudeResult.status === 'error' ? '✗' : claudeResult.status === 'skipped' ? '·' : '✓';
     console.log(`  ${icon} CLAUDE.md — ${claudeResult.message}`);
     console.log('');
@@ -301,22 +301,76 @@ function installHook(opts: HookInstallOptions): { status: 'installed' | 'skipped
   }
 }
 
-function injectClaudeGuidance(claudeMdPath: string, local?: boolean): { status: 'injected' | 'skipped' | 'error'; message: string } {
-  try {
-    const marker = local ? PROJECT_CLAUDE_GUIDANCE_MARKER : CLAUDE_GUIDANCE_MARKER;
-    const block = local ? PROJECT_CLAUDE_GUIDANCE_BLOCK : CLAUDE_GUIDANCE_BLOCK;
+const BLOCK_START = '<!-- mdd-guidance-start -->';
+const BLOCK_END = '<!-- mdd-guidance-end -->';
 
-    if (existsSync(claudeMdPath)) {
-      const existing = readFileSync(claudeMdPath, 'utf-8');
-      if (existing.includes(CLAUDE_GUIDANCE_MARKER) || existing.includes(PROJECT_CLAUDE_GUIDANCE_MARKER)) {
-        return { status: 'skipped', message: 'guidance already present' };
-      }
-      appendFileSync(claudeMdPath, block, 'utf-8');
-    } else {
-      writeFileSync(claudeMdPath, block.trimStart(), 'utf-8');
+function injectClaudeGuidance(
+  claudeMdPath: string,
+  local?: boolean,
+  force?: boolean,
+): { status: 'injected' | 'updated' | 'skipped' | 'error'; message: string } {
+  try {
+    const block = (local ? PROJECT_CLAUDE_GUIDANCE_BLOCK : CLAUDE_GUIDANCE_BLOCK).trim();
+    const delimited = `${BLOCK_START}\n${block}\n${BLOCK_END}`;
+
+    if (!existsSync(claudeMdPath)) {
+      writeFileSync(claudeMdPath, delimited + '\n', 'utf-8');
+      return { status: 'injected', message: 'guidance injected' };
     }
-    return { status: 'injected', message: `${marker} injected` };
+
+    const existing = readFileSync(claudeMdPath, 'utf-8');
+
+    // ── New format: delimited block ──────────────────────────────────────
+    const startIdx = existing.indexOf(BLOCK_START);
+    if (startIdx !== -1) {
+      const endIdx = existing.indexOf(BLOCK_END, startIdx);
+      if (endIdx === -1) {
+        return { status: 'error', message: 'malformed guidance block (missing end marker)' };
+      }
+      const currentBlock = existing.slice(startIdx + BLOCK_START.length, endIdx).trim();
+      if (currentBlock === block) {
+        return { status: 'skipped', message: 'already up to date' };
+      }
+      if (!force) {
+        return { status: 'skipped', message: 'outdated — run `mdd update` to refresh' };
+      }
+      const after = existing.slice(endIdx + BLOCK_END.length);
+      writeFileSync(claudeMdPath, existing.slice(0, startIdx) + delimited + after, 'utf-8');
+      return { status: 'updated', message: 'guidance updated' };
+    }
+
+    // ── Legacy format: bare marker, no delimiters ────────────────────────
+    const legacyMarker = existing.includes(CLAUDE_GUIDANCE_MARKER)
+      ? CLAUDE_GUIDANCE_MARKER
+      : existing.includes(PROJECT_CLAUDE_GUIDANCE_MARKER)
+      ? PROJECT_CLAUDE_GUIDANCE_MARKER
+      : null;
+
+    if (legacyMarker) {
+      if (!force) {
+        return { status: 'skipped', message: 'legacy format — run `mdd update` to migrate to updatable format' };
+      }
+      const markerIdx = existing.indexOf(legacyMarker);
+      const blockEnd = findLegacyBlockEnd(existing, markerIdx);
+      const prefix = existing.slice(0, markerIdx).trimEnd();
+      const suffix = existing.slice(blockEnd);
+      const newContent = prefix + '\n\n' + delimited + suffix;
+      writeFileSync(claudeMdPath, newContent, 'utf-8');
+      return { status: 'updated', message: 'legacy guidance migrated to updatable format' };
+    }
+
+    // ── No existing block — append ───────────────────────────────────────
+    const separator = existing.endsWith('\n\n') ? '' : existing.endsWith('\n') ? '\n' : '\n\n';
+    appendFileSync(claudeMdPath, separator + delimited + '\n', 'utf-8');
+    return { status: 'injected', message: 'guidance injected' };
   } catch (err) {
     return { status: 'error', message: String(err) };
   }
+}
+
+function findLegacyBlockEnd(content: string, markerIdx: number): number {
+  // Find the next top-level heading after the marker to determine where the block ends
+  const after = content.slice(markerIdx + 1);
+  const match = after.match(/\n## /);
+  return match?.index !== undefined ? markerIdx + 1 + match.index : content.length;
 }
