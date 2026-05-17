@@ -6,6 +6,10 @@ Generates a comprehensive, print-ready user manual at `.mdd/manual/manual.md` fr
 MDD feature docs and ops runbooks. Uses content hashes to detect what changed since the
 last run — only stale sections are regenerated.
 
+Sections are written to disk **immediately after each generation batch completes** — never
+held in memory until the end. This means compaction mid-run loses at most one batch of
+sections, and the next run can resume from the saved state.
+
 ---
 
 ### Phase M1 — Scope & Hash Check
@@ -15,7 +19,7 @@ last run — only stale sections are regenerated.
 Check `.mdd/docs/`. If it contains zero `.md` files:
 ```
 ⚠️  No feature docs found.
-Run /mdd <feature> to create your first feature doc, then re-run /mdd manual.
+Run /mdd <feature> to create your first doc, then re-run /mdd manual.
 ```
 Stop here.
 
@@ -74,7 +78,79 @@ Stop here.
 
 ---
 
-### Phase M2 — Section Generation
+### Phase M2 — Skeleton Init (before generating any sections)
+
+Before generating any sections, ensure `manual.md` is in a writable state on disk.
+This protects against compaction — each section written to disk is durable.
+
+**Step 1 — Ensure output directory exists**
+```bash
+mkdir -p .mdd/manual
+```
+
+**Step 2 — Load existing manual or build skeleton**
+
+Read `.mdd/manual/manual.md` if it exists. Identify the preface: everything before the
+first `<!-- mdd-section: -->` marker. If the file is new, generate a default preface
+(see Phase M3 Step 2 below for the preface format) and write the skeleton immediately:
+
+```markdown
+# <Project Name> — User Manual
+
+> <tagline>
+
+**Version:** <version>
+**Generated:** <date>
+
+<overview paragraphs>
+
+---
+
+## Table of Contents
+<!-- toc -->
+(regenerated on completion)
+<!-- /toc -->
+
+---
+
+## Overview
+
+<overview content>
+
+---
+
+## Features
+
+(sections generating — re-run /mdd manual if interrupted)
+
+---
+
+## Operations
+
+(sections generating — re-run /mdd manual if interrupted)
+
+---
+
+## Command Reference
+
+(regenerated on completion)
+
+---
+```
+
+Write this skeleton to `.mdd/manual/manual.md` now, before any agents are launched.
+This ensures the file exists on disk even if compaction occurs mid-generation.
+
+**Step 3 — Remove deleted sections**
+
+For each doc classified as `deleted`: find and remove the entire
+`<!-- mdd-section: <id> -->` … `<!-- /mdd-section: <id> -->` block (including
+surrounding blank lines) from the current manual.md on disk. Write the file after
+each removal.
+
+---
+
+### Phase M3 — Section Generation (incremental, batch-by-batch)
 
 For each `changed` or `new` doc, generate a user-friendly manual section. The section
 must be readable by someone who has never seen the source code — focus on WHAT the
@@ -133,11 +209,37 @@ For ops runbooks, use a condensed format:
 <!-- /mdd-section: ops/<slug> -->
 ```
 
-**Parallelism:**
-- 1–4 changed docs → generate in main conversation sequentially
-- 5+ changed docs → launch one `general-purpose` agent per doc (max 8 concurrent). Each
-  agent receives: the full doc content, the section structure template above, and the
-  output section id. Collect all outputs before proceeding to Phase M3.
+**Parallelism and incremental writing — CRITICAL:**
+
+- **1–4 changed docs** → generate sequentially in main conversation. After EACH section
+  is generated, immediately patch it into `manual.md` on disk (see patching rules below)
+  before generating the next section.
+
+- **5+ changed docs** → split into batches of up to 8. For each batch:
+  1. Launch one `general-purpose` agent per doc in the batch (all agents in the batch
+     run concurrently). Each agent receives: the full doc content, the section structure
+     template above, and the output section id.
+  2. **Wait for ALL agents in this batch to complete.**
+  3. Immediately patch ALL returned sections into `manual.md` on disk (one Write call
+     per section, or one Write call with all sections patched at once).
+  4. Report progress: `  ✓ Batch <N>/<total> written to disk (<M> sections)`
+  5. Then launch the next batch.
+
+  **Never hold results across batches.** Each batch's sections must be on disk before
+  the next batch starts. Compaction mid-batch loses at most 8 sections; those will be
+  regenerated on the next `/mdd manual` run (their hashes won't be in `.hashes.json`
+  since that's only written at the very end).
+
+**Section patching rules (applied after each batch or each sequential section):**
+
+For each returned section:
+- Find the `<!-- mdd-section: <id> -->` … `<!-- /mdd-section: <id> -->` block in the
+  current `manual.md`.
+- If found: replace the entire block with the new section.
+- If not found (new doc): append the section after the last `<!-- /mdd-section: -->` tag
+  in the Features chapter (or Operations chapter for ops runbooks). If neither marker
+  exists yet, append after the `## Features` or `## Operations` heading.
+- Write `manual.md` to disk after each patch.
 
 **Reading source files during generation:**
 When the feature doc lists `source_files`, read those files briefly to verify the section
@@ -147,59 +249,33 @@ section header.
 
 ---
 
-### Phase M3 — Assembly
+### Phase M4 — Final Assembly
 
-**Step 1 — Load existing manual (if any)**
+After all sections are on disk, perform final assembly passes on `manual.md`.
 
-Read `.mdd/manual/manual.md`. If it does not exist, start with an empty string.
+**Step 1 — Rebuild aggregated reference sections**
 
-Identify the preface: everything before the first `<!-- mdd-section: -->` marker. This
-is user-written content — preserve it exactly across runs. If the file is new, generate
-a default preface (see Step 2).
+Scan every `<!-- mdd-section: -->` block in the current `manual.md` for:
 
-**Step 2 — Build/update preface**
+**Command Reference** — find all `#### Commands` tables. Merge into one master table,
+sorted alphabetically by command. Include a "Feature" column. Replace the existing
+`## Command Reference` section (or append if missing).
 
-If generating for the first time (no existing manual), create a preface:
+**API Reference** — find all `#### API Endpoints` tables. Merge into one master table,
+sorted by path. Include a "Feature" column. Replace the existing `## API Reference`
+section (or append if missing). Omit this section entirely if no API endpoints were found.
 
-Read `.mdd/.startup.md` for: project name, stack, tagline. Read `package.json` (if
-present) for version. Read `README.md` introduction (first 3 paragraphs, if present).
+**Configuration** — find all `#### Configuration` tables. Merge into one master table,
+grouped by feature. Replace the existing `## Configuration` section (or append if
+missing). Omit this section entirely if no configuration options were found.
 
-```markdown
-# <Project Name> — User Manual
+**Step 2 — Regenerate TOC**
 
-> <tagline or one-sentence description>
+Scan the assembled document for all `##` and `###` headings. Build a markdown TOC with
+anchor links. Replace the `<!-- toc -->` … `<!-- /toc -->` block (between
+`## Table of Contents` and the next `---` divider) with the new TOC.
 
-**Version:** <version from package.json, or "—">
-**Generated:** <date>
-
-<2-3 paragraph project overview synthesized from README and .startup.md>
-
----
-```
-
-**Step 3 — Patch sections**
-
-Apply changes to the existing manual body:
-
-- **Changed/new sections:** Find the `<!-- mdd-section: <id> -->` … `<!-- /mdd-section: <id> -->` block in the existing body and replace it with the newly generated section. If no existing block is found (new doc), append after the last existing `<!-- /mdd-section -->` tag in the Features or Operations chapter.
-- **Deleted sections:** Find and remove the entire `<!-- mdd-section: <id> -->` … `<!-- /mdd-section: <id> -->` block including surrounding blank lines.
-- **Unchanged sections:** Leave exactly as-is.
-
-**Step 4 — Rebuild aggregated reference sections**
-
-After patching all feature sections, regenerate these always (they aggregate across all docs):
-
-**Command Reference** — scan every feature section for `#### Commands` tables. Merge into one master table, sorted alphabetically by command. Include a "Feature" column.
-
-**API Reference** — scan every feature section for `#### API Endpoints` tables. Merge into one master table, sorted by path. Include a "Feature" column.
-
-**Configuration** — scan every feature section for `#### Configuration` tables. Merge into one master table, grouped by feature.
-
-**Step 5 — Regenerate TOC**
-
-Scan the assembled document for all `##` and `###` headings. Build a markdown TOC with anchor links. Replace the existing TOC block (between `## Table of Contents` and the next `---` divider) with the new one.
-
-**Step 6 — Final document structure**
+**Step 3 — Final document structure**
 
 The assembled `manual.md` must follow this order:
 
@@ -214,6 +290,7 @@ The assembled `manual.md` must follow this order:
 ---
 
 ## Table of Contents                   ← always regenerated
+<!-- toc -->
 1. [Overview](#overview)
 2. [Features](#features)
    - [Feature Name](#feature-name)
@@ -222,6 +299,7 @@ The assembled `manual.md` must follow this order:
 4. [Command Reference](#command-reference)
 5. [API Reference](#api-reference)      ← omit if no API endpoints found
 6. [Configuration](#configuration)     ← omit if no config options found
+<!-- /toc -->
 
 ---
 
@@ -261,23 +339,33 @@ The assembled `manual.md` must follow this order:
 | Option | Type | Default | Description | Feature |
 ```
 
-Omit any aggregated section (API Reference, Configuration) if no content was found across
-all feature sections.
+**Step 2 — Build/update preface** (if generating for the first time)
+
+If the preface was newly generated in Phase M2, ensure it uses this content:
+
+Read `.mdd/.startup.md` for: project name, stack, tagline. Read `package.json` (if
+present) for version. Read `README.md` introduction (first 3 paragraphs, if present).
+
+```markdown
+# <Project Name> — User Manual
+
+> <tagline or one-sentence description>
+
+**Version:** <version from package.json, or "—">
+**Generated:** <date>
+
+<2-3 paragraph project overview synthesized from README and .startup.md>
+
+---
+```
+
+Write the final assembled `manual.md` to disk.
 
 ---
 
-### Phase M4 — Write Output & Update Hashes
+### Phase M5 — Write Hashes & Report
 
-**Step 1 — Ensure output directory exists**
-```bash
-mkdir -p .mdd/manual
-```
-
-**Step 2 — Write manual**
-
-Write the assembled document to `.mdd/manual/manual.md`.
-
-**Step 3 — Update hash store**
+**Step 1 — Update hash store**
 
 Write `.mdd/manual/.hashes.json` with:
 - One entry per doc that now exists on disk (use the current hash)
@@ -285,7 +373,11 @@ Write `.mdd/manual/.hashes.json` with:
 - Update `_generated` to current ISO timestamp
 - Set `_manual_version: 1` (or increment if already set)
 
-**Step 4 — Report**
+**Only write this file after manual.md is fully complete.** The hash file is the
+completion marker — if `.hashes.json` is missing or stale, the next run will know
+to regenerate all sections.
+
+**Step 2 — Report**
 
 ```
 ✅ Manual generated
@@ -303,7 +395,7 @@ Tip: manual.md is print-ready markdown. Open in any markdown viewer,
      export to PDF, or use as source material for blog posts and docs.
 ```
 
-**Step 5 — Gitignore check**
+**Step 3 — Gitignore check**
 
 Check whether `.mdd/manual/` is in `.gitignore`. If not, suggest:
 ```
@@ -333,3 +425,17 @@ can read and understand. Rules for section writers:
 - **One idea per paragraph** — keep paragraphs to 3–5 sentences
 - **Examples are mandatory** for any command or API endpoint listed
 - **Planned features** are clearly marked `(planned — not yet implemented)`
+
+### Recovery from Interrupted Runs
+
+If `/mdd manual` was interrupted mid-generation (context compaction, session end, etc.):
+
+1. Re-run `/mdd manual`. The hash check will find that `.hashes.json` is missing or
+   incomplete (since it's only written at the very end in Phase M5).
+2. Sections already written to `manual.md` (from completed batches) will be detected as
+   present — but since their hashes aren't in `.hashes.json`, they'll be classified as
+   `new` and regenerated.
+3. The regenerated sections will simply replace what was already there. No data is lost.
+
+To skip regenerating sections that look complete, a user can run `--force` after manually
+verifying the manual looks correct, then let Phase M5 write the hash file to seal the run.
