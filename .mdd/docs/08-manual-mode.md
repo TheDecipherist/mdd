@@ -12,8 +12,8 @@ data_flow: greenfield
 last_synced: 2026-05-16
 status: complete
 phase: all
-mdd_version: 10
-tags: [manual, documentation, user-guide, hash, incremental, print-ready, toc, ops-runbooks]
+mdd_version: 11
+tags: [manual, documentation, user-guide, hash, incremental, print-ready, toc, ops-runbooks, batch-write, compaction-safe]
 path: Commands/Documentation
 integration_contracts: []
 satisfies_contracts: []
@@ -38,16 +38,25 @@ docs. Its lifecycle is:
 
 1. **Hash check** — read `.mdd/manual/.hashes.json`; compare SHA256 of each doc against
    stored values to classify docs as `unchanged`, `changed`, `new`, or `deleted`.
-2. **Section generation** — for each changed/new doc, generate a user-friendly section
-   using Claude in the main conversation (single doc) or parallel agents (5+ changed docs).
-3. **Patch assembly** — load existing `manual.md`, replace sections between
-   `<!-- mdd-section: <id> -->` / `<!-- /mdd-section: <id> -->` markers, insert new
-   sections, remove sections for deleted docs, regenerate the TOC.
-4. **Write output** — write `.mdd/manual/manual.md` and update `.mdd/manual/.hashes.json`.
+2. **Skeleton init** — before generating any sections, write a skeleton `manual.md` to
+   disk (preface + chapter headers + placeholder text). Ensures the file is durable even
+   if generation is interrupted by context compaction.
+3. **Section generation (incremental)** — for each changed/new doc, generate a
+   user-friendly section. Sections are patched into `manual.md` on disk immediately after
+   each batch completes — never held in memory across batches. With 5+ docs, agents run
+   in parallel batches of up to 8; each batch is written to disk before the next launches.
+4. **Final assembly** — regenerate aggregated reference sections (Command Reference, API
+   Reference, Configuration) by scanning the now-complete `manual.md`, then rebuild the
+   TOC.
+5. **Write hashes** — write `.mdd/manual/.hashes.json` only after `manual.md` is fully
+   complete. The hash file is the completion marker; a missing/stale hash file tells the
+   next run to regenerate.
 
-The section marker system makes manual.md patchable — any section can be replaced
-independently without touching the rest of the document, including any manually written
-preface or project-level intro the user has added above the generated content.
+The incremental-write design means compaction mid-run loses at most one batch of sections
+(up to 8). Re-running `/mdd manual` regenerates only the missing sections. The section
+marker system (`<!-- mdd-section: <id> -->` / `<!-- /mdd-section: <id> -->`) makes
+manual.md surgically patchable — any section can be replaced independently without
+touching the rest of the document, including any manually written preface.
 
 ## API Endpoints
 
@@ -82,6 +91,12 @@ None — CLI-only command.
 - The TOC is always fully regenerated even if only one section changed.
 - Content above the first `<!-- mdd-section: -->` marker (manual preface, project intro)
   is preserved across runs.
+- **Incremental writes:** with 5+ docs, agents run in batches of up to 8; each batch's
+  sections are patched into `manual.md` on disk before the next batch starts.
+- **Hash file is written last:** `.hashes.json` is only written after `manual.md` is
+  fully complete. A missing/stale hash file is the signal to regenerate.
+- **Compaction recovery:** re-running `/mdd manual` after interruption regenerates only
+  sections whose hashes are absent from `.hashes.json`.
 
 **Manual structure:**
 ```
