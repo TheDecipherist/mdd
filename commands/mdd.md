@@ -133,6 +133,9 @@ Use whichever path contains `mdd-audit.md`. Store it as `$MDD_DIR` and use it fo
 - If arguments start with `manual` →
   **Read `$MDD_DIR/mdd-manual.md` then follow MANUAL MODE instructions.**
 
+- If arguments start with `bug` →
+  **Read `$MDD_DIR/mdd-bug.md` then follow BUG MODE instructions.**
+
 - If arguments are empty → ask the user what they want to do (build a feature, run an audit, check status, etc.)
 
 - Otherwise → **Read `$MDD_DIR/mdd-build.md` then follow BUILD MODE instructions.**

@@ -239,6 +239,10 @@ known_issues: []
 ## Known Issues
 
 <Empty for new features. Will be populated by future audits.>
+
+## Bugs
+
+(none yet — populated by /mdd bug when issues are reported)
 ```
 
 **CRITICAL:** This documentation is the source of truth. Everything that follows is generated FROM this doc. Take time to make it complete and accurate.
