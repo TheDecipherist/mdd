@@ -148,8 +148,9 @@ Single feature or bounded change?
 
 Always ask — never auto-invoke. If the user says no, proceed as normal.
 
-Skip entirely for: bug fixes, typos, config tweaks, single-line changes,
-one-off shell commands.
+For bug fixes → suggest `/mdd bug <description>` to track and fix with doc integration.
+
+Skip entirely for: typos, config tweaks, single-line changes, one-off shell commands.
 ```
 
 ## Data Flow
