@@ -4,7 +4,7 @@
 
 # MDD - Manual-Driven Development for Claude Code
 
-> **One command. Twenty-four modes. Complete feature lifecycle from documentation to verified deployment.**
+> **One command. Twenty-five modes. Complete feature lifecycle from documentation to verified deployment.**
 
 <p align="center">
   <a href="https://thedecipherist.github.io/mdd">
@@ -42,7 +42,7 @@ Then in Claude Code:
 - [How It Works](#how-it-works)
 - [Installation](#installation)
 - [Quick Start](#quick-start)
-- [All 25 Modes at a Glance](#all-25-modes-at-a-glance)
+- [All 26 Modes at a Glance](#all-26-modes-at-a-glance)
 - [Build Mode - Feature Development](#build-mode--feature-development)
 - [Audit Mode - Code Review](#audit-mode--code-review)
 - [Status & Notes](#status--notes)
@@ -236,10 +236,11 @@ Every feature doc and ops runbook has a `tags:` field (4–8 domain-concept keyw
 
 ---
 
-## All 25 Modes at a Glance
+## All 26 Modes at a Glance
 
 ```
 /mdd <feature description>                 Build Mode - Document, plan, and implement
+/mdd bug <description>                     Bug Mode - Fix bugs tracked in feature docs
 /mdd manual [--force]                      Manual Mode - Generate a print-ready user manual
 /mdd audit [section]                       Audit Mode - Scan code for violations and drift
 /mdd status                                Overview: docs, tests, audit state, initiatives

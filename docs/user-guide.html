@@ -8,7 +8,7 @@
   <meta name="keywords" content="MDD, Manual-Driven Development, Claude Code, AI workflow, slash commands, feature documentation" />
   <meta name="author" content="TheDecipherist" />
   <meta property="og:title" content="MDD User Guide - Manual-Driven Development" />
-  <meta property="og:description" content="Complete reference for all 24 MDD modes: Build, Audit, Status, Scan, Update, Connect, Plan, Ops, and more." />
+  <meta property="og:description" content="Complete reference for all 25 MDD modes: Build, Bug, Audit, Status, Scan, Update, Connect, Plan, Ops, and more." />
   <meta property="og:url" content="https://thedecipherist.github.io/mdd/user-guide.html" />
   <meta property="og:type" content="website" />
   <link rel="canonical" href="https://thedecipherist.github.io/mdd/user-guide.html" />
@@ -143,7 +143,7 @@
     <div class="hero-badge">User Guide - v1.0.0</div>
     <h1>MDD User Guide</h1>
     <p class="hero-subtitle">
-      Complete reference for all 24 modes - Build, Audit, Status, Scan, Update, Connect, Plan, Ops, and more.
+      Complete reference for all 25 modes - Build, Bug, Audit, Status, Scan, Update, Connect, Plan, Ops, and more.
     </p>
     <pre><code class="language-bash">npm install -g @thedecipherist/mdd
 mdd install</code></pre>
@@ -161,6 +161,7 @@ mdd install</code></pre>
         <a href="#getting-started">Getting Started</a>
         <a href="#branch-guard" style="padding-left:1.25rem;font-size:0.85em">Branch Guard</a>
         <a href="#build-mode">Build Mode - 7 Phases</a>
+        <a href="#bug-mode">Bug Mode</a>
         <a href="#audit-mode">Audit Mode</a>
         <a href="#manage-modes">Status, Notes, Scan &amp; Update</a>
         <a href="#lifecycle-modes">Lifecycle Modes</a>
@@ -993,6 +994,80 @@ MANIFEST shows 23/57 files complete.
 
         <p>
           Choosing Resume re-runs A2 (updating config files to reflect remaining work), then continues from A3 with fresh agents. Previously completed notes are preserved and merged in A5.
+        </p>
+      </section>
+
+      <!-- ===== BUG MODE ===== -->
+      <section id="bug-mode">
+        <h2>Bug Mode</h2>
+
+        <p>
+          <code>/mdd bug &lt;description&gt;</code> routes bug fixes through the existing feature doc system
+          rather than creating new docs. MDD scans all feature docs to identify which feature(s) own the broken
+          behavior, adds a tracked entry to a <code>## Bugs</code> section in each related doc, then fixes the
+          code and marks the entry complete.
+        </p>
+
+        <pre><code class="language-bash">/mdd bug "users can't log in after password reset"
+/mdd bug "token refresh fails on mobile Safari"
+/mdd bug "import-spec crashes when spec file has no sections"</code></pre>
+
+        <h3>How It Works</h3>
+
+        <p>Bug Mode runs five phases:</p>
+
+        <ol>
+          <li><strong>Triage</strong> - reads frontmatter from all <code>.mdd/docs/*.md</code> files and scores
+            each by tag matches, title word matches, and source-file name matches against the bug description.
+            Threshold: score &ge; 2.0 qualifies as a candidate.</li>
+          <li><strong>Confirm</strong> - presents top matches via a multi-select prompt so you can confirm the
+            right docs and add any others that scored below the threshold. If zero docs match, Bug Mode stops
+            and explains why.</li>
+          <li><strong>Document</strong> - adds or appends to a <code>## Bugs</code> section in each confirmed
+            feature doc, recording the bug as <code>Open</code> with a date stamp.</li>
+          <li><strong>Fix</strong> - you choose lightweight (identify, fix, verify) or full BUILD MODE process
+            (test skeletons, red gate, green gate) depending on the complexity of the fix.</li>
+          <li><strong>Complete</strong> - marks the bug entry <code>Completed</code> with the fix location
+            (<code>file:line</code>) and regenerates <code>.mdd/connections.md</code>.</li>
+        </ol>
+
+        <h3>The Bugs Section</h3>
+
+        <p>
+          Bug Mode adds a <code>## Bugs</code> section to every related feature doc. New feature docs created
+          by Build Mode also include this section pre-populated as empty. Bug entries are never deleted -
+          they form a searchable audit trail inside the doc itself.
+        </p>
+
+        <pre><code class="language-markdown">## Bugs
+
+| ID | Description | Status | Fixed In | Reported | Fixed |
+|----|-------------|--------|----------|----------|-------|
+| B1 | Users can't log in after password reset | Completed | src/auth.ts:142 | 2026-05-17 | 2026-05-17 |
+| B2 | Token refresh fails on mobile Safari | Open | - | 2026-05-20 | - |</code></pre>
+
+        <h3>No-Match Behaviour</h3>
+
+        <p>
+          If no feature docs score &ge; 2.0, Bug Mode stops with a diagnostic rather than guessing:
+        </p>
+
+        <pre><code>No feature docs matched the bug description: "..."
+
+This could mean:
+  - The bug is in undocumented code (run /mdd reverse-engineer first)
+  - The description uses different words than the feature tags
+  - This is a new undocumented area (use /mdd &lt;description&gt; to create a feature doc first)
+
+Run /mdd status to see all documented features.</code></pre>
+
+        <h3>Multi-Doc Bugs</h3>
+
+        <p>
+          When a bug spans multiple feature docs, each doc gets its own independent entry with the same
+          description. IDs are sequential per-doc (B1, B2...). The <code>Fixed In</code> column is filled
+          only for the doc whose code actually changed - other related docs reference it as
+          <code>see NN-feature-name:B1</code>.
         </p>
       </section>
 
@@ -2301,7 +2376,7 @@ auth-system-overhaul - Wave 2: 1/2 features complete
           </li>
         </ol>
         <p>
-          Claude always <strong>asks</strong> — it never auto-invokes <code>/mdd</code>. If you say no, it proceeds with direct implementation as normal. Bug fixes, typo corrections, config tweaks, and one-off shell commands are never flagged.
+          Claude always <strong>asks</strong> — it never auto-invokes <code>/mdd</code>. If you say no, it proceeds with direct implementation as normal. For bug reports, Claude suggests <code>/mdd bug &lt;description&gt;</code> to track and fix with doc integration. Typos, config tweaks, and one-off shell commands are never flagged.
         </p>
         <p>
           Overlap detection is lightweight: Claude scans the <code>[tags]</code> in <code>.startup.md</code> — a compact file already injected into every conversation — rather than loading full feature docs into context. No extra tokens, no performance penalty.
