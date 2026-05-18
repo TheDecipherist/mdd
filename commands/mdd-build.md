@@ -262,10 +262,13 @@ satisfies_contracts:
   - from: <dependency-feature-id>
     function: <function-name>(<args>)
     when: <condition — e.g. "before any file read in executeInclude">
-    status: pending  ← change to "verified: <file>:<line>" during Phase 6
+    status: pending      # change to done during Phase 6
+    verified_at: ""      # set to "path/to/file.ts:lineN" when status is done
 ```
 
 **Leaving `satisfies_contracts` empty when a dependency has mandatory `integration_contracts` is a build error.** Do not proceed past Phase 3a until all applicable contracts are acknowledged.
+
+**Before marking any `satisfies_contracts` entry `status: done`:** run `grep -rn '<function-name>'` across the entire package. Every call site must invoke the contract function — not just the one currently in focus. If the function is only wired in one layer (e.g. dispatcher) but not another (e.g. executor), the contract is not satisfied. Set `verified_at` to the confirmed call site before updating status.
 
 **Cross-cutting concerns that always require contract resolution:**
 - Any dependency tagged with `security`, `auth`, `masking`, `filesystem`, `audit`, `immutable` — its contracts are always mandatory
@@ -338,6 +341,8 @@ describe('<Feature Name>', () => {
 **Parallelization rule:**
 - If BOTH unit AND E2E tests are needed → launch 2 parallel `general-purpose` agents. Each receives: the full MDD doc content, the skeleton template above, project testing conventions, and the exact output file path. Agent A writes `tests/unit/<feature-name>.test.ts`, Agent B writes `tests/e2e/<feature-name>.spec.ts`. These are different files — no write conflict is possible.
 - If only unit tests needed → generate directly in the main conversation (no agent overhead for a single file).
+
+**CLI feature additional check:** If the feature adds or modifies CLI commands, add a skeleton that invokes each new command with `--help` and asserts all five universal flags (`--env`, `--cwd`, `--verbose`, `--strict`, `--silent`) appear in the output. This catches missing `universalOptions()` wiring before implementation begins.
 
 **E2E skeleton template (if applicable):**
 ```typescript
@@ -530,6 +535,8 @@ Execute blocks in dependency layer order (Layer 1 → 2 → 3 → 4). Within the
 
 **For sequential blocks:** read the MDD doc, read the relevant test skeletons, implement, run the Green Gate loop below.
 
+**Directive/constant change ripple rule:** If this block changes any directive syntax, canonical header string, config key, or other string constant that other parts of the codebase may consume (e.g. language grammars, test fixtures, snippets, detection code), run `grep -rn 'old_string'` across the entire repo before marking the block complete. Update every consumer found — tmLanguage files, E2E fixtures, snippets, and any hardcoded string comparisons — in the same block, not as a follow-up.
+
 #### Step 6b — Green Gate loop (per block)
 
 After each block's implementation (sequential or parallel), run the Green Gate:
@@ -678,7 +685,8 @@ where the agent patches the wrong thing because it accepted an external excuse t
 
 1. **Contract verification gate** — before marking complete, check the feature doc's `satisfies_contracts`:
    - Any entry still `status: pending` means the integration was never wired
-   - For each pending entry: locate the call site in the implementation, verify it exists, update to `verified: <file>:<line>`
+   - For each entry: run `grep -rn '<function-name>'` across the entire package. Every call site must invoke the contract function — not just the one originally in scope. If a layer (e.g. executor vs dispatcher) is missing the call, the contract is not satisfied.
+   - Update each confirmed entry to `status: done` and `verified_at: "path/to/file.ts:lineN"` pointing to the confirmed call site.
    - If the call site is missing: implement it now (do not mark complete without it)
    - **A feature with any `pending` contract cannot be marked `status: complete`**
 

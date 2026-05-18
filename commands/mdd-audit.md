@@ -158,6 +158,8 @@ Integration context:   .mdd/jobs/audit-<date>/integration-context.md
 - "Immutable" rule arrays exported as plain mutable arrays — not `Object.freeze()` + `readonly`
 - Untrusted MCP/API/CLI input used without validation or sanitization
 - Data cached or stored without masking applied first
+- Local reimplementation of security logic — any function named `isConfined`, `isAllowed`, `isSafe`, `isBlocked`, or similar that replicates what a documented security module already provides. Require replacement with the canonical security module function.
+- Contract function undefined — if `integration_contracts` specifies a function name, grep the entire package for that name as an export. If the function does not exist anywhere, flag P1 regardless of whether call sites are present.
 
 **Note:** `satisfies_contracts status: pending` is checked by main in Phase A1, not here — agents cannot read feature docs.
 
@@ -168,7 +170,9 @@ Integration context:   .mdd/jobs/audit-<date>/integration-context.md
 - File exceeds 300 lines
 - Function exceeds 50 lines
 - Transformation/substitution function handles some but not all AST/domain types (silent fallthrough for unhandled types)
+- Switch on a string-union type or operation enum with no `default:` case, or where `default:` returns a value rather than throwing. Check all `switch` statements in execution, adapter, and transformation code. Approved pattern: `default: throw new Error(\`unhandled type: \${x satisfies never}\`)` — the `satisfies never` check produces a compile error when a new variant is added without updating the switch.
 - MCP-exposed function accepts untrusted params with no explicit validation
+- Security parameter never passed — if a function accepts a policy param (allowedKeys, blockedDomains, securityConfig, etc.) that must come from a caller, verify the caller passes a non-empty, non-null value. If the parameter always arrives as `undefined`, `null`, or `[]`, the enforcement is a no-op.
 
 ### P3 Medium
 - TypeScript strict mode not enabled in tsconfig
@@ -176,6 +180,8 @@ Integration context:   .mdd/jobs/audit-<date>/integration-context.md
 - Missing test cases for documented business rules
 - CLI command missing any of the universal flags (--env, --cwd, --verbose, --strict, --silent) — check all commands against the CLI feature doc's universal flags requirement
 - `file.*` filesystem helpers or path-resolving functions accept arbitrary paths without confinement to a documented jailRoot
+- Code that constructs a `SecurityConfig` or equivalent security object sets `jailRoot: null`. A null jailRoot disables filesystem confinement — the default should be the document's directory (`dirname(resolvedPath)`), not `null`, unless the caller explicitly provides an override.
+- `String.replace()` uses a captured group reference (`$1`, `$2`, etc.) in the replacement argument where the captured value originates from untrusted input. Values containing `$1`, `$&`, `$'`, etc. are silently mangled by JavaScript's substitution semantics. Sanitize with `.replace(/\$/g, '$$$$')` before interpolating into a replacement string.
 - Silent error swallow: catch block returns empty/undefined without pushing to warnings array
 - Template/substitution function matches `{{varname}}` without spaces but not `{{ varname }}` with spaces — spec uses spaced form; use regex `\s*` not exact string
 
