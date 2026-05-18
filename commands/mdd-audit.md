@@ -191,7 +191,7 @@ Integration context:   .mdd/jobs/audit-<date>/integration-context.md
 2. Read shard-<N>.md to know your file list
 3. Read MANIFEST.md — find the first [ ] entry in Shard <N>
 4. Read the last 20 lines of agent-<N>-notes.md for continuity
-5. Read integration-context.md — load this into working memory. Use it when checking P1 (integration contract not called at call site): cross-reference the source file's feature against the contracts defined for its dependencies.
+5. Read integration-context.md — load this into working memory. Use it when checking P1: (a) find this file under "Feature Source Files" to identify its owning feature; (b) scan "Integration Contracts" for any entry where that feature appears under "Caller features" — those are the contracts this file must satisfy.
 6. Begin the per-file loop at that first [ ] entry
 ```
 
@@ -298,7 +298,7 @@ This step runs independently of agent findings. It uses `integration-context.md`
 
 For each contract in `integration-context.md`:
 1. Identify all source files listed under "Caller source files" for that contract
-2. For each such source file, check `audits/MANIFEST-<date>.md` (or the job folder MANIFEST.md if the permanent copy isn't written yet) — if the file is marked `[e]`, skip contract verification for it and note in the Contract Violations section: "Could not verify — file was unreadable during audit."
+2. For each such source file, check the job folder's `MANIFEST.md` for that file's status — the permanent copy at `audits/MANIFEST-<date>.md` does not exist yet at this stage (it is written after Phase A6 completes). If the file is marked `[e]`, skip contract verification for it and note in the Contract Violations section: "Could not verify — file was unreadable during audit."
 3. For files not marked `[e]`, find the file's `## <filepath>` entry in `audits/notes-<date>.md` and read the `Contracts:` line:
    - `SATISFIED` — agent confirmed the call is present. No action.
    - `VIOLATION` — agent flagged it. Include as P1 in Contract Violations section.
