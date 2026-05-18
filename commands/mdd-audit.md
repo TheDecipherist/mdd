@@ -25,6 +25,17 @@ Triggered when arguments start with `audit`.
    - If "manual": exit and let the user create docs per feature
 3. Resolve every source file referenced across all feature docs. Deduplicate (same file may appear in multiple feature docs).
 
+**Feature doc cross-checks (run in Phase A1, before any agents are spawned):**
+
+These checks require comparing feature docs to each other and to disk. They cannot be done by per-file agents and must be done here:
+
+- For each feature, verify every path in `source_files` exists on disk. Missing files = P2 finding.
+- For each feature with `depends_on` that includes a feature with `integration_contracts`: verify this feature's `satisfies_contracts` is not empty. Missing acknowledgment = P2 finding.
+- For each feature with `satisfies_contracts` entries where `status: pending`: flag every pending entry as P1 — contract was documented but never wired.
+- For each feature with `integration_contracts`: verify every listed `caller_feature` exists as a feature doc. Non-existent caller referenced = P3 finding.
+
+Record all findings from this step in a dedicated `audits/doc-findings-<date>.md` file. These are merged into the final report in Phase A5 as a separate "Feature Doc Issues" section.
+
 **Incremental vs full (only when a previous completed audit exists):**
 ```
 A completed audit exists from <date>.
@@ -89,6 +100,32 @@ Main writes a shard file and config file for each agent into the job folder **be
 
 **`shard-N.md`** — flat list of files assigned to this agent, extracted from the manifest. The agent uses this to know its scope without parsing the full manifest.
 
+**`integration-context.md`** — built once by main from all `.mdd/docs/*.md` files and written to the job folder. Every agent reads this at startup. Format:
+
+```markdown
+# Integration Context
+# Job: audit-<date>
+
+## Feature Source Files
+<!-- Maps source files back to the feature that owns them -->
+<feature-name>: src/foo.ts, src/bar.ts
+<feature-name>: src/baz.ts
+
+## Integration Contracts
+<!-- What each security/shared feature requires ALL callers to implement -->
+### <feature-name>
+- Contract: <description of what caller must call/implement>
+  Caller features: <featureA>, <featureB>
+  Caller source files: src/a.ts, src/b.ts, src/c.ts
+
+## Satisfied Contracts
+<!-- What each feature has acknowledged and wired -->
+### <feature-name>
+- Satisfies: <other-feature> contract — status: <done|pending>
+```
+
+If no feature has `integration_contracts`, write an empty file with `# No integration contracts defined`. This file is always created — agents must not fail if it is empty.
+
 **`agent-N-config.md`** format:
 
 ```markdown
@@ -99,9 +136,10 @@ You are Audit Agent <N> of <total>.
 Job: audit-<date>
 
 ## Paths (relative to project root)
-Shard file:  .mdd/jobs/audit-<date>/shard-<N>.md
-Notes file:  .mdd/jobs/audit-<date>/agent-<N>-notes.md
-Manifest:    .mdd/jobs/audit-<date>/MANIFEST.md
+Shard file:            .mdd/jobs/audit-<date>/shard-<N>.md
+Notes file:            .mdd/jobs/audit-<date>/agent-<N>-notes.md
+Manifest:              .mdd/jobs/audit-<date>/MANIFEST.md
+Integration context:   .mdd/jobs/audit-<date>/integration-context.md
 
 ## Rules
 - Write findings to your notes file ONLY. Never touch another agent's file.
@@ -127,20 +165,19 @@ Manifest:    .mdd/jobs/audit-<date>/MANIFEST.md
 - `console.log` in library code (should use logger)
 - File exceeds 300 lines
 - Function exceeds 50 lines
-- Feature's `source_files` lists a file that does not exist on disk
 - Transformation/substitution function handles some but not all AST/domain types (silent fallthrough for unhandled types)
 - MCP-exposed function accepts untrusted params with no explicit validation
 
 ### P3 Medium
 - TypeScript strict mode not enabled in tsconfig
 - Missing error handling at system/user-input boundaries
-- Feature has `depends_on` entries with `integration_contracts` but `satisfies_contracts` is empty
-- Security module's `integration_contracts` specifies a caller that has no `satisfies_contracts` entry
 - Missing test cases for documented business rules
 - CLI command missing any of the universal flags (--env, --cwd, --verbose, --strict, --silent) — check all commands against the CLI feature doc's universal flags requirement
 - `file.*` filesystem helpers or path-resolving functions accept arbitrary paths without confinement to a documented jailRoot
 - Silent error swallow: catch block returns empty/undefined without pushing to warnings array
 - Template/substitution function matches `{{varname}}` without spaces but not `{{ varname }}` with spaces — spec uses spaced form; use regex `\s*` not exact string
+
+**Note:** Feature-doc cross-checks (source_files on disk, integration_contracts vs satisfies_contracts) are handled by main in Phase A1 — not by per-file agents. Do not duplicate those checks here.
 
 ### P4 Low
 - Code style inconsistencies
@@ -152,7 +189,8 @@ Manifest:    .mdd/jobs/audit-<date>/MANIFEST.md
 2. Read shard-<N>.md to know your file list
 3. Read MANIFEST.md — find the first [ ] entry in Shard <N>
 4. Read the last 20 lines of agent-<N>-notes.md for continuity
-5. Begin the per-file loop at that first [ ] entry
+5. Read integration-context.md — load this into working memory. Use it when checking P1 (integration contract not called at call site): cross-reference the source file's feature against the contracts defined for its dependencies.
+6. Begin the per-file loop at that first [ ] entry
 ```
 
 This config file contains no source code or findings — only paths and instructions. It is the only thing an agent needs to resume correctly after a context clear.
@@ -171,7 +209,8 @@ STARTUP (run on every fresh start and after every context clear):
   2. Read shard-N.md
   3. Read MANIFEST.md — find first [ ] in own shard
   4. Read last 20 lines of agent-N-notes.md for continuity
-  5. Begin per-file loop
+  5. Read integration-context.md — holds feature ownership map and all integration contracts
+  6. Begin per-file loop
 
 PER-FILE LOOP:
   1. Mark file as [~] in MANIFEST.md        ← write to disk first
@@ -216,7 +255,8 @@ Main merges all agent notes into the canonical output file:
 1. Read `MANIFEST.md` to get canonical file order
 2. For each file in manifest order, locate its `## <filepath>` section in the correct agent notes file
 3. Append to `audits/notes-<date>.md` in that order
-4. Verify entry count in `audits/notes-<date>.md` matches manifest file count
+4. If `audits/doc-findings-<date>.md` exists and is non-empty, append its contents to `audits/notes-<date>.md` under a `## Feature Doc Issues` header
+5. Verify entry count in `audits/notes-<date>.md` matches manifest file count (doc findings are supplemental — they don't affect the per-file count)
 
 Merge is in manifest order, not agent completion order. The job folder is not touched during or after merge — all temp files remain until the report is confirmed in Phase A6.
 
@@ -240,14 +280,23 @@ Read ONLY `audits/notes-<date>.md` (NOT source code again). Produce `audits/repo
    - `[doc-field-gap]` — a new feature doc frontmatter field would have surfaced this earlier; suggest the field name and schema
    For each item, name the exact MDD file and section that needs changing.
 
-**Integration contract cross-check (in addition to per-file analysis):**
-After per-file analysis is complete, read all `.mdd/docs/*.md` and:
-- For each feature with `integration_contracts` entries: verify that every listed `caller_feature` has a matching `satisfies_contracts` entry referencing back to this feature
-- For each feature with `satisfies_contracts` entries still `status: pending`: flag as P1 — the wiring was documented but never implemented
-- For each feature doc where `satisfies_contracts` is empty but `depends_on` includes a feature with `integration_contracts`: flag as P2 — missing acknowledgment of mandatory contracts
-- For each source file flagged `[!]` where the finding is "security function not called at call site": cross-reference against `integration_contracts` of dependencies — these are contract violations, not just code quality issues
+**Integration contract verification (proactive — does not depend on what agents flagged):**
 
-Report these as a separate "Contract Violations" section before the standard findings table.
+This step runs independently of agent findings. It uses `integration-context.md` from the job folder (already built in Phase A2) and re-reads specific source files as needed. The "Read ONLY notes" constraint applies to standard synthesis only — this step may re-read source files.
+
+For each contract in `integration-context.md`:
+1. Identify all source files listed under "Caller source files" for that contract
+2. For each such source file, check `audits/notes-<date>.md` for that file's entry:
+   - If notes explicitly confirm the contract call is present: no action
+   - If notes flag a contract violation: include in Contract Violations section
+   - If notes say "No issues found" but the contract requires a specific function call: **re-read that source file now** and check whether the required call is actually present. Agents marked the file `[x]` without the contract context — verify independently.
+3. Report each confirmed gap as P1 ("contract call absent — agent lacked context to detect this")
+
+Additionally read all `.mdd/docs/*.md` to catch any cases the Phase A1 doc cross-check might have missed (e.g., docs added after Phase A1 ran, or pending contracts that weren't flagged):
+- Any `satisfies_contracts` with `status: pending` not already in doc-findings = P1
+- Any `depends_on` with `integration_contracts` and empty `satisfies_contracts` not already in doc-findings = P2
+
+Report all findings from this step as a "Contract Violations" section before the standard findings table.
 
 **Once `audits/report-<date>.md` is confirmed written and non-empty:**
 1. Copy `jobs/audit-<date>/MANIFEST.md` → `audits/MANIFEST-<date>.md`
