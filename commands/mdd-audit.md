@@ -153,11 +153,12 @@ Integration context:   .mdd/jobs/audit-<date>/integration-context.md
 - `eval()` used anywhere — only `vm.runInNewContext` is permitted
 - Cloud metadata endpoints (169.254.169.254, 169.254.170.2, fd00:ec2::254, metadata.google.internal) reachable without block
 - Secrets, API keys, or credentials hardcoded in source
-- Security enforcement function exists in a dependency but is NOT called at this call site (check dependency docs for `integration_contracts`)
+- Security enforcement function exists in a dependency but is NOT called at this call site — check `integration-context.md` under "Integration Contracts" for the contract that applies to this file's feature, then verify the required call is present in this file
 - "Immutable" rule arrays exported as plain mutable arrays — not `Object.freeze()` + `readonly`
 - Untrusted MCP/API/CLI input used without validation or sanitization
 - Data cached or stored without masking applied first
-- `satisfies_contracts` entry is `status: pending` — contract was acknowledged but never wired
+
+**Note:** `satisfies_contracts status: pending` is checked by main in Phase A1, not here — agents cannot read feature docs.
 
 ### P2 High
 - TypeScript `any` used — must use `unknown` with narrowing
@@ -219,9 +220,17 @@ PER-FILE LOOP:
   4. Append to agent-N-notes.md:
        ## src/handlers/auth.ts
        <findings, or "No issues found">
+       Contracts: <explicit result for every contract that applies to this file>
+         - [feature-name] contract: SATISFIED — [function name] called at line N
+         - [feature-name] contract: VIOLATION — required call absent (P1)
+         - (none) — no contracts apply to this file per integration-context.md
   5. Mark file as [x] or [!] in MANIFEST.md ← [!] = has findings
   6. Clear context                           ← every file, no exceptions
   7. On restart: run STARTUP above
+
+The Contracts line is mandatory for every file. It allows Phase A6 to distinguish
+"agent checked and confirmed satisfied" from "agent never checked." If integration-context.md
+shows no contracts apply to this file, write "(none)" — never omit the line entirely.
 ```
 
 **Hard rules:**
@@ -264,7 +273,9 @@ Merge is in manifest order, not agent completion order. The job folder is not to
 
 ### Phase A6 — Analyze
 
-Read ONLY `audits/notes-<date>.md` (NOT source code again). Produce `audits/report-<date>.md` — include `mdd_version: <current from mdd.md frontmatter>` as the first line of frontmatter:
+Read `audits/notes-<date>.md` as the primary source. Produce `audits/report-<date>.md` — include `mdd_version: <current from mdd.md frontmatter>` as the first line of frontmatter.
+
+**Source code access in this phase:** Standard synthesis (items 1-8 below) uses only the notes file. The integration contract verification step that follows may re-read specific source files — that is the only exception, and it is mandatory.
 
 1. Executive summary
 2. Feature completeness matrix
@@ -286,11 +297,12 @@ This step runs independently of agent findings. It uses `integration-context.md`
 
 For each contract in `integration-context.md`:
 1. Identify all source files listed under "Caller source files" for that contract
-2. For each such source file, check `audits/notes-<date>.md` for that file's entry:
-   - If notes explicitly confirm the contract call is present: no action
-   - If notes flag a contract violation: include in Contract Violations section
-   - If notes say "No issues found" but the contract requires a specific function call: **re-read that source file now** and check whether the required call is actually present. Agents marked the file `[x]` without the contract context — verify independently.
-3. Report each confirmed gap as P1 ("contract call absent — agent lacked context to detect this")
+2. For each such source file, find its `## <filepath>` entry in `audits/notes-<date>.md` and read the `Contracts:` line:
+   - `SATISFIED` — agent confirmed the call is present. No action.
+   - `VIOLATION` — agent flagged it. Include as P1 in Contract Violations section.
+   - `(none)` written but this file IS a caller per integration-context.md — agent made an error. **Re-read that source file now** and check independently.
+   - `Contracts:` line is missing entirely — agent ran before this version of the workflow. **Re-read that source file now** and check independently.
+3. Report each confirmed gap as P1. Note whether it was caught by the agent or discovered by Phase A6.
 
 Additionally read all `.mdd/docs/*.md` to catch any cases the Phase A1 doc cross-check might have missed (e.g., docs added after Phase A1 ran, or pending contracts that weren't flagged):
 - Any `satisfies_contracts` with `status: pending` not already in doc-findings = P1
@@ -425,5 +437,7 @@ After the issue is opened, update the `Status` field of each logged entry in `md
 ### Single-Feature Audit Mode
 
 When running `/mdd audit <section>` with fewer than 10 resolved files, skip the shard/config/agent system. Main conversation runs the per-file loop directly — context clear between each file, writing to a single `agent-1-notes.md` in the job folder. The job folder structure and completion sequence are otherwise identical.
+
+**Integration context still applies in this mode.** Before starting the per-file loop, build `integration-context.md` into the job folder using the same logic as Phase A2 (read all `.mdd/docs/*.md`, extract contracts and feature-to-file mappings). Read `integration-context.md` at the start of the per-file loop and after every context clear — identical to the multi-agent startup sequence. The mandatory `Contracts:` line in notes applies here too.
 
 ---
