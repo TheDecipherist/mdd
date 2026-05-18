@@ -113,6 +113,7 @@ Main writes a shard file and config file for each agent into the job folder **be
 
 ## Integration Contracts
 <!-- What each security/shared feature requires ALL callers to implement -->
+<!-- "Caller source files" = look up each caller_feature name in "Feature Source Files" above and list those files -->
 ### <feature-name>
 - Contract: <description of what caller must call/implement>
   Caller features: <featureA>, <featureB>
@@ -153,7 +154,7 @@ Integration context:   .mdd/jobs/audit-<date>/integration-context.md
 - `eval()` used anywhere — only `vm.runInNewContext` is permitted
 - Cloud metadata endpoints (169.254.169.254, 169.254.170.2, fd00:ec2::254, metadata.google.internal) reachable without block
 - Secrets, API keys, or credentials hardcoded in source
-- Security enforcement function exists in a dependency but is NOT called at this call site — check `integration-context.md` under "Integration Contracts" for the contract that applies to this file's feature, then verify the required call is present in this file
+- Security enforcement function required by a dependency contract is absent from this file — two-step check: (1) find this file under "Feature Source Files" in `integration-context.md` to identify its owning feature; (2) scan "Integration Contracts" for any contract where this file's owning feature appears under "Caller features" — those are contracts this file must satisfy. Verify each required call is present.
 - "Immutable" rule arrays exported as plain mutable arrays — not `Object.freeze()` + `readonly`
 - Untrusted MCP/API/CLI input used without validation or sanitization
 - Data cached or stored without masking applied first
@@ -297,12 +298,13 @@ This step runs independently of agent findings. It uses `integration-context.md`
 
 For each contract in `integration-context.md`:
 1. Identify all source files listed under "Caller source files" for that contract
-2. For each such source file, find its `## <filepath>` entry in `audits/notes-<date>.md` and read the `Contracts:` line:
+2. For each such source file, check `audits/MANIFEST-<date>.md` (or the job folder MANIFEST.md if the permanent copy isn't written yet) — if the file is marked `[e]`, skip contract verification for it and note in the Contract Violations section: "Could not verify — file was unreadable during audit."
+3. For files not marked `[e]`, find the file's `## <filepath>` entry in `audits/notes-<date>.md` and read the `Contracts:` line:
    - `SATISFIED` — agent confirmed the call is present. No action.
    - `VIOLATION` — agent flagged it. Include as P1 in Contract Violations section.
    - `(none)` written but this file IS a caller per integration-context.md — agent made an error. **Re-read that source file now** and check independently.
    - `Contracts:` line is missing entirely — agent ran before this version of the workflow. **Re-read that source file now** and check independently.
-3. Report each confirmed gap as P1. Note whether it was caught by the agent or discovered by Phase A6.
+4. Report each confirmed gap as P1. Note whether it was caught by the agent or discovered by Phase A6.
 
 Additionally read all `.mdd/docs/*.md` to catch any cases the Phase A1 doc cross-check might have missed (e.g., docs added after Phase A1 ran, or pending contracts that weren't flagged):
 - Any `satisfies_contracts` with `status: pending` not already in doc-findings = P1
