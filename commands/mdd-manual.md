@@ -1,20 +1,20 @@
-## MANUAL MODE — `/mdd manual [--force]`
+## MANUAL MODE - `/mdd manual [--force]`
 
 Triggered when arguments start with `manual`.
 
 Generates a comprehensive, print-ready user manual at `.mdd/manual/manual.md` from all
 MDD feature docs and ops runbooks. Uses content hashes to detect what changed since the
-last run — only stale sections are regenerated.
+last run - only stale sections are regenerated.
 
-Sections are written to disk **immediately after each generation batch completes** — never
+Sections are written to disk **immediately after each generation batch completes** - never
 held in memory until the end. This means compaction mid-run loses at most one batch of
 sections, and the next run can resume from the saved state.
 
 ---
 
-### Phase M1 — Scope & Hash Check
+### Phase M1 - Scope & Hash Check
 
-**Step 1 — Guard against empty projects**
+**Step 1 - Guard against empty projects**
 
 Check `.mdd/docs/`. If it contains zero `.md` files:
 ```
@@ -23,7 +23,7 @@ Run /mdd <feature> to create your first doc, then re-run /mdd manual.
 ```
 Stop here.
 
-**Step 2 — Load stored hashes**
+**Step 2 - Load stored hashes**
 
 Read `.mdd/manual/.hashes.json` if it exists. If absent, treat every doc as new (full
 generation run).
@@ -38,24 +38,24 @@ Stored hash format:
 }
 ```
 
-**Step 3 — Compute current hashes**
+**Step 3 - Compute current hashes**
 
 For every file in `.mdd/docs/*.md` and `.mdd/ops/*.md`, compute SHA256 of file contents:
 ```bash
 sha256sum .mdd/docs/*.md .mdd/ops/*.md 2>/dev/null
 ```
 
-**Step 4 — Classify each doc**
+**Step 4 - Classify each doc**
 
 Compare current vs stored hashes:
-- `unchanged` — hash matches stored value → skip section regeneration
-- `changed` — hash differs → regenerate section
-- `new` — no stored hash → generate section
-- `deleted` — stored hash exists but file no longer present → remove section
+- `unchanged` - hash matches stored value → skip section regeneration
+- `changed` - hash differs → regenerate section
+- `new` - no stored hash → generate section
+- `deleted` - stored hash exists but file no longer present → remove section
 
 If `--force` was passed: treat every doc as `changed` regardless of hashes.
 
-**Step 5 — Report scope**
+**Step 5 - Report scope**
 
 ```
 📖 MDD Manual Generator
@@ -78,24 +78,24 @@ Stop here.
 
 ---
 
-### Phase M2 — Skeleton Init (before generating any sections)
+### Phase M2 - Skeleton Init (before generating any sections)
 
 Before generating any sections, ensure `manual.md` is in a writable state on disk.
-This protects against compaction — each section written to disk is durable.
+This protects against compaction - each section written to disk is durable.
 
-**Step 1 — Ensure output directory exists**
+**Step 1 - Ensure output directory exists**
 ```bash
 mkdir -p .mdd/manual
 ```
 
-**Step 2 — Load existing manual or build skeleton**
+**Step 2 - Load existing manual or build skeleton**
 
 Read `.mdd/manual/manual.md` if it exists. Identify the preface: everything before the
 first `<!-- mdd-section: -->` marker. If the file is new, generate a default preface
 (see Phase M3 Step 2 below for the preface format) and write the skeleton immediately:
 
 ```markdown
-# <Project Name> — User Manual
+# <Project Name> - User Manual
 
 > <tagline>
 
@@ -121,13 +121,13 @@ first `<!-- mdd-section: -->` marker. If the file is new, generate a default pre
 
 ## Features
 
-(sections generating — re-run /mdd manual if interrupted)
+(sections generating - re-run /mdd manual if interrupted)
 
 ---
 
 ## Operations
 
-(sections generating — re-run /mdd manual if interrupted)
+(sections generating - re-run /mdd manual if interrupted)
 
 ---
 
@@ -141,7 +141,7 @@ first `<!-- mdd-section: -->` marker. If the file is new, generate a default pre
 Write this skeleton to `.mdd/manual/manual.md` now, before any agents are launched.
 This ensures the file exists on disk even if compaction occurs mid-generation.
 
-**Step 3 — Remove deleted sections**
+**Step 3 - Remove deleted sections**
 
 For each doc classified as `deleted`: find and remove the entire
 `<!-- mdd-section: <id> -->` … `<!-- /mdd-section: <id> -->` block (including
@@ -150,10 +150,10 @@ each removal.
 
 ---
 
-### Phase M3 — Section Generation (incremental, batch-by-batch)
+### Phase M3 - Section Generation (incremental, batch-by-batch)
 
 For each `changed` or `new` doc, generate a user-friendly manual section. The section
-must be readable by someone who has never seen the source code — focus on WHAT the
+must be readable by someone who has never seen the source code - focus on WHAT the
 feature does and HOW to use it, not implementation details.
 
 **Section structure per feature doc:**
@@ -171,18 +171,18 @@ feature does and HOW to use it, not implementation details.
 <Step-by-step user instructions. Include command syntax, options, examples.>
 
 #### Commands
-<If the feature has CLI commands — table with command, description, flags.>
+<If the feature has CLI commands - table with command, description, flags.>
 | Command | Description | Flags |
 |---------|-------------|-------|
 | `mdd <cmd>` | … | `--flag` |
 
 #### API Endpoints
-<If the feature exposes HTTP endpoints — table with method, path, description.>
+<If the feature exposes HTTP endpoints - table with method, path, description.>
 | Method | Path | Description | Auth |
 |--------|------|-------------|------|
 
 #### Configuration
-<If the feature has configurable options — env vars, settings, flags.>
+<If the feature has configurable options - env vars, settings, flags.>
 | Option | Type | Default | Description |
 |--------|------|---------|-------------|
 
@@ -209,7 +209,7 @@ For ops runbooks, use a condensed format:
 <!-- /mdd-section: ops/<slug> -->
 ```
 
-**Parallelism and incremental writing — CRITICAL:**
+**Parallelism and incremental writing - CRITICAL:**
 
 - **1–4 changed docs** → generate sequentially in main conversation. After EACH section
   is generated, immediately patch it into `manual.md` on disk (see patching rules below)
@@ -243,44 +243,44 @@ For each returned section:
 
 **Reading source files during generation:**
 When the feature doc lists `source_files`, read those files briefly to verify the section
-accurately reflects what is implemented — do not invent capabilities not present in code.
+accurately reflects what is implemented - do not invent capabilities not present in code.
 If source files don't exist yet (draft feature), note the section as "(planned)" in the
 section header.
 
 ---
 
-### Phase M4 — Final Assembly
+### Phase M4 - Final Assembly
 
 After all sections are on disk, perform final assembly passes on `manual.md`.
 
-**Step 1 — Rebuild aggregated reference sections**
+**Step 1 - Rebuild aggregated reference sections**
 
 Scan every `<!-- mdd-section: -->` block in the current `manual.md` for:
 
-**Command Reference** — find all `#### Commands` tables. Merge into one master table,
+**Command Reference** - find all `#### Commands` tables. Merge into one master table,
 sorted alphabetically by command. Include a "Feature" column. Replace the existing
 `## Command Reference` section (or append if missing).
 
-**API Reference** — find all `#### API Endpoints` tables. Merge into one master table,
+**API Reference** - find all `#### API Endpoints` tables. Merge into one master table,
 sorted by path. Include a "Feature" column. Replace the existing `## API Reference`
 section (or append if missing). Omit this section entirely if no API endpoints were found.
 
-**Configuration** — find all `#### Configuration` tables. Merge into one master table,
+**Configuration** - find all `#### Configuration` tables. Merge into one master table,
 grouped by feature. Replace the existing `## Configuration` section (or append if
 missing). Omit this section entirely if no configuration options were found.
 
-**Step 2 — Regenerate TOC**
+**Step 2 - Regenerate TOC**
 
 Scan the assembled document for all `##` and `###` headings. Build a markdown TOC with
 anchor links. Replace the `<!-- toc -->` … `<!-- /toc -->` block (between
 `## Table of Contents` and the next `---` divider) with the new TOC.
 
-**Step 3 — Final document structure**
+**Step 3 - Final document structure**
 
 The assembled `manual.md` must follow this order:
 
 ```markdown
-# <Project Name> — User Manual        ← preface (preserved or generated)
+# <Project Name> - User Manual        ← preface (preserved or generated)
 > <tagline>
 
 **Version:** … **Generated:** …
@@ -339,7 +339,7 @@ The assembled `manual.md` must follow this order:
 | Option | Type | Default | Description | Feature |
 ```
 
-**Step 2 — Build/update preface** (if generating for the first time)
+**Step 2 - Build/update preface** (if generating for the first time)
 
 If the preface was newly generated in Phase M2, ensure it uses this content:
 
@@ -347,11 +347,11 @@ Read `.mdd/.startup.md` for: project name, stack, tagline. Read `package.json` (
 present) for version. Read `README.md` introduction (first 3 paragraphs, if present).
 
 ```markdown
-# <Project Name> — User Manual
+# <Project Name> - User Manual
 
 > <tagline or one-sentence description>
 
-**Version:** <version from package.json, or "—">
+**Version:** <version from package.json, or "-">
 **Generated:** <date>
 
 <2-3 paragraph project overview synthesized from README and .startup.md>
@@ -363,9 +363,9 @@ Write the final assembled `manual.md` to disk.
 
 ---
 
-### Phase M5 — Write Hashes & Report
+### Phase M5 - Write Hashes & Report
 
-**Step 1 — Update hash store**
+**Step 1 - Update hash store**
 
 Write `.mdd/manual/.hashes.json` with:
 - One entry per doc that now exists on disk (use the current hash)
@@ -374,10 +374,10 @@ Write `.mdd/manual/.hashes.json` with:
 - Set `_manual_version: 1` (or increment if already set)
 
 **Only write this file after manual.md is fully complete.** The hash file is the
-completion marker — if `.hashes.json` is missing or stale, the next run will know
+completion marker - if `.hashes.json` is missing or stale, the next run will know
 to regenerate all sections.
 
-**Step 2 — Report**
+**Step 2 - Report**
 
 ```
 ✅ Manual generated
@@ -395,7 +395,7 @@ Tip: manual.md is print-ready markdown. Open in any markdown viewer,
      export to PDF, or use as source material for blog posts and docs.
 ```
 
-**Step 3 — Gitignore check**
+**Step 3 - Gitignore check**
 
 Check whether `.mdd/manual/` is in `.gitignore`. If not, suggest:
 ```
@@ -409,8 +409,8 @@ Check whether `.mdd/manual/` is in `.gitignore`. If not, suggest:
 
 | Flag | Effect |
 |------|--------|
-| `--force` | Bypass hash check — regenerate all sections |
-| (none) | Default — only regenerate changed/new sections |
+| `--force` | Bypass hash check - regenerate all sections |
+| (none) | Default - only regenerate changed/new sections |
 
 ---
 
@@ -419,12 +419,13 @@ Check whether `.mdd/manual/` is in `.gitignore`. If not, suggest:
 When generating each section, the goal is a document a non-technical user or executive
 can read and understand. Rules for section writers:
 
+- **No em dashes** - never use `-` anywhere in generated content; use a plain hyphen `-` instead
 - **No internal file paths** in body text (they belong in the feature doc, not the manual)
-- **No jargon without definition** — if a term needs explanation, add it
-- **Active voice** — "The auth system validates your token" not "Tokens are validated"
-- **One idea per paragraph** — keep paragraphs to 3–5 sentences
+- **No jargon without definition** - if a term needs explanation, add it
+- **Active voice** - "The auth system validates your token" not "Tokens are validated"
+- **One idea per paragraph** - keep paragraphs to 3-5 sentences
 - **Examples are mandatory** for any command or API endpoint listed
-- **Planned features** are clearly marked `(planned — not yet implemented)`
+- **Planned features** are clearly marked `(planned - not yet implemented)`
 
 ### Recovery from Interrupted Runs
 
@@ -433,7 +434,7 @@ If `/mdd manual` was interrupted mid-generation (context compaction, session end
 1. Re-run `/mdd manual`. The hash check will find that `.hashes.json` is missing or
    incomplete (since it's only written at the very end in Phase M5).
 2. Sections already written to `manual.md` (from completed batches) will be detected as
-   present — but since their hashes aren't in `.hashes.json`, they'll be classified as
+   present - but since their hashes aren't in `.hashes.json`, they'll be classified as
    `new` and regenerated.
 3. The regenerated sections will simply replace what was already there. No data is lost.
 
