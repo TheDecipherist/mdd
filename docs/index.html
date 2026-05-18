@@ -6,7 +6,7 @@
   <title>MDD - Manual-Driven Development</title>
 
   <!-- SEO Meta Tags -->
-  <meta name="description" content="MDD (Manual-Driven Development) - One command. Twenty-five modes. Complete feature lifecycle from documentation to verified deployment. An npm package for Claude Code." />
+  <meta name="description" content="MDD (Manual-Driven Development) - One command. Twenty-six modes. Complete feature lifecycle from documentation to verified deployment. An npm package for Claude Code." />
   <meta name="keywords" content="MDD, Manual-Driven Development, Claude Code, AI development, npm, software lifecycle, feature development, code audit" />
   <meta name="author" content="TheDecipherist" />
   <meta name="robots" content="index, follow" />
@@ -16,14 +16,14 @@
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://thedecipherist.github.io/mdd" />
   <meta property="og:title" content="MDD - Manual-Driven Development" />
-  <meta property="og:description" content="One command. Twenty-five modes. Complete feature lifecycle from documentation to verified deployment." />
+  <meta property="og:description" content="One command. Twenty-six modes. Complete feature lifecycle from documentation to verified deployment." />
   <meta property="og:image" content="https://thedecipherist.github.io/mdd/mdd_hero.webp" />
   <meta property="og:site_name" content="MDD" />
 
   <!-- Twitter Card -->
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="MDD - Manual-Driven Development" />
-  <meta name="twitter:description" content="One command. Twenty-five modes. Complete feature lifecycle from documentation to verified deployment." />
+  <meta name="twitter:description" content="One command. Twenty-six modes. Complete feature lifecycle from documentation to verified deployment." />
   <meta name="twitter:image" content="https://thedecipherist.github.io/mdd/mdd_hero.webp" />
 
   <!-- Schema.org JSON-LD -->
@@ -33,7 +33,7 @@
     "@type": "SoftwareApplication",
     "name": "MDD - Manual-Driven Development",
     "alternateName": "MDD",
-    "description": "One command. Twenty-five modes. Complete feature lifecycle from documentation to verified deployment. An npm package for Claude Code.",
+    "description": "One command. Twenty-six modes. Complete feature lifecycle from documentation to verified deployment. An npm package for Claude Code.",
     "url": "https://thedecipherist.github.io/mdd",
     "downloadUrl": "https://www.npmjs.com/package/@thedecipherist/mdd",
     "applicationCategory": "DeveloperApplication",
@@ -149,7 +149,7 @@
       <a href="#why">Why MDD</a>
       <a href="#how-it-works">How It Works</a>
       <a href="#install">Installation</a>
-      <a href="#modes">All 25 Modes</a>
+      <a href="#modes">All 26 Modes</a>
       <a href="#build">Build Mode</a>
       <a href="#audit">Audit Mode</a>
       <a href="#results">Real Results</a>
@@ -177,7 +177,7 @@
       <div class="hero-badge">npm install -g @thedecipherist/mdd</div>
       <h1>MDD - Manual-Driven Development</h1>
       <p class="hero-subtitle">
-        One command. Twenty-five modes. Complete feature lifecycle from documentation to verified deployment.
+        One command. Twenty-six modes. Complete feature lifecycle from documentation to verified deployment.
       </p>
       <div class="hero-actions">
         <a href="user-guide.html" class="btn btn-primary">Read the Guide &rarr;</a>
@@ -206,7 +206,7 @@
         <a href="#why">Why MDD</a>
         <a href="#how-it-works">How It Works</a>
         <a href="#install">Installation</a>
-        <a href="#modes">All 25 Modes</a>
+        <a href="#modes">All 26 Modes</a>
         <a href="#build">Build Mode</a>
         <a href="#audit">Audit Mode</a>
         <a href="#results">Real Results</a>
@@ -461,13 +461,13 @@ mdd install</code></pre>
       </section>
 
       <!-- ===================== -->
-      <!-- Section: All 25 Modes -->
+      <!-- Section: All 26 Modes -->
       <!-- ===================== -->
       <section id="modes">
-        <h2>All 25 Modes</h2>
+        <h2>All 26 Modes</h2>
 
         <p>
-          MDD organises its 25 modes into 7 groups. Each group is loaded independently -
+          MDD organises its 26 modes into 8 groups. Each group is loaded independently -
           running a manage command never loads the build pipeline, and running a plan command
           never loads the audit system. Pick the mode that matches what you need right now.
         </p>
@@ -574,6 +574,24 @@ mdd install</code></pre>
               <li><code>/mdd runop</code> - execute a runbook step-by-step</li>
               <li><code>/mdd update-op</code> - revise an existing runbook</li>
               <li><code>/mdd ops list</code> - list all runbooks</li>
+            </ul>
+          </div>
+
+          <div class="command-card">
+            <h3>&#128218; Manual</h3>
+            <p class="command-desc">
+              <code>/mdd manual [--force]</code>
+            </p>
+            <p class="command-desc">
+              Generates a comprehensive, print-ready user manual at <code>.mdd/manual/manual.md</code>
+              from all feature docs and ops runbooks. Uses content hashes so only changed sections
+              are regenerated — fast on repeat runs.
+            </p>
+            <ul>
+              <li>Table of contents with anchor links</li>
+              <li>Plain-English feature descriptions</li>
+              <li>Aggregated command, API, and config tables</li>
+              <li><code>--force</code> to rebuild everything from scratch</li>
             </ul>
           </div>
 
