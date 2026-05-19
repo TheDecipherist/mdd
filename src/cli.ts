@@ -81,4 +81,12 @@ program
     install({ dir: effectiveDir, modesDir, force: true, local, claudeMdPath, settingsPath, selfImprovement });
   });
 
+program
+  .command('update-ecommerce')
+  .description('Update @thedecipherist/mdd-ecommerce-* packages and report breaking changes')
+  .action(async () => {
+    const { updateEcommerce } = await import('./update-ecommerce.js');
+    updateEcommerce();
+  });
+
 program.parseAsync();
