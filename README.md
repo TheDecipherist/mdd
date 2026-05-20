@@ -864,6 +864,7 @@ Every `.mdd/docs/<NN>-<feature-name>.md` file uses this YAML frontmatter:
 | `tags` | 4–8 domain-concept keywords surfaced in `.startup.md` so Claude can detect when a prompt relates to this feature (e.g. `[auth, jwt, login, sessions]`) |
 | `path` | Slash-delimited breadcrumb showing where this feature lives in the product (e.g. `Auth/Login`, `E-commerce/Cart/Checkout`). Used by dashboards and listing tools to group docs into a human-readable tree. Distinct from `depends_on` — this is for navigation, not build order. |
 | `known_issues` | Issues discovered during audits or implementation |
+| `security_read_sites` | Optional. List of `file:line` entries where user-supplied file paths are read. Phase A1 cross-checks each against path-confinement calls - a listed site with no guard is a P1 finding. Leave empty or omit if the feature has no file-read attack surface. |
 
 **`depends_on` rules:**
 - Feature docs only - never list task docs (one-off, frozen, no ongoing contract)
@@ -1011,7 +1012,7 @@ MDD creates `.mdd/settings.json` on first run. It controls which rule files load
 
 **`phaseLogging: true` (default)** - Controls whether MDD writes phase timing data via `mdd-log-phase.sh`. Set to `false` to suppress all phase log output.
 
-**`securityScan: false` (default)** - Enables the security rule generator. See the section below.
+**`securityScan: false` (default)** - Set to `true` to enable the security rule generator. See the section below.
 
 ### Stack-Specific Rule Files
 
@@ -1022,6 +1023,7 @@ mdd-rules-typescript.md   # TypeScript-specific audit criteria and build checkli
 mdd-rules-express.md      # Express error handling, middleware, route validation rules
 mdd-rules-jwt.md          # JWT decode safety, expiry checks, secret validation
 mdd-rules-prisma.md       # Prisma query safety, transaction patterns, migration checks
+mdd-rules-mcp.md          # MCP tool input validation and rejection test enforcement
 ```
 
 Rules are additive - they append criteria to the existing phase rather than replacing anything. If a rule file doesn't exist for a stack entry, MDD warns once and continues. A misconfigured or missing `settings.json` never halts a session.
