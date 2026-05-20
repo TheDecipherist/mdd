@@ -1,3 +1,15 @@
+## Phase Logging
+
+At the **start** of every phase (before any action) and the **end** of every phase (after all actions), run the command below. Substitute `PHASE` with the phase identifier (e.g., `Phase OP1`, `Phase RO2`) and `EVENT` with `start` or `end`:
+
+```bash
+bash -c 'D=$(date +%Y-%m-%d); T=$(date +%H:%M:%S); K=$(compressmcp --status 2>/dev/null | grep -oE "[0-9]+K/[0-9]+K" | head -1 || echo "-"); mkdir -p ~/.claude/mdd; printf "| %s | mdd-ops | PHASE | EVENT | %s | %s |\n" "$D" "$T" "$K" >> ~/.claude/mdd/log.md' 2>/dev/null || true
+```
+
+Log file: `~/.claude/mdd/log.md`
+
+---
+
 ## OPS DOCUMENT MODE — `/mdd ops <description>`
 
 Triggered when arguments start with `ops`. If arguments are exactly `ops list` → jump to **Ops List Mode** (Phase OL) instead.
