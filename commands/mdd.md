@@ -160,6 +160,7 @@ For `package.json`, scan both `dependencies` and `devDependencies` for these kno
 | `mongoose` | orm | `mongoose` |
 | `jsonwebtoken`, `jose` | auth | `jwt` |
 | `passport` | auth | `passport` |
+| `@modelcontextprotocol/sdk`, `@anthropic-ai/mcp` | frameworks | `mcp` |
 
 Write detected entries back into `settings.json` under `stack` (non-destructive — only updates `stack`, never touches `overrides`, `phaseLogging`, `autoDiscovery`, or `securityScan`).
 

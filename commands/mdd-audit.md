@@ -53,7 +53,9 @@ These checks require comparing feature docs to each other and to disk. They cann
 
 - For each feature, verify every path in `source_files` exists on disk. Missing files = P2 finding.
 - For each feature with `depends_on` that includes a feature with `integration_contracts`: verify this feature's `satisfies_contracts` is not empty. Missing acknowledgment = P2 finding.
+- For each feature with `satisfies_contracts` entries: verify that EVERY file in the feature's `source_files` that performs the contracted operation has the required guard call — not just one file per entry. A single guarded file does not satisfy a contract that covers the whole feature. Any unguarded file = P2 finding (P1 if the contract is a security contract).
 - For each feature with `satisfies_contracts` entries where `status: pending`: flag every pending entry as P1 — contract was documented but never wired.
+- For each feature with `security_read_sites` present and non-empty: read each listed `file:line` and confirm the immediately surrounding code calls the canonical path-confinement function. A listed site with no confinement call = P1 finding.
 - For each feature with `integration_contracts`: verify every listed `caller_feature` exists as a feature doc. Non-existent caller referenced = P3 finding.
 
 Record all findings from this step in a dedicated `audits/doc-findings-<date>.md` file. These are merged into the final report in Phase A5 as a separate "Feature Doc Issues" section.
@@ -188,7 +190,7 @@ Integration context:   .mdd/jobs/audit-<date>/integration-context.md
 - "Immutable" rule arrays exported as plain mutable arrays — not `Object.freeze()` + `readonly`
 - Untrusted MCP/API/CLI input used without validation or sanitization
 - Data cached or stored without masking applied first
-- Local reimplementation of security logic — any function named `isConfined`, `isAllowed`, `isSafe`, `isBlocked`, or similar that replicates what a documented security module already provides. Require replacement with the canonical security module function.
+- Local reimplementation of security logic — any function named `isConfined`, `isAllowed`, `isSafe`, `isBlocked`, or similar that replicates what a documented security module already provides. Require replacement with the canonical security module function. Also check for any object-literal property or anonymous helper that performs path resolution and containment (`resolve` + `relative` + `startsWith('..')`) without delegating to the canonical security module — these are the same violation regardless of whether they are named functions.
 - Contract function undefined — if `integration_contracts` specifies a function name, grep the entire package for that name as an export. If the function does not exist anywhere, flag P1 regardless of whether call sites are present.
 
 **Note:** `satisfies_contracts status: pending` is checked by main in Phase A1, not here — agents cannot read feature docs.

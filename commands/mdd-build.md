@@ -107,6 +107,8 @@ Before writing anything, gather context using **3 parallel Explore agents**. Lau
 
 **After all 3 return:** synthesize into a working context in the main conversation. If any agent fails, silently fall back to direct `Read`/`Glob` for that agent's data — never surface agent failures to the user unless all 3 fail.
 
+**Shared-utilities check (when Agent B returns features with `depends_on` entries):** For each dependency feature, scan its `source_files` for shared infrastructure — error types, DB clients, utility functions — that the new feature would likely duplicate. If overlap is found, surface it before asking questions: "Feature `<NN>` already has `<type/client>` in `<file>`. Extract to a shared module before implementing?" Add an extraction block to the build plan if the user agrees. This check runs here — not at Phase 6 — so duplication is caught before documentation is written.
+
 **Detect task type before asking questions.** If `src/` has fewer than 3 TypeScript/source files AND the feature description contains words like `workflow`, `command`, `config`, `docs`, `tooling`, `hook`, `script`, or `prompt` — mark as a **tooling task** and skip the database and API questions entirely.
 
 Then ask the user targeted questions using AskUserQuestion. Ask ALL relevant questions upfront in a single interaction — don't spread them across multiple turns:
@@ -240,6 +242,7 @@ path: <Area/Section>
 integration_contracts: []
 satisfies_contracts: []
 known_issues: []
+security_read_sites: []   # optional: list file:line entries where user-supplied paths are read; Phase A1 cross-checks each against path-confinement calls
 ---
 
 # <NN> — <Feature Title>
