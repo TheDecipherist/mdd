@@ -1,0 +1,6 @@
+node_modules
+dist
+.mdd
+.claude
+_ai_temp
+*.log
