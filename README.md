@@ -7,11 +7,11 @@
 > **One command. Twenty-five modes. Complete feature lifecycle from documentation to verified deployment.**
 
 <p align="center">
-  <a href="https://thedecipherist.github.io/mdd">
-    <img src="https://img.shields.io/badge/📖_Documentation-thedecipherist.github.io%2Fmdd-00e5cc?style=for-the-badge&labelColor=08090f" alt="Documentation Site" />
+  <a href="https://mddai.dev">
+    <img src="https://img.shields.io/badge/📖_Documentation-mddai.dev-00e5cc?style=for-the-badge&labelColor=08090f" alt="Documentation Site" />
   </a>
   &nbsp;
-  <a href="https://thedecipherist.github.io/mdd/user-guide.html">
+  <a href="https://mddai.dev/user-guide.html">
     <img src="https://img.shields.io/badge/📚_User_Guide-Full_Reference-00ff88?style=for-the-badge&labelColor=08090f" alt="User Guide" />
   </a>
 </p>
@@ -32,7 +32,7 @@ Then in Claude Code:
 /mdd add user authentication with JWT tokens
 ```
 
-📖 **[Full Documentation Site](https://thedecipherist.github.io/mdd)** · [User Guide](https://thedecipherist.github.io/mdd/user-guide.html) · [GitHub](https://github.com/TheDecipherist/mdd)
+📖 **[Full Documentation Site](https://mddai.dev)** · [User Guide](https://mddai.dev/user-guide.html) · [GitHub](https://github.com/TheDecipherist/mdd)
 
 ---
 
