@@ -11,6 +11,7 @@ source_files:
   - commands/mdd-rules-express.md
   - commands/mdd-rules-jwt.md
   - commands/mdd-rules-prisma.md
+  - commands/mdd-rules-mcp.md
   - src/install.ts
 routes: []
 models: []
