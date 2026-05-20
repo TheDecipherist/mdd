@@ -1,5 +1,17 @@
 ## BUILD MODE — New Feature Development
 
+## Phase Logging
+
+At the **start** of every phase (before any action) and the **end** of every phase (after all actions), run the command below. Substitute `PHASE` with the phase identifier (e.g., `Phase 0`, `Phase 1`) and `EVENT` with `start` or `end`:
+
+```bash
+bash -c 'D=$(date +%Y-%m-%d); T=$(date +%H:%M:%S); K=$(compressmcp --status 2>/dev/null | grep -oE "[0-9]+K/[0-9]+K" | head -1 || echo "-"); mkdir -p ~/.claude/mdd; printf "| %s | mdd-build | PHASE | EVENT | %s | %s |\n" "$D" "$T" "$K" >> ~/.claude/mdd/log.md' 2>/dev/null || true
+```
+
+Log file: `~/.claude/mdd/log.md`
+
+---
+
 ### Phase 0 — Branch Safety Check
 
 Before gathering any context, verify the current branch is compatible with the requested feature.

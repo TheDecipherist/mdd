@@ -2,6 +2,16 @@
 
 Routes to one of three sub-modes based on the command used.
 
+## Phase Logging
+
+At the **start** of every step (before any action) and the **end** of every step (after all actions), run the command below. Substitute `PHASE` with the step identifier (e.g., `Step 1`, `Step 3`) and `EVENT` with `start` or `end`:
+
+```bash
+bash -c 'D=$(date +%Y-%m-%d); T=$(date +%H:%M:%S); K=$(compressmcp --status 2>/dev/null | grep -oE "[0-9]+K/[0-9]+K" | head -1 || echo "-"); mkdir -p ~/.claude/mdd; printf "| %s | mdd-framework | PHASE | EVENT | %s | %s |\n" "$D" "$T" "$K" >> ~/.claude/mdd/log.md' 2>/dev/null || true
+```
+
+Log file: `~/.claude/mdd/log.md`
+
 ---
 
 ## `framework <feature>` — Add a Module to mdd-ecommerce

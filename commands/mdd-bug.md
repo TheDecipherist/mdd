@@ -3,6 +3,16 @@
 **Trigger:** `/mdd bug <description>`
 
 The user is reporting a bug in an existing feature. Do NOT create a new feature doc.
+
+## Phase Logging
+
+At the **start** of every phase (before any action) and the **end** of every phase (after all actions), run the command below. Substitute `PHASE` with the phase identifier (e.g., `Phase B0`, `Phase B1`) and `EVENT` with `start` or `end`:
+
+```bash
+bash -c 'D=$(date +%Y-%m-%d); T=$(date +%H:%M:%S); K=$(compressmcp --status 2>/dev/null | grep -oE "[0-9]+K/[0-9]+K" | head -1 || echo "-"); mkdir -p ~/.claude/mdd; printf "| %s | mdd-bug | PHASE | EVENT | %s | %s |\n" "$D" "$T" "$K" >> ~/.claude/mdd/log.md' 2>/dev/null || true
+```
+
+Log file: `~/.claude/mdd/log.md`
 Instead: scan existing docs to identify which feature(s) own the broken behavior,
 document the bug in those docs, fix it, and mark it complete.
 
