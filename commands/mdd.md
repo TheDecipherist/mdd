@@ -98,6 +98,85 @@ Read CLAUDE.md for the full rulebook. Key rules:
 
 This bootstrap runs for **all modes** — build, audit, scan, update, and every other mode — so no mode ever fails due to a missing `.mdd/` structure.
 
+## Step 0c — Settings Bootstrap (silent, automatic)
+
+After the directory structure is confirmed, load project settings. This also runs for every mode and never prompts the user.
+
+**Read or create `.mdd/settings.json`:**
+
+If the file does not exist, create it with this default and report one line:
+
+```json
+{
+  "autoDiscovery": true,
+  "stack": {
+    "language": [],
+    "runtime": [],
+    "frameworks": [],
+    "orm": [],
+    "auth": []
+  },
+  "overrides": {},
+  "phaseLogging": true,
+  "securityScan": false
+}
+```
+
+```
+📋 MDD settings initialised: .mdd/settings.json
+```
+
+If the file exists but cannot be read or is not valid JSON: emit one warning (`⚠ settings.json unreadable — running without stack rules`) and proceed with all defaults. Never halt.
+
+**Set session variables from settings:**
+
+- `$MDD_PHASE_LOGGING` = `settings.phaseLogging` (default: `true`)
+- `$MDD_SECURITY_SCAN` = `settings.securityScan` (default: `false`)
+
+**If `autoDiscovery: true`, run stack detection** — check manifest files in the project root:
+
+| File | What to detect |
+|------|----------------|
+| `package.json` | language (`typescript` if typescript in deps, else `javascript`), runtime (`node`), plus frameworks/orm/auth from dep names below |
+| `go.mod` | language: `go` |
+| `pyproject.toml` or `requirements.txt` | language: `python` |
+| `composer.json` | language: `php` |
+
+For `package.json`, scan both `dependencies` and `devDependencies` for these known packages:
+
+| Package(s) | Category | Stack value |
+|-----------|----------|-------------|
+| `typescript` | language | `typescript` |
+| `express` | frameworks | `express` |
+| `fastify` | frameworks | `fastify` |
+| `koa` | frameworks | `koa` |
+| `hono` | frameworks | `hono` |
+| `next` | frameworks | `nextjs` |
+| `react` | frameworks | `react` |
+| `vue` | frameworks | `vue` |
+| `@prisma/client` | orm | `prisma` |
+| `drizzle-orm` | orm | `drizzle` |
+| `typeorm` | orm | `typeorm` |
+| `mongoose` | orm | `mongoose` |
+| `jsonwebtoken`, `jose` | auth | `jwt` |
+| `passport` | auth | `passport` |
+
+Write detected entries back into `settings.json` under `stack` (non-destructive — only updates `stack`, never touches `overrides`, `phaseLogging`, `autoDiscovery`, or `securityScan`).
+
+If `autoDiscovery: false`, read `settings.json` as-is — no scan runs.
+
+**Build `$MDD_STACK`** by merging `stack` + `overrides` into a flat deduplicated array of all values across all categories.
+
+If the stack was newly detected or changed, report one line:
+```
+📋 Stack: typescript, node, express, prisma, jwt  |  phase logging: on  |  security scan: off
+```
+
+**Phase logging gate:** All `mdd-log-phase.sh` calls throughout every mode file must be wrapped:
+```bash
+[ "$MDD_PHASE_LOGGING" = "false" ] || bash ~/.claude/hooks/mdd-log-phase.sh ...
+```
+
 ## Step 0b — Detect Mode
 
 The user's full arguments are: **$ARGUMENTS**
@@ -135,6 +214,9 @@ Use whichever path contains `mdd-audit.md`. Store it as `$MDD_DIR` and use it fo
 
 - If arguments start with `bug` →
   **Read `$MDD_DIR/mdd-bug.md` then follow BUG MODE instructions.**
+
+- If arguments start with `security-rules` →
+  **Read `$MDD_DIR/mdd-security-rules.md` then follow SECURITY RULES MODE instructions.**
 
 - If arguments are empty → ask the user what they want to do (build a feature, run an audit, check status, etc.)
 

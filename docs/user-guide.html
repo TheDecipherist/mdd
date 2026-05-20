@@ -117,6 +117,8 @@
     <a href="#ops-modes">Ops Runbooks</a>
     <a href="#doc-format">Feature Doc Reference</a>
     <a href="#mdd-directory">The .mdd/ Directory</a>
+    <a href="#settings">Stack Settings</a>
+    <a href="#security-rules">Security Rule Generator</a>
     <a href="#versioning">MDD Versioning</a>
     <a href="#migration">Migrating from the Starter Kit</a>
     <a href="#dashboards">Dashboards</a>
@@ -173,6 +175,8 @@ mdd install</code></pre>
         <a href="#doc-format">Feature Doc Reference</a>
         <a href="#path-field" style="padding-left:1.25rem;font-size:0.85em">The path Field</a>
         <a href="#mdd-directory">The .mdd/ Directory</a>
+        <a href="#settings">Stack Settings</a>
+        <a href="#security-rules" style="padding-left:1.25rem;font-size:0.85em">Security Rule Generator</a>
         <a href="#versioning">MDD Versioning</a>
         <a href="#migration">Migrating from Starter Kit</a>
         <a href="#dashboards">Dashboards</a>
@@ -2280,6 +2284,7 @@ Platform/
 │       ├── agent-2-config.md
 │       └── agent-2-notes.md
 │
+├── settings.json                     # Stack config — auto-populated by discovery (committed)
 ├── connections.md                    # Pre-computed relationship map (committed to git)
 └── .startup.md                       # Auto-generated session context</code></pre>
 
@@ -2397,6 +2402,177 @@ auth-system-overhaul - Wave 2: 1/2 features complete
         </ul>
         <p>
           Global runbooks are shown alongside project runbooks in <code>/mdd ops list</code> but are stored outside the project repo and are not committed.
+        </p>
+      </section>
+
+      <!-- ===== SETTINGS ===== -->
+      <section id="settings">
+        <h2>Stack Settings</h2>
+
+        <p>
+          MDD creates <code>.mdd/settings.json</code> on first run. It controls stack detection,
+          which rule files load during audit and build phases, and a few session-level behaviours.
+          The file is committed to git - it's part of your project's knowledge base.
+        </p>
+
+        <pre><code class="language-json">{
+  "autoDiscovery": true,
+  "stack": {
+    "language": ["typescript"],
+    "runtime": ["node"],
+    "frameworks": ["express"],
+    "orm": ["prisma"],
+    "auth": ["jwt"]
+  },
+  "overrides": {},
+  "phaseLogging": true,
+  "securityScan": false
+}</code></pre>
+
+        <h3>autoDiscovery</h3>
+        <p>
+          When <code>true</code> (the default), MDD scans your manifest files once at session start
+          and writes the detected stack into <code>settings.json</code>. It checks
+          <code>package.json</code>, <code>go.mod</code>, <code>pyproject.toml</code>, and
+          <code>composer.json</code>. The <code>stack</code> field is owned by discovery;
+          <code>overrides</code> is always yours.
+        </p>
+        <p>
+          Set to <code>false</code> to manage the stack manually. Useful when your dependency
+          manifest doesn't reflect the full picture - custom implementations, monorepos,
+          or anything else discovery can't detect from package files.
+        </p>
+
+        <h3>stack and overrides</h3>
+        <p>
+          <code>stack</code> is written by auto-discovery. <code>overrides</code> is merged on top
+          at phase time and is always user-controlled. Add anything discovery misses:
+          hand-rolled auth, internal frameworks, or stack entries that don't appear in
+          any manifest file.
+        </p>
+
+        <h3>phaseLogging</h3>
+        <p>
+          Controls whether MDD writes phase timing data via <code>mdd-log-phase.sh</code>.
+          Defaults to <code>true</code>. Set to <code>false</code> to suppress all phase log output.
+        </p>
+
+        <h3>securityScan</h3>
+        <p>
+          Opt-in flag for the security rule generator. Defaults to <code>false</code>. When
+          enabled, MDD runs a vulnerability scan during <code>/mdd audit</code> and generates
+          new audit rules for any patterns not already covered. See the next section.
+        </p>
+
+        <h3>Stack-Specific Rule Files</h3>
+        <p>
+          Once MDD knows your stack, it loads matching rule files at the start of each audit
+          and build phase. These files are installed alongside the other mode files in
+          <code>~/.claude/mdd/</code>.
+        </p>
+        <table>
+          <thead><tr><th>File</th><th>Covers</th></tr></thead>
+          <tbody>
+            <tr><td><code>mdd-rules-typescript.md</code></td><td>TypeScript-specific audit criteria and build checklists</td></tr>
+            <tr><td><code>mdd-rules-express.md</code></td><td>Error handling, middleware order, route input validation</td></tr>
+            <tr><td><code>mdd-rules-jwt.md</code></td><td>Decode safety, expiry checks, secret validation at startup</td></tr>
+            <tr><td><code>mdd-rules-prisma.md</code></td><td>Query safety, transaction patterns, migration checks</td></tr>
+          </tbody>
+        </table>
+        <p>
+          Rules are additive - they append criteria to the existing phase, never replace anything.
+          If a rule file doesn't exist for a stack entry, MDD warns once and continues. A
+          missing or corrupt <code>settings.json</code> never halts a session - MDD degrades
+          gracefully to running without stack-specific rules.
+        </p>
+      </section>
+
+      <!-- ===== SECURITY RULES ===== -->
+      <section id="security-rules">
+        <h2>Security Rule Generator</h2>
+
+        <p>
+          When <code>securityScan: true</code> in your settings, MDD scans your declared stack
+          for known vulnerabilities and translates any unaddressed findings into new MDD audit
+          rules. The goal isn't just to find CVEs - it's to close the gap between what
+          vulnerabilities exist and what your audit criteria actually check for.
+        </p>
+
+        <pre><code class="language-bash"># Runs automatically during /mdd audit when securityScan: true
+# Or run directly:
+/mdd security-rules</code></pre>
+
+        <h3>How It Works</h3>
+        <ol>
+          <li>
+            <strong>Scan</strong> - MDD runs free vulnerability tools against your dependencies:
+            <code>npm audit</code> for Node projects, <code>osv-scanner</code> for multi-language
+            coverage, and Snyk CLI free tier if installed. No API keys required.
+          </li>
+          <li>
+            <strong>Compare</strong> - The existing rules in every <code>mdd-rules-{stack}.md</code>
+            file are loaded and compared against each finding. If the attack vector is already
+            covered by a rule, the finding is skipped.
+          </li>
+          <li>
+            <strong>Generate</strong> - For any uncovered pattern, a new rule is written that
+            targets the vulnerability <em>class</em>, not just the specific package version.
+            A rule about "unvalidated redirects" will catch future variants - it isn't tied
+            to the CVE that inspired it.
+          </li>
+          <li>
+            <strong>Append</strong> - New rules are added to the relevant
+            <code>mdd-rules-{stack}.md</code> file with the source CVE as a traceable reference.
+          </li>
+        </ol>
+
+        <pre><code class="language-bash">Security rule generator - 2026-05-20
+
+Sources: npm audit, osv-scanner
+Findings reviewed: 12
+Already covered by existing rules: 9
+Gaps found: 3
+
+New rules generated:
+  mdd-rules-express.md  +2 rules
+    - [P2] Prototype pollution via req.query or req.body merge — use
+      structuredClone() or a safe merge utility.
+      Reference: CVE-2024-29041
+
+    - [P2] res.redirect() called with user-supplied path without allowlist
+      validation. Reference: CVE-2024-43796
+
+  mdd-rules-jwt.md  +1 rule
+    - [P2] jwt.decode() used instead of jwt.verify() — decode skips
+      signature verification. Reference: CVE-2022-21449 (class)</code></pre>
+
+        <h3>Rule Quality</h3>
+        <p>
+          Rules are generated by Claude, not by a template. The aim is a rule that a
+          developer reading it would immediately understand - a concrete pattern to check for,
+          not a reference to look up. Each rule is tagged with severity (P2 for
+          critical/high CVEs, P3 for medium, P4 for low) and includes the source CVE
+          as a traceable reference.
+        </p>
+        <p>
+          The gap check uses semantic comparison rather than string matching, so rules
+          generated in a previous scan are not duplicated even if their wording differs.
+          You can review, edit, or remove any generated rule - they live in plain markdown
+          files you control.
+        </p>
+
+        <h3>What It Doesn't Do</h3>
+        <p>
+          The security rule generator does not modify your source code, install patches, or
+          update package versions. It only adds audit rules so future <code>/mdd audit</code>
+          runs will check for the patterns that matter for your stack. Actually fixing
+          vulnerable dependencies is your call.
+        </p>
+        <p>
+          Scans run locally using CLI tools. No source code or credentials leave your machine
+          beyond what those tools normally send (e.g. <code>npm audit</code> sends the
+          dependency manifest to the npm registry). Users on air-gapped networks should
+          keep <code>securityScan: false</code>.
         </p>
       </section>
 

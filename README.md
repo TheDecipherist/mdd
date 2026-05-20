@@ -943,6 +943,7 @@ All MDD artifacts live in one place:
 │       ├── agent-N-config.md
 │       └── agent-N-notes.md
 ├── .startup.md                   # Auto-generated session context (read by Claude on start)
+├── settings.json                 # Stack config — auto-populated by discovery, committed to git
 └── connections.md                # Pre-computed relationship map (path tree + Mermaid graph)
 ```
 
@@ -979,6 +980,91 @@ Framework: Express + React | DB: PostgreSQL | Host: Dokploy
 ```
 
 The auto-generated section above the `---` is rebuilt each time. The Notes section below is append-only and preserved.
+
+---
+
+## Stack Settings
+
+MDD creates `.mdd/settings.json` on first run. It controls which rule files load during audit and build phases, whether stack detection runs automatically, and a few other session behaviours.
+
+```json
+{
+  "autoDiscovery": true,
+  "stack": {
+    "language": ["typescript"],
+    "runtime": ["node"],
+    "frameworks": ["express"],
+    "orm": ["prisma"],
+    "auth": ["jwt"]
+  },
+  "overrides": {},
+  "phaseLogging": true,
+  "securityScan": false
+}
+```
+
+**`autoDiscovery: true` (default)** - MDD scans your manifest files once at session start and writes the detected stack into `settings.json`. It checks `package.json`, `go.mod`, `pyproject.toml`, and `composer.json`. The `stack` field is owned by discovery when this is on; `overrides` is always yours to edit.
+
+**`autoDiscovery: false`** - MDD reads `settings.json` as-is. You control the stack manually. Useful when your dependencies don't reflect the full picture (custom implementations, monorepos, unusual setups).
+
+**`overrides`** - Merged on top of `stack` at phase time. Add anything discovery misses - custom auth implementations, internal frameworks, or anything else that needs stack-specific rules.
+
+**`phaseLogging: true` (default)** - Controls whether MDD writes phase timing data via `mdd-log-phase.sh`. Set to `false` to suppress all phase log output.
+
+**`securityScan: false` (default)** - Enables the security rule generator. See the section below.
+
+### Stack-Specific Rule Files
+
+Once MDD knows your stack, it loads matching rule files at the start of each audit and build phase. These files live in `~/.claude/mdd/` alongside the other mode files and are installed with `mdd install`.
+
+```
+mdd-rules-typescript.md   # TypeScript-specific audit criteria and build checklists
+mdd-rules-express.md      # Express error handling, middleware, route validation rules
+mdd-rules-jwt.md          # JWT decode safety, expiry checks, secret validation
+mdd-rules-prisma.md       # Prisma query safety, transaction patterns, migration checks
+```
+
+Rules are additive - they append criteria to the existing phase rather than replacing anything. If a rule file doesn't exist for a stack entry, MDD warns once and continues. A misconfigured or missing `settings.json` never halts a session.
+
+### Security Rule Generator
+
+When `securityScan: true`, MDD runs a vulnerability scan against your declared stack and generates new audit rules for any patterns not already covered.
+
+```bash
+# Runs automatically during /mdd audit when securityScan: true
+# Or run directly:
+/mdd security-rules
+```
+
+**How it works:**
+
+1. Scans your dependencies using free tools - `npm audit` for Node projects, `osv-scanner` for multi-language, Snyk CLI free tier if installed. No API keys required.
+2. Reads all existing `mdd-rules-{stack}.md` files and extracts the current rule set.
+3. For each vulnerability found: checks whether the attack vector is already covered by an existing rule.
+4. If a gap exists: generates a new rule targeting the vulnerability *class*, not just the specific CVE. A rule about "prototype pollution via unvalidated query parameters" will catch future variants, not just the package version that triggered it.
+5. Appends new rules to the relevant `mdd-rules-{stack}.md` file with the source CVE as a reference.
+
+```
+Security rule generator - 2026-05-20
+
+Sources: npm audit, osv-scanner
+Findings reviewed: 12
+Already covered by existing rules: 9
+Gaps found: 3
+
+New rules generated:
+  mdd-rules-express.md  +2 rules
+    - [P2] Prototype pollution via req.query or req.body merge — use structuredClone() or
+      a safe merge utility. Reference: CVE-2024-29041
+    - [P2] res.redirect() called with user-supplied path without allowlist validation.
+      Reference: CVE-2024-43796
+
+  mdd-rules-jwt.md  +1 rule
+    - [P2] jwt.decode() used instead of jwt.verify() — decode skips signature check.
+      Reference: CVE-2022-21449 (class)
+```
+
+The gap check uses semantic comparison, not string matching, so rules generated in a previous run are not duplicated even if they use different wording. Each generated rule includes the CVE ID so you can trace where it came from and review or remove it if needed.
 
 ---
 
