@@ -15,6 +15,8 @@ If yes, update whichever of these three files are affected before staging the co
 
 Ask for all doc updates in a single question, not one file at a time.
 
+**If any changes to `README.md` mdd npm package must be published**
+
 ## What This Repo Is
 
 `@thedecipherist/mdd` is an npm package that installs 7 Claude command (`.md`) files into `~/.claude/commands/` (or a local `.claude/commands/`) so the `/mdd` slash command is available in Claude Code sessions. The TypeScript source is a thin CLI wrapper; the real product is the Markdown files in `commands/`.
@@ -83,3 +85,28 @@ mdd-branch-guard.sh   PreToolUse hook — blocks Write/Edit/NotebookEdit on main
 ## TypeScript Config
 
 ESM (`"type": "module"`), `NodeNext` module resolution, strict mode. All imports in `src/` must use `.js` extensions (resolved to `.ts` at compile time by NodeNext). Target is ES2022, Node ≥ 18.
+
+<!-- mdd-guidance-start -->
+## MDD — Build Approach
+
+This project uses MDD (Manual-Driven Development). Always start a session with `/mdd`
+to load project context. Each feature is documented before it is built — use
+`/mdd <description>` for a single feature, or `/mdd plan-initiative` to coordinate
+multiple features in waves. When an initiative is active, build in wave order and
+do not skip waves.
+
+The `.mdd/docs/` directory contains one feature doc per feature. Each doc is the
+authoritative source of truth for what to build. Read it fully before writing any code.
+
+**Learning from mistakes**
+All code in this project is built via the MDD workflow. Whenever a bug, flaw, or gap
+is found — or if a feature doc changes or gains new frontmatter fields — document why
+it happened and how it could have been prevented. When a fix is identified, ask the user if you should open a GitHub issue on their
+behalf at https://github.com/TheDecipherist/mdd/issues with a clear description of
+the problem and a suggested fix so it can be patched in the workflow for all users
+(best practices, security hardening, performance optimization).
+
+**After an MDD patch is published**
+Run `mdd update` (global) or `mdd update --install-local` (project) to sync this
+project to the latest version.
+<!-- mdd-guidance-end -->
