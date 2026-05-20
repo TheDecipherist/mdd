@@ -9,4 +9,7 @@ dist/
 # MDD active jobs (ephemeral — deleted on completion)
 .mdd/jobs/
 
+# Local MDD install (installed via mdd install --install-local)
+.claude/
+
 .env

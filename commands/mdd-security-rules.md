@@ -20,7 +20,7 @@ Load all existing MDD stack rule files so the gap analysis in Phase SS2 has some
 
 **Step 1 — Locate rule files:**
 
-For each entry in `$MDD_STACK`, check whether `.mdd/mdd-rules-{entry}.md` exists. Build two lists:
+For each entry in `$MDD_STACK`, check whether `$MDD_DIR/mdd-rules-{entry}.md` exists. Build two lists:
 
 - `$RULE_FILES_FOUND` — entries that have a rule file
 - `$RULE_FILES_MISSING` — entries with no rule file yet (a new file will be created in Phase SS3 if needed)
@@ -210,7 +210,7 @@ Bad example (too CVE-specific, won't catch future variants):
 **Appending to rule files:**
 
 For each stack entry with new rules:
-1. Check whether `.mdd/mdd-rules-{stack-entry}.md` exists.
+1. Check whether `$MDD_DIR/mdd-rules-{stack-entry}.md` exists.
    - If yes: append the new rules to the end of the file.
    - If no: create the file with a minimal header and the new rules:
      ```markdown
