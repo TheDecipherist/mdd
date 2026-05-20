@@ -236,13 +236,14 @@ Every feature doc and ops runbook has a `tags:` field (4–8 domain-concept keyw
 
 ---
 
-## All 26 Modes at a Glance
+## All 27 Modes at a Glance
 
 ```
 /mdd <feature description>                 Build Mode - Document, plan, and implement
 /mdd bug <description>                     Bug Mode - Fix bugs tracked in feature docs
 /mdd manual [--force]                      Manual Mode - Generate a print-ready user manual
 /mdd audit [section]                       Audit Mode - Scan code for violations and drift
+/mdd security-rules                        Scan deps for vulnerabilities, generate stack rule files
 /mdd status                                Overview: docs, tests, audit state, initiatives
 /mdd scan                                  Detect features whose source files changed
 /mdd update <feature-id>                   Re-sync a feature doc after code changes
