@@ -1,5 +1,21 @@
 ## BUILD MODE — New Feature Development
 
+### Stack Rule Loading (runs before Phase 0)
+
+After Step 0c in `mdd.md` sets `$MDD_STACK` and `$MDD_DIR`, load any matching stack rule files. This runs silently — no output unless a problem occurs.
+
+```
+For each entry in $MDD_STACK:
+  If $MDD_DIR/mdd-rules-{entry}.md exists:
+    Read the file — append all build checklist items to Phase 6 implementation steps
+    Append any additional audit criteria to Phase 7b verification checks
+  Else:
+    Emit one line: ⚠ No rule file for '{entry}' — skipping
+    Continue (never halt)
+```
+
+Stack rules are **additive only** — they extend Phase 6 checklists and Phase 7b verification. They never replace or gate core build behaviour.
+
 ### Phase 0 — Branch Safety Check
 
 ```bash
