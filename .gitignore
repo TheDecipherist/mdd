@@ -8,3 +8,5 @@ dist/
 
 # MDD active jobs (ephemeral — deleted on completion)
 .mdd/jobs/
+
+.env
