@@ -1,16 +1,8 @@
-## Phase Logging
-
-At the **start** of every mode or phase (before any action) and the **end** (after all actions), run the command below. Substitute `PHASE` with the mode/phase identifier (e.g., `STATUS`, `Phase SC1`, `Phase U1`) and `EVENT` with `start` or `end`:
+## STATUS MODE — `/mdd status`
 
 ```bash
-bash -c 'D=$(date +%Y-%m-%d); T=$(date +%H:%M:%S); K=$(compressmcp --status 2>/dev/null | grep -oE "[0-9]+K/[0-9]+K" | head -1 || echo "-"); mkdir -p ~/.claude/mdd; printf "| %s | mdd-manage | PHASE | EVENT | %s | %s |\n" "$D" "$T" "$K" >> ~/.claude/mdd/log.md' 2>/dev/null || true
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-manage" "STATUS" start "$ARGUMENTS"
 ```
-
-Log file: `~/.claude/mdd/log.md`
-
----
-
-## STATUS MODE — `/mdd status`
 
 Quick overview of MDD state for the project:
 
@@ -93,7 +85,19 @@ After rebuilding `.startup.md`, check connections.md:
 
 ---
 
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-manage" "STATUS" end "$ARGUMENTS"
+```
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-manage" "-" "complete" "$ARGUMENTS"
+```
 ## NOTE MODE — `/mdd note`
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-manage" "NOTE" start "$ARGUMENTS"
+```
 
 Triggered when arguments start with `note`. Three subcommands:
 
@@ -127,17 +131,37 @@ Triggered when arguments start with `note`. Three subcommands:
 
 ---
 
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-manage" "NOTE" end "$ARGUMENTS"
+```
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-manage" "-" "complete" "$ARGUMENTS"
+```
 ## SCAN MODE — `/mdd scan`
 
 Triggered when arguments start with `scan`. Detects features whose source files have changed since the last MDD session, and checks for initiative/wave drift.
 
 ### Phase SC1 — Read all feature docs, ops runbooks, and initiative/wave files
 
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-manage" "Phase SC1" start "$ARGUMENTS"
+```
+
 Read every `.mdd/docs/*.md` (excluding `archive/`) and every `.mdd/ops/*.md` (excluding `archive/`). For each, extract:
 - `last_synced` from frontmatter
 - `source_files` list from frontmatter (feature docs) or the ops doc slug for ops runbooks
 
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-manage" "Phase SC1" end "$ARGUMENTS"
+```
 ### Phase SC2 — Check each feature for drift (parallelized)
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-manage" "Phase SC2" start "$ARGUMENTS"
+```
 
 After Phase SC1 has the full feature list (IDs, `last_synced`, `source_files`), delegate all git log checks to a **single Explore agent** rather than running them sequentially in the main conversation.
 
@@ -185,7 +209,15 @@ After the agent returns its table, the main conversation writes the drift report
 
 **Fallback:** If the agent fails, run git checks sequentially in the main conversation using the same logic.
 
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-manage" "Phase SC2" end "$ARGUMENTS"
+```
 ### Phase SC3 — Present drift report
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-manage" "Phase SC3" start "$ARGUMENTS"
+```
 
 ```
 🔍 MDD Scan — Drift Report
@@ -243,21 +275,49 @@ Save the full report to `.mdd/audits/scan-<date>.md`.
 
 ---
 
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-manage" "Phase SC3" end "$ARGUMENTS"
+```
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-manage" "-" "complete" "$ARGUMENTS"
+```
 ## UPDATE MODE — `/mdd update <feature-id>`
 
 Triggered when arguments start with `update`. Updates an existing feature doc to reflect code that has changed since the last MDD session.
 
 ### Phase U1 — Load the feature
 
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-manage" "Phase U1" start "$ARGUMENTS"
+```
+
 Parse `<feature-id>` from arguments (e.g., `04` or `04-content-builder`). Find the matching `.mdd/docs/*.md` file. Read it fully.
 
 If the feature-id is not found, list all available docs and ask the user to pick one.
 
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-manage" "Phase U1" end "$ARGUMENTS"
+```
 ### Phase U2 — Read current source files
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-manage" "Phase U2" start "$ARGUMENTS"
+```
 
 Read every file listed in `source_files` frontmatter. If a file is missing, note it as a broken reference — ask the user for the new path before continuing.
 
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-manage" "Phase U2" end "$ARGUMENTS"
+```
 ### Phase U3 — Diff doc vs code
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-manage" "Phase U3" start "$ARGUMENTS"
+```
 
 Compare what the doc says against what the code actually does:
 - New functions, endpoints, or exports not in the doc
@@ -268,7 +328,15 @@ Compare what the doc says against what the code actually does:
 
 Write findings to `.mdd/audits/update-notes-<feature-id>-<date>.md`.
 
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-manage" "Phase U3" end "$ARGUMENTS"
+```
 ### Phase U4 — Present changes
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-manage" "Phase U4" start "$ARGUMENTS"
+```
 
 ```
 📝 Update Review: <NN>-<feature-name>
@@ -287,7 +355,15 @@ Proceed with doc update? (yes / review findings first / cancel)
 
 Wait for user confirmation.
 
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-manage" "Phase U4" end "$ARGUMENTS"
+```
 ### Phase U5 — Rewrite affected sections
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-manage" "Phase U5" start "$ARGUMENTS"
+```
 
 Rewrite ONLY the sections that changed. Preserve:
 - `known_issues` section (don't remove existing issues)
@@ -300,7 +376,15 @@ After rewriting, update frontmatter:
 - `phase:` — update to reflect current state
 - `path:` — if the doc is missing a `path` field, offer to add it: "This doc is missing a `path` field. Where does this feature live in the product? (e.g. `Auth/Login`)" — if the user provides a value, write it between `tags` and `known_issues` in the frontmatter.
 
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-manage" "Phase U5" end "$ARGUMENTS"
+```
 ### Phase U6 — Regenerate test skeletons for new behaviors
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-manage" "Phase U6" start "$ARGUMENTS"
+```
 
 For any NEW documented behaviors (not previously in the doc), generate test skeleton entries and append them to the existing test file. Do NOT modify existing test implementations.
 
@@ -328,15 +412,35 @@ Read all `.mdd/docs/*.md` (excluding `archive/`) — frontmatter only (id, title
 
 ---
 
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-manage" "Phase U6" end "$ARGUMENTS"
+```
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-manage" "-" "complete" "$ARGUMENTS"
+```
 ## DEPRECATE MODE — `/mdd deprecate <feature-id>`
 
 Triggered when arguments start with `deprecate`. Archives a feature cleanly.
 
 ### Phase D1 — Load + impact check
 
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-manage" "Phase D1" start "$ARGUMENTS"
+```
+
 Find and read the target feature doc. Then scan all other `.mdd/docs/*.md` for any that list this feature in `depends_on`. Build the impact list.
 
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-manage" "Phase D1" end "$ARGUMENTS"
+```
 ### Phase D2 — Present impact
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-manage" "Phase D2" start "$ARGUMENTS"
+```
 
 ```
 🗑️  Deprecate: <NN>-<feature-name>
@@ -361,7 +465,15 @@ Deprecate? (yes / review dependents first / cancel)
 
 If user says yes:
 
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-manage" "Phase D2" end "$ARGUMENTS"
+```
 ### Phase D3 — Archive
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-manage" "Phase D3" start "$ARGUMENTS"
+```
 
 1. Set `status: deprecated` and `last_synced: <today>` in the doc frontmatter.
 2. Create `.mdd/docs/archive/` directory if it doesn't exist.
@@ -392,6 +504,14 @@ Test files: <kept/deleted per user choice>
 
 ---
 
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-manage" "Phase D3" end "$ARGUMENTS"
+```
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-manage" "-" "complete" "$ARGUMENTS"
+```
 ## REBUILD-TAGS MODE — `/mdd rebuild-tags [--force]`
 
 Triggered when arguments start with `rebuild-tags`. Scans all feature docs and ops runbooks, generates `tags:` for any doc missing the field, then rebuilds `.startup.md`.
@@ -399,6 +519,10 @@ Triggered when arguments start with `rebuild-tags`. Scans all feature docs and o
 **Use case:** Migrating existing projects to the tag system. Safe to run multiple times — docs that already have `tags:` are skipped unless `--force` is passed.
 
 ### Phase RT1 — Inventory
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-manage" "Phase RT1" start "$ARGUMENTS"
+```
 
 1. Glob `.mdd/docs/*.md` (excluding `archive/`) and `.mdd/ops/*.md` (excluding `archive/`).
 2. For each doc, check frontmatter for a `tags:` field.
@@ -419,7 +543,15 @@ Docs needing tags: <N> of <total>
 
 If 0 docs need tags (and `--force` not passed) → report "All docs already have tags. `.startup.md` will be rebuilt." and jump to Phase RT3.
 
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-manage" "Phase RT1" end "$ARGUMENTS"
+```
 ### Phase RT2 — Generate Tags
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-manage" "Phase RT2" start "$ARGUMENTS"
+```
 
 For each doc missing `tags:` (or all docs if `--force`):
 
@@ -434,7 +566,15 @@ For each doc missing `tags:` (or all docs if `--force`):
 
 **`--force` behaviour:** Regenerate and overwrite `tags:` even on docs that already have them. Show old → new for each.
 
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-manage" "Phase RT2" end "$ARGUMENTS"
+```
 ### Phase RT3 — Rebuild Startup
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-manage" "Phase RT3" start "$ARGUMENTS"
+```
 
 Trigger the `.mdd/.startup.md` rebuild (same logic as Status Mode — rebuild auto-generated zone, preserve Notes zone). The rebuilt startup now reflects tags on every feature and ops line.
 
@@ -448,7 +588,15 @@ Read all `.mdd/docs/*.md` (excluding `archive/`) — frontmatter only (id, title
 4. **Warnings:** flag broken `depends_on` references (target does not exist), circular dependencies, docs missing `path` field.
 5. **Write** `.mdd/connections.md` with YAML frontmatter (`generated: <today>`, `doc_count: <N>`, `connection_count: <N edges>`, `overlap_count: <N overlap files>`) followed by four sections: Path Tree, Dependency Graph (Mermaid), Source File Overlap, Warnings.
 
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-manage" "Phase RT3" end "$ARGUMENTS"
+```
 ### Phase RT4 — Report
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-manage" "Phase RT4" start "$ARGUMENTS"
+```
 
 ```
 ✅ Rebuild Tags Complete
@@ -468,7 +616,19 @@ Run /mdd status to see the full updated startup snapshot.
 
 ---
 
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-manage" "Phase RT4" end "$ARGUMENTS"
+```
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-manage" "-" "complete" "$ARGUMENTS"
+```
 ## CONNECT MODE — `/mdd connect`
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-manage" "CONNECT" start "$ARGUMENTS"
+```
 
 Triggered when arguments start with `connect`. Performs a full rebuild of `.mdd/connections.md` unconditionally — no staleness check, always regenerates from scratch.
 
@@ -490,4 +650,13 @@ Report when done:
   Warnings:         <N> (or "none")
 
 ✅ .mdd/connections.md updated (<today>)
+```
+
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-manage" "CONNECT" end "$ARGUMENTS"
+```
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-manage" "-" "complete" "$ARGUMENTS"
 ```

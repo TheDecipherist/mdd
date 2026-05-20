@@ -140,6 +140,12 @@ Use whichever path contains `mdd-audit.md`. Store it as `$MDD_DIR` and use it fo
 
 - Otherwise → **Read `$MDD_DIR/mdd-build.md` then follow BUILD MODE instructions.**
 
+After mode is determined and before reading the mode file, log the invocation. `$ARGUMENTS` is the full argument string the user typed (e.g., `build user-auth`, `audit 03`, `status`):
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd" "-" "invoked" "$ARGUMENTS"
+```
+
 ---
 
 ## Branch Guard (All Modes)

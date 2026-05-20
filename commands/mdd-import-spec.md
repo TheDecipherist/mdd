@@ -2,21 +2,11 @@
 
 Triggered when arguments start with `import-spec`.
 
-## Phase Logging
-
-At the **start** of every phase (before any action) and the **end** of every phase (after all actions), run the command below. Substitute `PHASE` with the phase identifier (e.g., `Phase IS1`, `Phase IS3`) and `EVENT` with `start` or `end`:
+### Phase IS1 — Read Spec Files
 
 ```bash
-bash -c 'D=$(date +%Y-%m-%d); T=$(date +%H:%M:%S); K=$(compressmcp --status 2>/dev/null | grep -oE "[0-9]+K/[0-9]+K" | head -1 || echo "-"); mkdir -p ~/.claude/mdd; printf "| %s | mdd-import-spec | PHASE | EVENT | %s | %s |\n" "$D" "$T" "$K" >> ~/.claude/mdd/log.md' 2>/dev/null || true
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-import-spec" "Phase IS1" start "$ARGUMENTS"
 ```
-
-Log file: `~/.claude/mdd/log.md`
-
-Reads one or more large spec or prompt documents — the kind produced by extended brainstorming sessions with Claude — and converts them into properly structured MDD initiatives, waves, and feature docs. Every decision in the spec is preserved. Duplicate or overlapping topics are merged intelligently. Features are numbered and waved in **build dependency order**, not spec-reading order.
-
----
-
-### Phase IS1 — Read Spec Files
 
 **Stale job detection (runs first):** Check `.mdd/jobs/` for any existing `import-*/` folder.
 - If found: read its `MANIFEST.md` and count written vs total files. Present to user:
@@ -68,7 +58,15 @@ If multiple files are provided, merge all content into a single working document
 
 ---
 
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-import-spec" "Phase IS1" end "$ARGUMENTS"
+```
 ### Phase IS2 — Feature Extraction, Classification + Path Grouping
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-import-spec" "Phase IS2" start "$ARGUMENTS"
+```
 
 This phase runs in four steps. Build-order classification (IS2c) always precedes structure determination (IS2d) because the correct numbering depends on understanding what you build vs. what you reference.
 
@@ -237,7 +235,15 @@ These thresholds are guidelines — apply judgment.
 
 ---
 
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-import-spec" "Phase IS2" end "$ARGUMENTS"
+```
 ### Phase IS2.5 — CLAUDE.md Check
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-import-spec" "Phase IS2.5" start "$ARGUMENTS"
+```
 
 Before showing the dry-run preview, check the project's CLAUDE.md.
 
@@ -294,7 +300,15 @@ This project uses MDD (Manual-Driven Development). The `.mdd/` directory contain
 
 ---
 
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-import-spec" "Phase IS2.5" end "$ARGUMENTS"
+```
 ### Phase IS3 — Dry-Run Preview (mandatory gate)
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-import-spec" "Phase IS3" start "$ARGUMENTS"
+```
 
 Before writing any files, display the complete proposed structure and wait for explicit user approval.
 
@@ -368,7 +382,15 @@ List every file that will be written in the order it will be written. Nothing pr
 
 ---
 
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-import-spec" "Phase IS3" end "$ARGUMENTS"
+```
 ### Phase IS4 — Write Files
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-import-spec" "Phase IS4" start "$ARGUMENTS"
+```
 
 **First — ensure the MDD directory structure exists.** Run these before writing any file:
 
@@ -585,7 +607,15 @@ Writing files...
 
 ---
 
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-import-spec" "Phase IS4" end "$ARGUMENTS"
+```
 ### Phase IS5 — Rebuild .startup.md + Connections
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-import-spec" "Phase IS5" start "$ARGUMENTS"
+```
 
 Rebuild `.mdd/.startup.md`:
 - Rebuild the auto-generated zone (Project Snapshot, Features Documented list with IDs, status, and tags; Ops Runbooks)
@@ -629,4 +659,13 @@ Next steps:
   /mdd plan-execute <slug>-wave-1   — start building Wave 1
   /mdd audit                        — run a full audit across all imported docs
   /mdd <NN>                         — jump directly to any feature doc
+```
+
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-import-spec" "Phase IS5" end "$ARGUMENTS"
+```
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-import-spec" "-" "complete" "$ARGUMENTS"
 ```

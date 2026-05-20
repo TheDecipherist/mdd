@@ -1,20 +1,12 @@
-## Phase Logging
-
-At the **start** of every phase (before any action) and the **end** of every phase (after all actions), run the command below. Substitute `PHASE` with the phase identifier (e.g., `Phase R1`, `Phase G2`, `Phase UP3`) and `EVENT` with `start` or `end`:
-
-```bash
-bash -c 'D=$(date +%Y-%m-%d); T=$(date +%H:%M:%S); K=$(compressmcp --status 2>/dev/null | grep -oE "[0-9]+K/[0-9]+K" | head -1 || echo "-"); mkdir -p ~/.claude/mdd; printf "| %s | mdd-lifecycle | PHASE | EVENT | %s | %s |\n" "$D" "$T" "$K" >> ~/.claude/mdd/log.md' 2>/dev/null || true
-```
-
-Log file: `~/.claude/mdd/log.md`
-
----
-
 ## REVERSE-ENGINEER MODE — `/mdd reverse-engineer [path or feature-id]`
 
 Triggered when arguments start with `reverse-engineer` or `reverse`. Generates or regenerates MDD documentation from existing source code.
 
 ### Phase R1 — Determine scope
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-lifecycle" "Phase R1" start "$ARGUMENTS"
+```
 
 **If a path or feature-id is given:**
 - If it matches an existing `.mdd/docs/*.md` — load that doc as the "existing doc" for comparison (regenerate mode).
@@ -25,7 +17,15 @@ Triggered when arguments start with `reverse-engineer` or `reverse`. Generates o
 - Cross-reference against `source_files` fields in all `.mdd/docs/*.md`.
 - List files not registered in any doc. Ask the user which ones to document.
 
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-lifecycle" "Phase R1" end "$ARGUMENTS"
+```
 ### Phase R2 — Read source files (parallelized for multi-file scope)
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-lifecycle" "Phase R2" start "$ARGUMENTS"
+```
 
 **Threshold rule:**
 - ≤ 3 source files: read directly in the main conversation — no agent overhead
@@ -67,7 +67,15 @@ After all agents return, synthesize their output into Phase R3 (draft the doc). 
 
 **Fallback:** If any agent fails, read that batch of files directly in the main conversation.
 
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-lifecycle" "Phase R2" end "$ARGUMENTS"
+```
 ### Phase R3 — Draft the doc
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-lifecycle" "Phase R3" start "$ARGUMENTS"
+```
 
 Draft a complete feature doc following the Phase 3 template. Set:
 - `last_synced: <today>`
@@ -92,7 +100,15 @@ Ask: "Merge new draft into existing doc? (yes / keep existing / show full diff)"
 
 **In new doc mode:** Show the full draft and ask: "Does this accurately describe the feature? Anything to add or change?"
 
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-lifecycle" "Phase R3" end "$ARGUMENTS"
+```
 ### Phase R4 — Save and optionally generate test skeletons
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-lifecycle" "Phase R4" start "$ARGUMENTS"
+```
 
 After user confirmation, write the doc. Then ask:
 "Generate test skeletons from the inferred endpoints and business rules? (yes / no)"
@@ -109,11 +125,23 @@ If yes, follow Phase 4 logic using the newly written doc.
 
 ---
 
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-lifecycle" "Phase R4" end "$ARGUMENTS"
+```
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-lifecycle" "-" "complete" "$ARGUMENTS"
+```
 ## GRAPH MODE — `/mdd graph`
 
 Triggered when arguments start with `graph`. Shows the cross-feature dependency map, plus initiative/wave structure if present.
 
 ### Phase G1 — Build dependency graph
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-lifecycle" "Phase G1" start "$ARGUMENTS"
+```
 
 Read all `.mdd/docs/*.md` (including `archive/`). For each doc, extract `id`, `title`, `status`, and `depends_on`.
 
@@ -121,7 +149,15 @@ Build a directed graph: edge A → B means "A depends on B" (B must exist for A 
 
 **Initiative/wave graph** (only shown if `.mdd/initiatives/` exists): Also read all initiative and wave files. Build a second graph showing the initiative → wave → feature doc hierarchy.
 
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-lifecycle" "Phase G1" end "$ARGUMENTS"
+```
 ### Phase G2 — Detect issues
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-lifecycle" "Phase G2" start "$ARGUMENTS"
+```
 
 **Broken dependency:** A doc lists a deprecated or archived feature in `depends_on`.
 
@@ -136,7 +172,15 @@ Build a directed graph: edge A → B means "A depends on B" (B must exist for A 
 - A wave references a `dependsOn` wave that is not in the same initiative → invalid (cross-initiative deps not supported)
 - A feature doc whose slug appears in a wave but has no `docPath` set and status is `complete` → doc missing for completed feature
 
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-lifecycle" "Phase G2" end "$ARGUMENTS"
+```
 ### Phase G3 — Render
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-lifecycle" "Phase G3" start "$ARGUMENTS"
+```
 
 ```
 📊 MDD Dependency Graph
@@ -189,6 +233,14 @@ Save the graph to `.mdd/audits/graph-<date>.md`.
 
 ---
 
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-lifecycle" "Phase G3" end "$ARGUMENTS"
+```
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-lifecycle" "-" "complete" "$ARGUMENTS"
+```
 ## UPGRADE MODE — `/mdd upgrade`
 
 Triggered when arguments start with `upgrade`.
@@ -200,6 +252,10 @@ Batch-patches missing frontmatter fields (`last_synced`, `status`, `phase`, `tag
 ---
 
 ### Phase UP1 — Inventory
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-lifecycle" "Phase UP1" start "$ARGUMENTS"
+```
 
 1. Glob `.mdd/docs/*.md` (and `.mdd/docs/archive/*.md` if it exists). Collect all paths.
 2. For each doc, read its frontmatter only (up to the closing `---` line).
@@ -228,7 +284,15 @@ Fields to add:
 
 ---
 
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-lifecycle" "Phase UP1" end "$ARGUMENTS"
+```
 ### Phase UP2 — Infer Defaults (per doc)
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-lifecycle" "Phase UP2" start "$ARGUMENTS"
+```
 
 For each doc that needs patching, infer sensible defaults. **Do NOT ask the user for each doc** — infer silently, then show the plan for confirmation.
 
@@ -273,7 +337,15 @@ For each doc missing `path`:
 
 ---
 
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-lifecycle" "Phase UP2" end "$ARGUMENTS"
+```
 ### Phase UP3 — Show Plan + Confirm
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-lifecycle" "Phase UP3" start "$ARGUMENTS"
+```
 
 Present the inferred patches to the user before writing anything:
 
@@ -308,7 +380,15 @@ If the user says **"yes"**: proceed to Phase UP4 with all inferred values.
 
 ---
 
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-lifecycle" "Phase UP3" end "$ARGUMENTS"
+```
 ### Phase UP4 — Patch Docs
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-lifecycle" "Phase UP4" start "$ARGUMENTS"
+```
 
 For each doc in the plan, patch the frontmatter block **non-destructively**:
 
@@ -354,7 +434,15 @@ Patching...
 
 ---
 
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-lifecycle" "Phase UP4" end "$ARGUMENTS"
+```
 ### Phase UP5 — Verify + Rebuild Startup
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-lifecycle" "Phase UP5" start "$ARGUMENTS"
+```
 
 After all patches are applied:
 
@@ -386,3 +474,12 @@ Run `/mdd scan` to see current drift status across all docs.
 ---
 
 ---
+
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-lifecycle" "Phase UP5" end "$ARGUMENTS"
+```
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-lifecycle" "-" "complete" "$ARGUMENTS"
+```

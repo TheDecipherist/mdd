@@ -2,19 +2,11 @@
 
 Triggered when arguments start with `audit`.
 
-## Phase Logging
-
-At the **start** of every phase (before any action) and the **end** of every phase (after all actions), run the command below. Substitute `PHASE` with the phase identifier (e.g., `Phase A1`, `Phase A2`) and `EVENT` with `start` or `end`:
+### Phase A1 — Scope
 
 ```bash
-bash -c 'D=$(date +%Y-%m-%d); T=$(date +%H:%M:%S); K=$(compressmcp --status 2>/dev/null | grep -oE "[0-9]+K/[0-9]+K" | head -1 || echo "-"); mkdir -p ~/.claude/mdd; printf "| %s | mdd-audit | PHASE | EVENT | %s | %s |\n" "$D" "$T" "$K" >> ~/.claude/mdd/log.md' 2>/dev/null || true
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-audit" "Phase A1" start "$AUDIT_TARGET"
 ```
-
-Log file: `~/.claude/mdd/log.md`
-
----
-
-### Phase A1 — Scope
 
 **Stale job detection (runs first):** Check `.mdd/jobs/` for any existing `audit-*/` folder.
 - If found: check whether a corresponding `audits/report-<date>.md` exists.
@@ -106,7 +98,15 @@ Create `.mdd/jobs/audit-<date>/` and write `MANIFEST.md`:
 
 ---
 
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-audit" "Phase A1" end "$AUDIT_TARGET"
+```
 ### Phase A2 — Per-Agent Config Setup
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-audit" "Phase A2" start "$AUDIT_TARGET"
+```
 
 Main writes a shard file and config file for each agent into the job folder **before spawning anything**.
 
@@ -217,7 +217,15 @@ This config file contains no source code or findings — only paths and instruct
 
 ---
 
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-audit" "Phase A2" end "$AUDIT_TARGET"
+```
 ### Phase A3 — Parallel Agent Execution
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-audit" "Phase A3" start "$AUDIT_TARGET"
+```
 
 Main spawns all agents simultaneously. Each agent receives only the path to its config file.
 
@@ -264,7 +272,15 @@ shows no contracts apply to this file, write "(none)" — never omit the line en
 
 ---
 
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-audit" "Phase A3" end "$AUDIT_TARGET"
+```
 ### Phase A4 — Convergence Check
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-audit" "Phase A4" start "$AUDIT_TARGET"
+```
 
 After all agents signal completion, main reads `MANIFEST.md` and checks for any `[ ]` or `[~]` entries.
 
@@ -276,7 +292,15 @@ Audit does not advance to Phase A5 until every file is `[x]`, `[!]`, or `[e]`.
 
 ---
 
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-audit" "Phase A4" end "$AUDIT_TARGET"
+```
 ### Phase A5 — Merge
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-audit" "Phase A5" start "$AUDIT_TARGET"
+```
 
 Main merges all agent notes into the canonical output file:
 
@@ -290,7 +314,15 @@ Merge is in manifest order, not agent completion order. The job folder is not to
 
 ---
 
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-audit" "Phase A5" end "$AUDIT_TARGET"
+```
 ### Phase A6 — Analyze
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-audit" "Phase A6" start "$AUDIT_TARGET"
+```
 
 Read `audits/notes-<date>.md` as the primary source. Produce `audits/report-<date>.md` — include `mdd_version: <current from mdd.md frontmatter>` as the first line of frontmatter.
 
@@ -338,7 +370,15 @@ The manifest is kept permanently in `audits/` — `[x]` vs `[!]` per file shows 
 
 ---
 
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-audit" "Phase A6" end "$AUDIT_TARGET"
+```
 ### Phase A7 — Present Findings + Fix
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-audit" "Phase A7" start "$AUDIT_TARGET"
+```
 
 Show the user:
 ```
@@ -385,7 +425,15 @@ Report progress per finding. Update documentation `known_issues` to remove fixed
 
 ---
 
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-audit" "Phase A7" end "$AUDIT_TARGET"
+```
 ### Phase A8 — MDD Self-Review
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-audit" "Phase A8" start "$AUDIT_TARGET"
+```
 
 Runs at the end of every audit, after fixes (or immediately after A7 if user chose not to fix now).
 
@@ -461,3 +509,12 @@ When running `/mdd audit <section>` with fewer than 10 resolved files, skip the 
 **Integration context still applies in this mode.** Before starting the per-file loop, build `integration-context.md` into the job folder using the same logic as Phase A2 (read all `.mdd/docs/*.md`, extract contracts and feature-to-file mappings). Read `integration-context.md` at the start of the per-file loop and after every context clear — identical to the multi-agent startup sequence. The mandatory `Contracts:` line in notes applies here too.
 
 ---
+
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-audit" "Phase A8" end "$AUDIT_TARGET"
+```
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-audit" "-" "complete" "$AUDIT_TARGET"
+```

@@ -1,18 +1,10 @@
 ## BUILD MODE — New Feature Development
 
-## Phase Logging
-
-At the **start** of every phase (before any action) and the **end** of every phase (after all actions), run the command below. Substitute `PHASE` with the phase identifier (e.g., `Phase 0`, `Phase 1`) and `EVENT` with `start` or `end`:
+### Phase 0 — Branch Safety Check
 
 ```bash
-bash -c 'D=$(date +%Y-%m-%d); T=$(date +%H:%M:%S); K=$(compressmcp --status 2>/dev/null | grep -oE "[0-9]+K/[0-9]+K" | head -1 || echo "-"); mkdir -p ~/.claude/mdd; printf "| %s | mdd-build | PHASE | EVENT | %s | %s |\n" "$D" "$T" "$K" >> ~/.claude/mdd/log.md' 2>/dev/null || true
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-build" "Phase 0" start "$FEATURE_SLUG"
 ```
-
-Log file: `~/.claude/mdd/log.md`
-
----
-
-### Phase 0 — Branch Safety Check
 
 Before gathering any context, verify the current branch is compatible with the requested feature.
 
@@ -75,7 +67,15 @@ What would you like to do?
 - Report: "Aborted. Commit your current work, merge `<branch-name>` to main, then re-run `/mdd $ARGUMENTS` on a fresh branch."
 - Stop.
 
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-build" "Phase 0" end "$FEATURE_SLUG"
+```
 ### Phase 1 — Understand the Feature
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-build" "Phase 1" start "$FEATURE_SLUG"
+```
 
 Read the user's description: **$ARGUMENTS**
 
@@ -111,7 +111,15 @@ Then ask the user targeted questions using AskUserQuestion. Ask ALL relevant que
 
 Wait for all answers before proceeding.
 
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-build" "Phase 1" end "$FEATURE_SLUG"
+```
 ### Phase 2 — Data Flow & Impact Analysis
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-build" "Phase 2" start "$FEATURE_SLUG"
+```
 
 **Skip condition:** If `.mdd/docs/` has no existing files AND `src/` has fewer than 5 source files, skip this phase entirely and note: "Greenfield detected — skipping data flow analysis." Then jump to Phase 3.
 
@@ -176,7 +184,15 @@ Ask the user: **"Proceed with documentation? (yes / adjust scope based on findin
 
 **This gate is mandatory.** Do not proceed to Phase 3 until the user confirms. If consistency issues were found, discuss whether to fix them as part of this feature or track them as pre-existing known issues first.
 
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-build" "Phase 2" end "$FEATURE_SLUG"
+```
 ### Phase 3 — Write the MDD Documentation
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-build" "Phase 3" start "$FEATURE_SLUG"
+```
 
 Create the feature documentation file at `.mdd/docs/<NN>-<feature-name>.md`.
 
@@ -318,7 +334,15 @@ Show the completed doc to the user and ask: **"Does this accurately describe wha
 
 Wait for confirmation before proceeding.
 
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-build" "Phase 3" end "$FEATURE_SLUG"
+```
 ### Phase 4 — Generate Test Skeletons
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-build" "Phase 4" start "$FEATURE_SLUG"
+```
 
 Read the documentation file created in Phase 3. From the endpoints, business rules, and edge cases documented, generate test skeletons.
 
@@ -382,7 +406,15 @@ That's the point — they're the finish line.
 
 ---
 
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-build" "Phase 4" end "$FEATURE_SLUG"
+```
 ### Phase 4b — Red Gate (mandatory)
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-build" "Phase 4b" start "$FEATURE_SLUG"
+```
 
 **No skip condition.** This phase runs after every skeleton generation, every time.
 
@@ -422,7 +454,15 @@ If any test passes unexpectedly and the fix isn't trivial, ask the user:
    Proceed with fix? (yes / adjust differently / stop)
 ```
 
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-build" "Phase 4b" end "$FEATURE_SLUG"
+```
 ### Phase 5 — Present the Build Plan
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-build" "Phase 5" start "$FEATURE_SLUG"
+```
 
 **Auto-detect feature size** before choosing plan format:
 
@@ -525,7 +565,15 @@ Ready to build? (yes / modify plan / stop here)
 
 Wait for user confirmation.
 
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-build" "Phase 5" end "$FEATURE_SLUG"
+```
 ### Phase 6 — Implement (Test-Driven)
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-build" "Phase 6" start "$FEATURE_SLUG"
+```
 
 #### Step 6a — Layered execution
 
@@ -606,7 +654,15 @@ Block 2 (Services):   ✅ — 8/8 tests passing, no regressions
 Block 3 (Wiring):     🔄 in progress...
 ```
 
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-build" "Phase 6" end "$FEATURE_SLUG"
+```
 ### Phase 7 — Verify + Report
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-build" "Phase 7" start "$FEATURE_SLUG"
+```
 
 #### Phase 7a — Quality Gates
 
@@ -802,3 +858,12 @@ Changes: <N files changed, N insertions, N deletions> (from git diff --stat)
 Report: "Skipped. Branch `feat/<feature-name>` — run `/commit` and then merge when ready."
 
 ---
+
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-build" "Phase 7" end "$FEATURE_SLUG"
+```
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-build" "-" "complete" "$FEATURE_SLUG"
+```
