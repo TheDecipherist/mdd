@@ -1,20 +1,12 @@
-## Phase Logging
-
-At the **start** of every phase (before any action) and the **end** of every phase (after all actions), run the command below. Substitute `PHASE` with the phase identifier (e.g., `Phase OP1`, `Phase RO2`) and `EVENT` with `start` or `end`:
-
-```bash
-bash -c 'D=$(date +%Y-%m-%d); T=$(date +%H:%M:%S); K=$(compressmcp --status 2>/dev/null | grep -oE "[0-9]+K/[0-9]+K" | head -1 || echo "-"); mkdir -p ~/.claude/mdd; printf "| %s | mdd-ops | PHASE | EVENT | %s | %s |\n" "$D" "$T" "$K" >> ~/.claude/mdd/log.md' 2>/dev/null || true
-```
-
-Log file: `~/.claude/mdd/log.md`
-
----
-
 ## OPS DOCUMENT MODE — `/mdd ops <description>`
 
 Triggered when arguments start with `ops`. If arguments are exactly `ops list` → jump to **Ops List Mode** (Phase OL) instead.
 
 ### Phase OP1 — Scope, slug, and collision check
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-ops" "Phase OP1" start "$RUNBOOK_SLUG"
+```
 
 **Step 1 — Ask scope first (before anything else):**
 
@@ -42,7 +34,15 @@ Derive a slug: lowercase, hyphens, drop filler words (e.g., "deploy swarmk to do
 - **Does not exist** → proceed to Phase OP2 (create)
 - **Exists** → tell the user: *"Runbook `<slug>` already exists. Use `/mdd update-op <slug>` to edit it or `/mdd runop <slug>` to execute it."* Stop.
 
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-ops" "Phase OP1" end "$RUNBOOK_SLUG"
+```
 ### Phase OP2 — Ask questions
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-ops" "Phase OP2" start "$RUNBOOK_SLUG"
+```
 
 Ask all questions in a single interaction:
 
@@ -57,7 +57,15 @@ Ask all questions in a single interaction:
 9. "Are any MCP servers required during deployment? (e.g., strictdb-mcp for post-deploy seeding)"
 10. "What environments does this target? (staging / production / both)"
 
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-ops" "Phase OP2" end "$RUNBOOK_SLUG"
+```
 ### Phase OP3 — Write the runbook
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-ops" "Phase OP3" start "$RUNBOOK_SLUG"
+```
 
 Create `.mdd/ops/<slug>.md` with full frontmatter and all 7 mandatory sections:
 
@@ -137,7 +145,15 @@ Step 2 (Name):
 <Specific steps to undo this deployment if it fails. Must be actionable, not "revert the commit".>
 ```
 
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-ops" "Phase OP3" end "$RUNBOOK_SLUG"
+```
 ### Phase OP4 — Offer next steps
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-ops" "Phase OP4" start "$RUNBOOK_SLUG"
+```
 
 ```
 ✅ Runbook created: .mdd/ops/<slug>.md
@@ -149,11 +165,23 @@ Next steps:
 
 ---
 
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-ops" "Phase OP4" end "$RUNBOOK_SLUG"
+```
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-ops" "-" "complete" "$RUNBOOK_SLUG"
+```
 ## OPS EXECUTE MODE — `/mdd runop <slug>`
 
 Triggered when arguments start with `runop`. Executes an existing ops runbook with pre-flight health checks, canary-gated region deployment, and post-flight verification.
 
 ### Phase RO1 — Load runbook
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-ops" "Phase RO1" start "$RUNBOOK_SLUG"
+```
 
 1. Parse `<slug>` from arguments — hard stop *"Slug required. Usage: /mdd runop <slug>"* if missing.
 2. Locate the runbook (project-local first, then global):
@@ -162,7 +190,15 @@ Triggered when arguments start with `runop`. Executes an existing ops runbook wi
    - Neither found → hard stop: *"No runbook found for `<slug>` (checked project and global). Run `/mdd ops <description>` to create one, or `/mdd ops list` to see all available runbooks."*
 3. Parse all frontmatter fields: regions (sorted by `deploy_order`), services, `deployment_strategy`.
 
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-ops" "Phase RO1" end "$RUNBOOK_SLUG"
+```
 ### Phase RO2 — Pre-flight health check (all regions)
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-ops" "Phase RO2" start "$RUNBOOK_SLUG"
+```
 
 Run each service's `health_check` for each of its declared regions. Display a status table:
 
@@ -187,7 +223,15 @@ For each service that is **not healthy**, ask per region:
   (c) Abort — stop the entire runop
 ```
 
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-ops" "Phase RO2" end "$RUNBOOK_SLUG"
+```
 ### Phase RO3 — Deploy region by region (in deploy_order)
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-ops" "Phase RO3" start "$RUNBOOK_SLUG"
+```
 
 For each region in `deploy_order` sequence:
 
@@ -227,7 +271,15 @@ Write updated `status` and `last_checked` for all services in this region to fro
 
 Gate passed → proceed to next region in `deploy_order`. Repeat Steps A–B.
 
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-ops" "Phase RO3" end "$RUNBOOK_SLUG"
+```
 ### Phase RO4 — Post-flight health check (all regions)
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-ops" "Phase RO4" start "$RUNBOOK_SLUG"
+```
 
 Re-run all service health checks across all regions. Display full cross-region before → after table:
 
@@ -242,7 +294,15 @@ Post-flight Health Check — <slug>
 Write final `status` and `last_checked` to all service region entries in frontmatter.
 Any service still failing → append entry to `known_issues` in the doc.
 
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-ops" "Phase RO4" end "$RUNBOOK_SLUG"
+```
 ### Phase RO5 — Summary
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-ops" "Phase RO5" start "$RUNBOOK_SLUG"
+```
 
 **Update the runbook frontmatter** — write this field before displaying the summary:
 - `last_synced: <today>`
@@ -273,11 +333,23 @@ Fix: resolve <service> in <region-1>, then re-run /mdd runop <slug>
 
 ---
 
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-ops" "Phase RO5" end "$RUNBOOK_SLUG"
+```
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-ops" "-" "complete" "$RUNBOOK_SLUG"
+```
 ## OPS UPDATE MODE — `/mdd update-op <slug>`
 
 Triggered when arguments start with `update-op`. Updates an existing ops runbook.
 
 ### Phase UO1 — Load
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-ops" "Phase UO1" start "$RUNBOOK_SLUG"
+```
 
 1. Parse `<slug>` — hard stop *"Slug required. Usage: /mdd update-op <slug>"* if missing.
 2. Locate runbook (project-local first, then global):
@@ -285,7 +357,15 @@ Triggered when arguments start with `update-op`. Updates an existing ops runbook
    - Check `~/.claude/ops/<slug>.md` → found: load it, note scope = global
    - Neither found → hard stop: *"No runbook found for `<slug>`. Run `/mdd ops list` to see all available runbooks."*
 
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-ops" "Phase UO1" end "$RUNBOOK_SLUG"
+```
 ### Phase UO2 — Re-ask with current values pre-filled
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-ops" "Phase UO2" start "$RUNBOOK_SLUG"
+```
 
 Re-present the Phase OP2 questions with current values shown as defaults. User can accept (press enter) or type a new value. Only changed fields are rewritten.
 
@@ -299,7 +379,15 @@ Changes detected:
 
 Ask: *"Apply these changes? (yes / cancel)"*
 
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-ops" "Phase UO2" end "$RUNBOOK_SLUG"
+```
 ### Phase UO3 — Rewrite and update
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-ops" "Phase UO3" start "$RUNBOOK_SLUG"
+```
 
 Rewrite only changed sections. Preserve:
 - `known_issues` (never remove existing entries without asking)
@@ -315,11 +403,23 @@ Update frontmatter: `last_synced: <today>`, `status: draft` if previously `compl
 
 ---
 
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-ops" "Phase UO3" end "$RUNBOOK_SLUG"
+```
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-ops" "-" "complete" "$RUNBOOK_SLUG"
+```
 ## OPS LIST MODE — `/mdd ops list`
 
 Triggered when arguments are exactly `ops list`. Lists all ops runbooks — global and project — in a single unified view.
 
 ### Phase OL — Scan and display
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-ops" "Phase OL" start "$RUNBOOK_SLUG"
+```
 
 1. Glob `~/.claude/ops/*.md` — read each, extract `id`, `title`, `platform`, `status`, and the last `last_checked` value across all services.
 2. Glob `.mdd/ops/*.md` (excluding `archive/`) — same fields.
@@ -349,11 +449,23 @@ No ops runbooks found.
 
 ---
 
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-ops" "Phase OL" end "$RUNBOOK_SLUG"
+```
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-ops" "-" "complete" "$RUNBOOK_SLUG"
+```
 ## COMMANDS MODE — `/mdd commands`
 
 Triggered when arguments start with `commands`. Outputs a reference table of every available MDD mode.
 
 ### Phase CM — Render Mode Reference
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-ops" "Phase CM" start "$RUNBOOK_SLUG"
+```
 
 Read the **Step 0b — Detect Mode** block from this file (the loaded prompt). For every bullet point that maps an argument pattern to a mode, extract the trigger word(s) and the mode name. Then render the following table:
 
@@ -392,3 +504,12 @@ Run /mdd <feature description> to start building, /mdd ops <description> to crea
 No files are created or modified by this mode.
 
 ---
+
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-ops" "Phase CM" end "$RUNBOOK_SLUG"
+```
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-ops" "-" "complete" "$RUNBOOK_SLUG"
+```

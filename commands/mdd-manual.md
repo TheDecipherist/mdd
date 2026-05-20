@@ -2,27 +2,11 @@
 
 Triggered when arguments start with `manual`.
 
-## Phase Logging
-
-At the **start** of every phase (before any action) and the **end** of every phase (after all actions), run the command below. Substitute `PHASE` with the phase identifier (e.g., `Phase M1`, `Phase M2`) and `EVENT` with `start` or `end`:
+### Phase M1 - Scope & Hash Check
 
 ```bash
-bash -c 'D=$(date +%Y-%m-%d); T=$(date +%H:%M:%S); K=$(compressmcp --status 2>/dev/null | grep -oE "[0-9]+K/[0-9]+K" | head -1 || echo "-"); mkdir -p ~/.claude/mdd; printf "| %s | mdd-manual | PHASE | EVENT | %s | %s |\n" "$D" "$T" "$K" >> ~/.claude/mdd/log.md' 2>/dev/null || true
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-manual" "Phase M1" start "$ARGUMENTS"
 ```
-
-Log file: `~/.claude/mdd/log.md`
-
-Generates a comprehensive, print-ready user manual at `.mdd/manual/manual.md` from all
-MDD feature docs and ops runbooks. Uses content hashes to detect what changed since the
-last run - only stale sections are regenerated.
-
-Sections are written to disk **immediately after each generation batch completes** - never
-held in memory until the end. This means compaction mid-run loses at most one batch of
-sections, and the next run can resume from the saved state.
-
----
-
-### Phase M1 - Scope & Hash Check
 
 **Step 1 - Guard against empty projects**
 
@@ -88,7 +72,15 @@ Stop here.
 
 ---
 
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-manual" "Phase M1" end "$ARGUMENTS"
+```
 ### Phase M2 - Skeleton Init (before generating any sections)
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-manual" "Phase M2" start "$ARGUMENTS"
+```
 
 Before generating any sections, ensure `manual.md` is in a writable state on disk.
 This protects against compaction - each section written to disk is durable.
@@ -160,7 +152,15 @@ each removal.
 
 ---
 
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-manual" "Phase M2" end "$ARGUMENTS"
+```
 ### Phase M3 - Section Generation (incremental, batch-by-batch)
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-manual" "Phase M3" start "$ARGUMENTS"
+```
 
 For each `changed` or `new` doc, generate a user-friendly manual section. The section
 must be readable by someone who has never seen the source code - focus on WHAT the
@@ -259,7 +259,15 @@ section header.
 
 ---
 
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-manual" "Phase M3" end "$ARGUMENTS"
+```
 ### Phase M4 - Final Assembly
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-manual" "Phase M4" start "$ARGUMENTS"
+```
 
 After all sections are on disk, perform final assembly passes on `manual.md`.
 
@@ -373,7 +381,15 @@ Write the final assembled `manual.md` to disk.
 
 ---
 
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-manual" "Phase M4" end "$ARGUMENTS"
+```
 ### Phase M5 - Write Hashes & Report
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-manual" "Phase M5" start "$ARGUMENTS"
+```
 
 **Step 1 - Update hash store**
 
@@ -450,3 +466,12 @@ If `/mdd manual` was interrupted mid-generation (context compaction, session end
 
 To skip regenerating sections that look complete, a user can run `--force` after manually
 verifying the manual looks correct, then let Phase M5 write the hash file to seal the run.
+
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-manual" "Phase M5" end "$ARGUMENTS"
+```
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-manual" "-" "complete" "$ARGUMENTS"
+```

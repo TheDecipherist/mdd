@@ -2,23 +2,15 @@
 
 Routes to one of three sub-modes based on the command used.
 
-## Phase Logging
-
-At the **start** of every step (before any action) and the **end** of every step (after all actions), run the command below. Substitute `PHASE` with the step identifier (e.g., `Step 1`, `Step 3`) and `EVENT` with `start` or `end`:
-
-```bash
-bash -c 'D=$(date +%Y-%m-%d); T=$(date +%H:%M:%S); K=$(compressmcp --status 2>/dev/null | grep -oE "[0-9]+K/[0-9]+K" | head -1 || echo "-"); mkdir -p ~/.claude/mdd; printf "| %s | mdd-framework | PHASE | EVENT | %s | %s |\n" "$D" "$T" "$K" >> ~/.claude/mdd/log.md' 2>/dev/null || true
-```
-
-Log file: `~/.claude/mdd/log.md`
-
----
-
 ## `framework <feature>` — Add a Module to mdd-ecommerce
 
 **$ARGUMENTS** is the feature description.
 
 ### Step 1 - Run normal BUILD MODE
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-framework" "fw-Step 1" start "$FEATURE_SLUG"
+```
 
 Read `$MDD_DIR/mdd-build.md` and follow every phase (branch check, context gather, questions, doc, implementation, tests). All standard MDD rules apply.
 
@@ -63,13 +55,33 @@ Use `skeleton-ready` when the module compiles but is not yet connected to real d
 
 **$ARGUMENTS** is the path to a completed proposal markdown file.
 
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-framework" "fw-Step 1" end "$FEATURE_SLUG"
+```
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-framework" "-" "complete" "$FEATURE_SLUG"
+```
 ### Step 1 - Read the proposal
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-framework" "ic-Step 1" start "$FEATURE_SLUG"
+```
 
 Read the file at `$ARGUMENTS`. If `$ARGUMENTS` is empty, ask: "What is the path to the proposal file?"
 
 Stop if the file does not exist. Report the path and ask the user to check it.
 
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-framework" "ic-Step 1" end "$FEATURE_SLUG"
+```
 ### Step 2 - Extract config values
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-framework" "ic-Step 2" start "$FEATURE_SLUG"
+```
 
 Parse the proposal for these values:
 
@@ -87,7 +99,15 @@ Parse the proposal for these values:
 
 If any required value is missing, list the gaps and ask the user to supply them before continuing.
 
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-framework" "ic-Step 2" end "$FEATURE_SLUG"
+```
 ### Step 3 - Parse the product catalog
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-framework" "ic-Step 3" start "$FEATURE_SLUG"
+```
 
 The proposal contains a markdown table with columns: `sku`, `mfr`, `name`, `description`, `brand`, `price`, `stock`.
 
@@ -95,7 +115,15 @@ Extract every row. Convert `price` to integers (cents/öre - multiply by 100 and
 
 If the table is missing or empty, ask: "No products found in the catalog table. Add products to the proposal and re-run, or continue with an empty seed?"
 
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-framework" "ic-Step 3" end "$FEATURE_SLUG"
+```
 ### Step 4 - Determine module wiring
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-framework" "ic-Step 4" start "$FEATURE_SLUG"
+```
 
 Based on the feature flags extracted in Step 2, decide which `@thedecipherist/mdd-ecommerce-*` packages to import and wire into `site.config.ts`:
 
@@ -105,7 +133,15 @@ Based on the feature flags extracted in Step 2, decide which `@thedecipherist/md
 
 Always include `@thedecipherist/mdd-ecommerce-core`.
 
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-framework" "ic-Step 4" end "$FEATURE_SLUG"
+```
 ### Step 5 - Generate files
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-framework" "ic-Step 5" start "$FEATURE_SLUG"
+```
 
 Write all files to the current working directory.
 
@@ -162,7 +198,15 @@ NEXT_PUBLIC_RYBBIT_URL=https://app.rybbit.io
 # add any other vars from the main mdd-ecommerce .env.example
 ```
 
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-framework" "ic-Step 5" end "$FEATURE_SLUG"
+```
 ### Step 6 - Report
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-framework" "ic-Step 6" start "$FEATURE_SLUG"
+```
 
 List every file written with its path. Then output:
 
@@ -179,23 +223,59 @@ Next steps:
 
 Run this from the root of a client project directory.
 
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-framework" "ic-Step 6" end "$FEATURE_SLUG"
+```
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-framework" "-" "complete" "$FEATURE_SLUG"
+```
 ### Step 1 - Read package.json
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-framework" "cs-Step 1" start "$FEATURE_SLUG"
+```
 
 Read `package.json` in the current directory. Find all dependencies and devDependencies whose names start with `@thedecipherist/mdd-ecommerce-`. List each with its pinned version.
 
 If no such dependencies exist, report: "No mdd-ecommerce packages found in package.json. Is this the right directory?"
 
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-framework" "cs-Step 1" end "$FEATURE_SLUG"
+```
 ### Step 2 - Read site.config.ts
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-framework" "cs-Step 2" start "$FEATURE_SLUG"
+```
 
 Read `site.config.ts`. Extract:
 - Which slots have modules wired (non-null slot values)
 - Which feature flags are `true`
 
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-framework" "cs-Step 2" end "$FEATURE_SLUG"
+```
 ### Step 3 - Check MDD docs
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-framework" "cs-Step 3" start "$FEATURE_SLUG"
+```
 
 Check if `.mdd/docs/` exists. If yes, count the `.md` files inside.
 
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-framework" "cs-Step 3" end "$FEATURE_SLUG"
+```
 ### Step 4 - Output status table
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-framework" "cs-Step 4" start "$FEATURE_SLUG"
+```
 
 ```
 mdd-ecommerce Client Status
@@ -213,3 +293,12 @@ MDD docs:          <N> files in .mdd/docs/  (or "directory not found")
 ```
 
 If `site.config.ts` does not exist, report that and skip slots/features rows.
+
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-framework" "cs-Step 4" end "$FEATURE_SLUG"
+```
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-framework" "-" "complete" "$FEATURE_SLUG"
+```

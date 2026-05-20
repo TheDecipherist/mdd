@@ -4,21 +4,11 @@
 
 The user is reporting a bug in an existing feature. Do NOT create a new feature doc.
 
-## Phase Logging
-
-At the **start** of every phase (before any action) and the **end** of every phase (after all actions), run the command below. Substitute `PHASE` with the phase identifier (e.g., `Phase B0`, `Phase B1`) and `EVENT` with `start` or `end`:
+### Phase B0 — Parse
 
 ```bash
-bash -c 'D=$(date +%Y-%m-%d); T=$(date +%H:%M:%S); K=$(compressmcp --status 2>/dev/null | grep -oE "[0-9]+K/[0-9]+K" | head -1 || echo "-"); mkdir -p ~/.claude/mdd; printf "| %s | mdd-bug | PHASE | EVENT | %s | %s |\n" "$D" "$T" "$K" >> ~/.claude/mdd/log.md' 2>/dev/null || true
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-bug" "Phase B0" start "$BUG_SLUG"
 ```
-
-Log file: `~/.claude/mdd/log.md`
-Instead: scan existing docs to identify which feature(s) own the broken behavior,
-document the bug in those docs, fix it, and mark it complete.
-
----
-
-### Phase B0 — Parse
 
 Extract the bug description from `$ARGUMENTS` by stripping the leading `bug ` prefix.
 Store as `$BUG_DESC`.
@@ -28,7 +18,15 @@ If `$BUG_DESC` is empty after stripping, ask the user:
 
 ---
 
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-bug" "Phase B0" end "$BUG_SLUG"
+```
 ### Phase B1 — Triage
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-bug" "Phase B1" start "$BUG_SLUG"
+```
 
 Read the frontmatter of every file in `.mdd/docs/` (excluding `archive/` subdirectory).
 Do **not** read doc bodies during triage — frontmatter only. You need: `id`, `title`, `tags`, `source_files`.
@@ -65,7 +63,15 @@ Run /mdd status to see the full project overview.
 
 ---
 
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-bug" "Phase B1" end "$BUG_SLUG"
+```
 ### Phase B2 — Confirm Related Docs
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-bug" "Phase B2" start "$BUG_SLUG"
+```
 
 Present the triage results and ask the user to confirm which docs the bug relates to.
 Always show the full doc list so the user can add docs that scored below the threshold.
@@ -88,7 +94,15 @@ Store the confirmed list as `$RELATED_DOCS`.
 
 ---
 
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-bug" "Phase B2" end "$BUG_SLUG"
+```
 ### Phase B3 — Document the Bug
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-bug" "Phase B3" start "$BUG_SLUG"
+```
 
 For each doc in `$RELATED_DOCS`:
 
@@ -135,7 +149,15 @@ Store the bug IDs per doc as `$BUG_IDS` (map of doc-id → B-number) for use in 
 
 ---
 
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-bug" "Phase B3" end "$BUG_SLUG"
+```
 ### Phase B4 — Fix
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-bug" "Phase B4" start "$BUG_SLUG"
+```
 
 Ask the user via AskUserQuestion how to proceed with the fix:
 
@@ -202,7 +224,15 @@ At the end of Phase 7, return here to Phase B5 to mark the bug complete in the d
 
 ---
 
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-bug" "Phase B4" end "$BUG_SLUG"
+```
 ### Phase B5 — Mark Complete
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-bug" "Phase B5" start "$BUG_SLUG"
+```
 
 After the fix is verified (via either Path A or Path B), update every doc in `$RELATED_DOCS`:
 
@@ -258,3 +288,12 @@ Options:
 ```
 
 Follow the same commit/merge logic as BUILD MODE Phase 7d.
+
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-bug" "Phase B5" end "$BUG_SLUG"
+```
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-bug" "-" "complete" "$BUG_SLUG"
+```

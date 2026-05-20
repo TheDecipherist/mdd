@@ -1,22 +1,12 @@
-## Phase Logging
-
-At the **start** of every phase (before any action) and the **end** of every phase (after all actions), run the command below. Substitute:
-- `PHASE` with the phase identifier **and the initiative or wave slug** from `$ARGUMENTS` — e.g., `Phase PI1 (my-initiative)`, `Phase PW3 (wave-auth)`, `Phase PE2 (wave-checkout)`
-- `EVENT` with `start` or `end`
-
-```bash
-bash -c 'D=$(date +%Y-%m-%d); T=$(date +%H:%M:%S); K=$(compressmcp --status 2>/dev/null | grep -oE "[0-9]+K/[0-9]+K" | head -1 || echo "-"); mkdir -p ~/.claude/mdd; printf "| %s | mdd-plan | PHASE | EVENT | %s | %s |\n" "$D" "$T" "$K" >> ~/.claude/mdd/log.md' 2>/dev/null || true
-```
-
-Log file: `~/.claude/mdd/log.md`
-
----
-
 ## PLAN-INITIATIVE MODE — `/mdd plan-initiative`
 
 Triggered when arguments start with `plan-initiative`. Creates a new initiative doc.
 
 ### Phase PI0 — Branch Guard
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-plan" "Phase PI0" start "$PLAN_TARGET"
+```
 
 Run before any file creation:
 
@@ -30,7 +20,15 @@ DIRTY=$(git status --porcelain)
 - **On a feature branch** → working dirty is fine. Proceed — initiative planning docs belong on whatever branch is current.
 - **Never proceed on main.** Hard block.
 
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-plan" "Phase PI0" end "$PLAN_TARGET"
+```
 ### Phase PI1 — Mode choice
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-plan" "Phase PI1" start "$PLAN_TARGET"
+```
 
 Ask the user:
 ```
@@ -52,7 +50,15 @@ How do you want to create this initiative?
 
 **If (a) Guide me:** proceed to Phase PI2.
 
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-plan" "Phase PI1" end "$PLAN_TARGET"
+```
 ### Phase PI2 — Questions
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-plan" "Phase PI2" start "$PLAN_TARGET"
+```
 
 Ask all questions in a single interaction:
 1. "What is the title of this initiative?"
@@ -61,7 +67,15 @@ Ask all questions in a single interaction:
 4. For each wave: "Wave N — name and one-sentence demo-state (what can the user DO when this wave is done?)"
 5. "What's still undecided that could affect architecture?" → these become open product questions (unchecked `- [ ]` items)
 
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-plan" "Phase PI2" end "$PLAN_TARGET"
+```
 ### Phase PI3 — Write initiative doc
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-plan" "Phase PI3" start "$PLAN_TARGET"
+```
 
 **Slug format:** lowercase, hyphens, no special characters. "Auth System" → `auth-system`.
 
@@ -99,7 +113,15 @@ Compute and write `hash:` field after writing (hash of file content excluding th
 
 Rebuild `.mdd/.startup.md`.
 
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-plan" "Phase PI3" end "$PLAN_TARGET"
+```
 ### Phase PI4 — Chain to plan-wave
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-plan" "Phase PI4" start "$PLAN_TARGET"
+```
 
 Show the created doc to the user. Ask:
 *"Want to plan Wave 1 now? (yes / no — I'll run /mdd plan-wave <slug>-wave-1 later)"*
@@ -108,11 +130,23 @@ If yes → run Phase PW1 inline for `<slug>-wave-1`.
 
 ---
 
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-plan" "Phase PI4" end "$PLAN_TARGET"
+```
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-plan" "-" "complete" "$PLAN_TARGET"
+```
 ## PLAN-WAVE MODE — `/mdd plan-wave <wave-slug>`
 
 Triggered when arguments start with `plan-wave`. Takes a wave slug (e.g. `auth-system-wave-2`), resolves the parent initiative from it.
 
 ### Phase PW1 — Load and validate
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-plan" "Phase PW1" start "$PLAN_TARGET"
+```
 
 **Step 0 — Branch guard:**
 
@@ -134,7 +168,15 @@ DIRTY=$(git status --porcelain)
 6. **Depends-on gate:** read existing wave docs for this initiative. If the new wave's `depends_on` wave exists and is not `complete` → hard stop.
 7. Surface context summary to user: initiative title, overview, wave count, which waves are done.
 
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-plan" "Phase PW1" end "$PLAN_TARGET"
+```
 ### Phase PW2 — Mode choice
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-plan" "Phase PW2" start "$PLAN_TARGET"
+```
 
 Same as PI1: ask "(a) Guide me / (b) Template".
 
@@ -142,7 +184,15 @@ Same as PI1: ask "(a) Guide me / (b) Template".
 
 **If (a) Guide me:** proceed to Phase PW3.
 
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-plan" "Phase PW2" end "$PLAN_TARGET"
+```
 ### Phase PW3 — Questions
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-plan" "Phase PW3" start "$PLAN_TARGET"
+```
 
 Ask in a single interaction:
 1. "Here's the demo-state from the initiative: [X]. Does this need sharpening for this wave?"
@@ -150,7 +200,15 @@ Ask in a single interaction:
 3. "Do any features depend on other features within this wave?"
 4. "Any open research questions before building? Or none?"
 
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-plan" "Phase PW3" end "$PLAN_TARGET"
+```
 ### Phase PW4 — Write wave doc
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-plan" "Phase PW4" start "$PLAN_TARGET"
+```
 
 Create `waves/<wave-slug>.md`:
 
@@ -187,18 +245,38 @@ Compute and write `hash:` field. Update the Waves table in `initiatives/<slug>.m
 
 Rebuild `.mdd/.startup.md`.
 
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-plan" "Phase PW4" end "$PLAN_TARGET"
+```
 ### Phase PW5 — Chain
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-plan" "Phase PW5" start "$PLAN_TARGET"
+```
 
 Ask: *"Want to plan Wave N+1 now? (yes / no)"*
 If yes → run Phase PW1 inline for the next wave slug.
 
 ---
 
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-plan" "Phase PW5" end "$PLAN_TARGET"
+```
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-plan" "-" "complete" "$PLAN_TARGET"
+```
 ## PLAN-EXECUTE MODE — `/mdd plan-execute <wave-slug>`
 
 Triggered when arguments start with `plan-execute`. Runs the full MDD build flow for each feature in the wave.
 
 ### Phase PE1 — Load and validate
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-plan" "Phase PE1" start "$PLAN_TARGET"
+```
 
 **Step 0 — Branch guard (runs before everything else):**
 
@@ -245,7 +323,15 @@ DIRTY=$(git status --porcelain)
    - **Discard:** delete the `wave-<wave-slug>/` folder, proceed to PE2 normally.
    - If no stale job exists: proceed to PE2 normally.
 
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-plan" "Phase PE1" end "$PLAN_TARGET"
+```
 ### Phase PE2 — Interaction mode + Job Setup
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-plan" "Phase PE2" start "$PLAN_TARGET"
+```
 
 Ask:
 ```
@@ -282,7 +368,15 @@ Create `.mdd/jobs/wave-<wave-slug>/MANIFEST.md`:
 
 List every feature from the wave's Features table in order. Features already marked `complete` in the wave doc get `[x]` from the start.
 
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-plan" "Phase PE2" end "$PLAN_TARGET"
+```
 ### Phase PE3 — Execute features
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-plan" "Phase PE3" start "$PLAN_TARGET"
+```
 
 For each feature in the wave's feature table, in dependency order, skipping `complete` features:
 
@@ -310,7 +404,15 @@ For each feature in the wave's feature table, in dependency order, skipping `com
 
 **Resume behaviour:** if re-run on a partially complete wave, stale job detection in PE1 handles resume. MANIFEST is the authoritative progress record — it is always written before and after each feature so an interrupted session can pick up at the exact right point.
 
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-plan" "Phase PE3" end "$PLAN_TARGET"
+```
 ### Phase PE4 — Wave completion
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-plan" "Phase PE4" start "$PLAN_TARGET"
+```
 
 When all features are `complete`:
 1. Update `MANIFEST.md` — set `# Status: COMPLETE` in the header.
@@ -343,11 +445,23 @@ Read all `.mdd/docs/*.md` (excluding `archive/`) — frontmatter only (id, title
 
 ---
 
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-plan" "Phase PE4" end "$PLAN_TARGET"
+```
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-plan" "-" "complete" "$PLAN_TARGET"
+```
 ## PLAN-SYNC MODE — `/mdd plan-sync`
 
 Triggered when arguments start with `plan-sync`. Detects manual edits to initiative/wave files via hash comparison and reconciles them.
 
 ### Phase PS1 — Scan all files
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-plan" "Phase PS1" start "$PLAN_TARGET"
+```
 
 Read every file in `.mdd/initiatives/` and `.mdd/waves/` (including `archive/`). For each, compute the hash of the file content (excluding the `hash:` line). Compare against stored `hash:` field.
 
@@ -359,7 +473,15 @@ auth-system-wave-1.md            | def456      | abc999        | YES
 billing-module.md                | (empty)     | xyz111        | YES (new — no hash yet)
 ```
 
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-plan" "Phase PS1" end "$PLAN_TARGET"
+```
 ### Phase PS2 — Present changes + confirm
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-plan" "Phase PS2" start "$PLAN_TARGET"
+```
 
 Show the full change table. Tell the user what will happen:
 
@@ -369,7 +491,15 @@ Show the full change table. Tell the user what will happen:
 
 Ask: *"Apply these updates? (yes / review each / cancel)"*
 
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-plan" "Phase PS2" end "$PLAN_TARGET"
+```
 ### Phase PS3 — Apply
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-plan" "Phase PS3" start "$PLAN_TARGET"
+```
 
 For each changed file, in initiative-first order:
 
@@ -403,18 +533,38 @@ Report:
 
 ---
 
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-plan" "Phase PS3" end "$PLAN_TARGET"
+```
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-plan" "-" "complete" "$PLAN_TARGET"
+```
 ## PLAN-REMOVE-FEATURE MODE — `/mdd plan-remove-feature <wave-slug> <feature-slug>`
 
 Triggered when arguments start with `plan-remove-feature`.
 
 ### Phase PRF1 — Load and validate
 
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-plan" "Phase PRF1" start "$PLAN_TARGET"
+```
+
 1. Parse `<wave-slug>` and `<feature-slug>` from arguments.
 2. Read wave doc — hard stop *"Wave does not exist"* if not found.
 3. Find the feature row — hard stop *"Feature `<slug>` does not exist in wave `<wave-slug>`"* if not found.
 4. **Dependency guard:** check if any other feature in the wave lists `<feature-slug>` in its `Depends on` column. If so → hard stop: *"`<other-feature>` depends on `<feature-slug>`. Remove or reassign that dependency first."*
 
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-plan" "Phase PRF1" end "$PLAN_TARGET"
+```
 ### Phase PRF2 — Confirm and remove
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-plan" "Phase PRF2" start "$PLAN_TARGET"
+```
 
 Show summary:
 ```
@@ -441,16 +591,36 @@ Rebuild `.mdd/.startup.md`.
 
 ---
 
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-plan" "Phase PRF2" end "$PLAN_TARGET"
+```
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-plan" "-" "complete" "$PLAN_TARGET"
+```
 ## PLAN-CANCEL-INITIATIVE MODE — `/mdd plan-cancel-initiative <slug>`
 
 Triggered when arguments start with `plan-cancel-initiative`.
 
 ### Phase PCI1 — Load
 
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-plan" "Phase PCI1" start "$PLAN_TARGET"
+```
+
 1. Parse `<slug>` — hard stop *"Initiative does not exist"* if `initiatives/<slug>.md` not found.
 2. Read initiative doc. Count: waves, wave statuses, associated feature docs (those with `initiative: <slug>` frontmatter).
 
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-plan" "Phase PCI1" end "$PLAN_TARGET"
+```
 ### Phase PCI2 — Confirm
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-plan" "Phase PCI2" start "$PLAN_TARGET"
+```
 
 Show summary:
 ```
@@ -465,7 +635,15 @@ Cancel this initiative? (yes/no)
 
 If yes:
 
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-plan" "Phase PCI2" end "$PLAN_TARGET"
+```
 ### Phase PCI3 — Cancel
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-plan" "Phase PCI3" start "$PLAN_TARGET"
+```
 
 1. Set `status: cancelled` in initiative frontmatter. Recompute hash.
 2. Ask: *"Archive wave docs? (yes/no)"* — if yes, move all wave files to `.mdd/waves/archive/`
@@ -483,3 +661,12 @@ Report:
 ```
 
 ---
+
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-plan" "Phase PCI3" end "$PLAN_TARGET"
+```
+
+```bash
+bash ~/.claude/hooks/mdd-log-phase.sh "mdd-plan" "-" "complete" "$PLAN_TARGET"
+```
