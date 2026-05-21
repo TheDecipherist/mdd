@@ -1207,7 +1207,7 @@ Every project below was built start to finish with this workflow - spec first in
 | [DockerDoctor](https://github.com/TheDecipherist/dockerdoctor) | Docker container health monitoring and diagnostics. Automated health checks, log analysis, and recovery suggestions. |
 | [TerseJSON](https://github.com/TheDecipherist/tersejson) | Transparent JSON key compression using lazy-loading proxies. 30-80% bandwidth reduction with no changes to consuming code. |
 | [CompressMCP](https://github.com/TheDecipherist/compressmcp) | Lossless dictionary-based JSON key compression for MCP tool responses via pre/post hooks. - [.mdd/](https://github.com/TheDecipherist/compressmcp/tree/main/.mdd) |
-| [PipeStage](https://github.com/TheDecipherist/pipestage) | Type-safe pipeline composition for Node.js with built-in error handling, validation, and parallel execution. |
+| [PipeStage](https://github.com/TheDecipherist/pipestage) | Type-safe pipeline composition for Node.js with built-in error handling, validation, and parallel execution. - [.mdd/](https://github.com/TheDecipherist/pipestage/tree/main/.mdd) |
 | [PeelX](https://github.com/TheDecipherist/peelX) | Recursive nested archive extraction CLI. Automatically unpacks zip-in-tar-in-gz in one command. Python, distributed via PyPI. - [.mdd/](https://github.com/TheDecipherist/peelX/tree/main/.mdd) |
 
 ---
