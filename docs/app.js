@@ -45,7 +45,7 @@
     });
   }
 
-  // Scroll spy — highlight current section in sidebar TOC
+  // Scroll spy , highlight current section in sidebar TOC
   function initScrollSpy() {
     var tocLinks = document.querySelectorAll('#toc a[href^="#"]');
     var mobileLinks = document.querySelectorAll('.mobile-toc a[href^="#"]');

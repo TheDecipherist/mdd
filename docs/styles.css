@@ -1,4 +1,4 @@
-/* MDD — Manual-Driven Development docs theme */
+/* MDD , Manual-Driven Development docs theme */
 /* Colors derived from the MDD hero image: electric teal crystals, neon green runes, dark navy backgrounds, amber torchlight */
 :root {
   --bg-primary: #08090f;
@@ -1425,7 +1425,7 @@ footer .footer-projects {
   }
 }
 
-/* Accent Colors for Section Dividers — teal/green rotation */
+/* Accent Colors for Section Dividers , teal/green rotation */
 #content section:nth-of-type(6n+1) h2 { border-top-color: var(--accent-cyan); }
 #content section:nth-of-type(6n+2) h2 { border-top-color: var(--accent-green); }
 #content section:nth-of-type(6n+3) h2 { border-top-color: var(--accent-blue); }

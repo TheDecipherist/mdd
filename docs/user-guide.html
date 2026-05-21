@@ -219,15 +219,15 @@ mdd --version</code></pre>
           <thead><tr><th>What</th><th>Where</th><th>Purpose</th></tr></thead>
           <tbody>
             <tr><td><code>mdd.md</code> (router)</td><td><code>~/.claude/commands/</code></td><td>The <code>/mdd</code> slash command entry point</td></tr>
-            <tr><td>6 mode <code>.md</code> files</td><td><code>~/.claude/mdd/</code></td><td>Mode files — read lazily, not exposed as commands</td></tr>
+            <tr><td>6 mode <code>.md</code> files</td><td><code>~/.claude/mdd/</code></td><td>Mode files , read lazily, not exposed as commands</td></tr>
             <tr><td>Branch Guard hook</td><td><code>~/.claude/hooks/mdd-branch-guard.sh</code></td><td>Blocks file writes on <code>main</code> in any MDD project</td></tr>
             <tr><td>Hook registration</td><td><code>~/.claude/settings.json</code></td><td>Wires the hook to Claude Code's <code>PreToolUse</code> event</td></tr>
             <tr><td>Guidance block</td><td><code>~/.claude/CLAUDE.md</code></td><td>Teaches Claude to suggest MDD automatically</td></tr>
           </tbody>
         </table>
-        <p>All four are idempotent — running <code>mdd install</code> or <code>mdd update</code> again never duplicates any of them.</p>
+        <p>All four are idempotent , running <code>mdd install</code> or <code>mdd update</code> again never duplicates any of them.</p>
 
-        <h3 id="branch-guard">Branch Guard — Never Work on <code>main</code></h3>
+        <h3 id="branch-guard">Branch Guard , Never Work on <code>main</code></h3>
         <p>
           <code>mdd install</code> registers a <strong>Claude Code <code>PreToolUse</code> hook</strong> that fires before every file write (<code>Write</code>, <code>Edit</code>, <code>NotebookEdit</code>) in any project with a <code>.mdd/</code> directory. If the current git branch is <code>main</code> or <code>master</code>, the hook blocks the operation and explains what to do:
         </p>
@@ -240,7 +240,7 @@ mdd --version</code></pre>
       git checkout -b feat/&lt;feature-name&gt;</code></pre>
 
         <p>
-          <strong>Why a hook and not just instructions?</strong> Claude's context compaction summarises earlier conversation turns when a session grows long. Instruction-based branch checks can be compacted away — the hook fires at the OS level on every tool call regardless of conversation length. The two layers work together: instructions guide Claude's decisions, the hook enforces the rule even when context is stale.
+          <strong>Why a hook and not just instructions?</strong> Claude's context compaction summarises earlier conversation turns when a session grows long. Instruction-based branch checks can be compacted away , the hook fires at the OS level on every tool call regardless of conversation length. The two layers work together: instructions guide Claude's decisions, the hook enforces the rule even when context is stale.
         </p>
 
         <p><strong>Branch naming MDD uses automatically:</strong></p>
@@ -1136,7 +1136,7 @@ Drift check:
 
         <h3><code>/mdd scan</code></h3>
         <p>
-          Detects features whose source files have changed since <code>last_synced</code>. Uses a single Explore agent to run all git checks in parallel, then classifies each feature. Scan also checks the freshness of <code>.mdd/connections.md</code> — a missing file is flagged as <code>broken</code>, and a file whose modification timestamp is older than the most recently modified feature doc is flagged as <code>drifted</code>.
+          Detects features whose source files have changed since <code>last_synced</code>. Uses a single Explore agent to run all git checks in parallel, then classifies each feature. Scan also checks the freshness of <code>.mdd/connections.md</code> , a missing file is flagged as <code>broken</code>, and a file whose modification timestamp is older than the most recently modified feature doc is flagged as <code>drifted</code>.
         </p>
 
         <table class="scale-table">
@@ -1320,20 +1320,20 @@ Graph saved: .mdd/audits/graph-2026-05-07.md</code></pre>
 
         <h3><code>/mdd rebuild-tags [--force]</code></h3>
         <p>
-          Scans all feature docs (<code>.mdd/docs/*.md</code>) and ops runbooks (<code>.mdd/ops/*.md</code>), generates a <code>tags:</code> field for any doc missing one, then rebuilds <code>.startup.md</code> with the new tag format. Safe to run multiple times — docs that already have <code>tags:</code> are skipped unless <code>--force</code> is passed.
+          Scans all feature docs (<code>.mdd/docs/*.md</code>) and ops runbooks (<code>.mdd/ops/*.md</code>), generates a <code>tags:</code> field for any doc missing one, then rebuilds <code>.startup.md</code> with the new tag format. Safe to run multiple times , docs that already have <code>tags:</code> are skipped unless <code>--force</code> is passed.
         </p>
         <p>
           Tags are 4–8 domain-concept keywords that identify what a doc is about. They appear in <code>.startup.md</code> next to each feature name, giving Claude a fast way to detect when a prompt relates to an already-documented feature or runbook without loading full docs into context.
         </p>
         <pre><code class="language-bash">/mdd rebuild-tags
 
-🏷️  Rebuild Tags — Inventory
+🏷️  Rebuild Tags , Inventory
   01-docs-site             ❌ missing
   02-dashboards-showcase   ❌ missing
   03-install-local-flag    ✅ present
 
-✅ 01-docs-site — tags: [github-pages, documentation, landing-page, user-guide]
-✅ 02-dashboards-showcase — tags: [dashboard, tui, showcase, mdd-dashboard]
+✅ 01-docs-site , tags: [github-pages, documentation, landing-page, user-guide]
+✅ 02-dashboards-showcase , tags: [dashboard, tui, showcase, mdd-dashboard]
 
 .startup.md rebuilt:
   - 01-docs-site (complete) [github-pages, documentation, landing-page, user-guide]
@@ -1357,7 +1357,7 @@ Graph saved: .mdd/audits/graph-2026-05-07.md</code></pre>
           <li><strong><code>status</code></strong> - inferred from <code>phase</code> field if present; defaults to <code>draft</code> if phase is absent</li>
           <li><strong><code>phase</code></strong> - inferred from <code>status</code>; <code>complete</code> status maps to <code>verified</code> phase</li>
           <li><strong><code>mdd_version</code></strong> - stamped with the current MDD version number</li>
-          <li><strong><code>path</code></strong> - inferred by reading each doc's full content and mapping it into the existing <code>path</code> vocabulary found across other docs. Content-aware inference: uses the Purpose and Architecture sections to place the feature in the product tree. Always shows the full plan for confirmation before writing — never assigns paths silently.</li>
+          <li><strong><code>path</code></strong> - inferred by reading each doc's full content and mapping it into the existing <code>path</code> vocabulary found across other docs. Content-aware inference: uses the Purpose and Architecture sections to place the feature in the product tree. Always shows the full plan for confirmation before writing , never assigns paths silently.</li>
         </ul>
 
         <pre><code class="language-bash">/mdd upgrade
@@ -1387,14 +1387,14 @@ Apply upgrades? [Y/n]
         <h2><code>/mdd import-spec</code></h2>
 
         <p>
-          Converts one or more spec documents — the large, free-form markdown files that accumulate during brainstorming, product discovery, or requirements sessions — into properly structured MDD feature docs. Nothing from the spec is lost: every piece of information is preserved and placed into the correct section of the generated docs.
+          Converts one or more spec documents , the large, free-form markdown files that accumulate during brainstorming, product discovery, or requirements sessions , into properly structured MDD feature docs. Nothing from the spec is lost: every piece of information is preserved and placed into the correct section of the generated docs.
         </p>
 
         <h3>Command Syntax</h3>
         <pre><code class="language-bash"># Convert a single spec file
 /mdd import-spec docs/spec.md
 
-# Convert multiple files — merged and deduplicated before processing
+# Convert multiple files , merged and deduplicated before processing
 /mdd import-spec product-brief.md technical-notes.md customer-requirements.md</code></pre>
 
         <h3>The 5 Phases</h3>
@@ -1403,7 +1403,7 @@ Apply upgrades? [Y/n]
           <div class="step-number">1</div>
           <div class="step-content">
             <h3>Read</h3>
-            <p>Loads the full content of each specified file. For multi-file invocations, all files are concatenated into a single corpus before analysis begins. No partial reads — the entire spec is held in context for the grouping pass.</p>
+            <p>Loads the full content of each specified file. For multi-file invocations, all files are concatenated into a single corpus before analysis begins. No partial reads , the entire spec is held in context for the grouping pass.</p>
           </div>
         </div>
 
@@ -1412,10 +1412,10 @@ Apply upgrades? [Y/n]
           <div class="step-content">
             <h3>Extract &amp; Group (path grouping pass first)</h3>
             <p>
-              The spec is analysed in two layers. First, a <strong>path grouping pass</strong> identifies the top-level product areas referenced in the spec (e.g., "Auth", "Checkout", "Notifications"). This pass runs before individual features are extracted, so that every feature is assigned a <code>path</code> value from the product vocabulary that already exists in your <code>.mdd/docs/</code> — or from the vocabulary established within the spec itself if the project is new.
+              The spec is analysed in two layers. First, a <strong>path grouping pass</strong> identifies the top-level product areas referenced in the spec (e.g., "Auth", "Checkout", "Notifications"). This pass runs before individual features are extracted, so that every feature is assigned a <code>path</code> value from the product vocabulary that already exists in your <code>.mdd/docs/</code> , or from the vocabulary established within the spec itself if the project is new.
             </p>
             <p>
-              After paths are established, individual features are extracted and grouped under their path segments. Overlapping or duplicate sections across multiple input files are semantically merged at this stage — content is combined, not duplicated.
+              After paths are established, individual features are extracted and grouped under their path segments. Overlapping or duplicate sections across multiple input files are semantically merged at this stage , content is combined, not duplicated.
             </p>
           </div>
         </div>
@@ -1427,7 +1427,7 @@ Apply upgrades? [Y/n]
             <p>
               Before writing a single file, MDD presents a full preview of what it is about to create. This gate is not skippable. You must confirm before any docs are written.
             </p>
-            <pre><code class="language-bash">Import Spec — Dry-Run Preview
+            <pre><code class="language-bash">Import Spec , Dry-Run Preview
 
 Path tree:
   Auth/
@@ -1448,7 +1448,7 @@ Content mapping:
 
 Merge summary:
   2 overlapping sections merged (auth flows → login + signup)
-  0 sections discarded — all content preserved
+  0 sections discarded , all content preserved
 
 Proceed with import? [Y/n]</code></pre>
           </div>
@@ -1458,7 +1458,7 @@ Proceed with import? [Y/n]</code></pre>
           <div class="step-number">4</div>
           <div class="step-content">
             <h3>Write Docs</h3>
-            <p>Creates each feature doc with full YAML frontmatter (including the inferred <code>path</code> field) and the 8 mandatory body sections. Spec content is distributed into the appropriate sections — business rules go into Business Rules, API shapes go into API Endpoints, data models go into Data Model, and so on. Any spec content that does not fit a standard section is placed in a <code>## Notes from Spec</code> subsection within the closest matching section, so nothing is lost.</p>
+            <p>Creates each feature doc with full YAML frontmatter (including the inferred <code>path</code> field) and the 8 mandatory body sections. Spec content is distributed into the appropriate sections , business rules go into Business Rules, API shapes go into API Endpoints, data models go into Data Model, and so on. Any spec content that does not fit a standard section is placed in a <code>## Notes from Spec</code> subsection within the closest matching section, so nothing is lost.</p>
           </div>
         </div>
 
@@ -1488,7 +1488,7 @@ Proceed with import? [Y/n]</code></pre>
             </tr>
             <tr>
               <td>4–7 features, 1–2 root areas</td>
-              <td>Creates Waves + feature docs. No initiative file — the waves are standalone without a named initiative container.</td>
+              <td>Creates Waves + feature docs. No initiative file , the waves are standalone without a named initiative container.</td>
             </tr>
             <tr>
               <td>1–3 features</td>
@@ -1513,7 +1513,7 @@ Proceed with import? [Y/n]</code></pre>
           When multiple files are passed, MDD performs a semantic merge before writing docs. This means:
         </p>
         <ul>
-          <li>Sections that cover the same feature from different angles are combined — the output contains the union of both descriptions, not a duplicate.</li>
+          <li>Sections that cover the same feature from different angles are combined , the output contains the union of both descriptions, not a duplicate.</li>
           <li>Identical or near-identical paragraphs are deduplicated. One canonical version is kept.</li>
           <li>Contradictions (e.g., two files specify different timeout values for the same endpoint) are flagged in the dry-run preview and left as a <code>known_issues</code> entry in the generated doc, rather than silently picking one.</li>
         </ul>
@@ -1529,21 +1529,21 @@ Proceed with import? [Y/n]</code></pre>
       <section id="manual-mode">
         <h2><code>/mdd manual</code></h2>
 
-        <p>Generates a comprehensive, print-ready user manual at <code>.mdd/manual/manual.md</code> from all MDD feature docs and ops runbooks. Uses content hashes so only changed sections are regenerated — running it repeatedly is fast and cheap.</p>
+        <p>Generates a comprehensive, print-ready user manual at <code>.mdd/manual/manual.md</code> from all MDD feature docs and ops runbooks. Uses content hashes so only changed sections are regenerated , running it repeatedly is fast and cheap.</p>
 
-        <pre><code class="language-bash">/mdd manual           # incremental — only regenerate changed sections
+        <pre><code class="language-bash">/mdd manual           # incremental , only regenerate changed sections
 /mdd manual --force   # regenerate everything from scratch</code></pre>
 
         <h3>What It Produces</h3>
         <p>A single <code>manual.md</code> with everything MDD knows about the project:</p>
         <ul>
-          <li><strong>Table of Contents</strong> — auto-generated with anchor links, always rebuilt</li>
-          <li><strong>Project Overview</strong> — synthesized from <code>.mdd/.startup.md</code> and <code>README.md</code></li>
-          <li><strong>Feature sections</strong> — one per feature doc, written in plain English. Each covers: what it does, how to use it, commands, API endpoints, configuration, and examples</li>
-          <li><strong>Operations chapter</strong> — runbooks from <code>.mdd/ops/</code> as step-by-step procedures</li>
-          <li><strong>Command Reference</strong> — aggregated table of all CLI commands across all features</li>
-          <li><strong>API Reference</strong> — aggregated endpoint table (omitted if none)</li>
-          <li><strong>Configuration</strong> — aggregated options table (omitted if none)</li>
+          <li><strong>Table of Contents</strong> , auto-generated with anchor links, always rebuilt</li>
+          <li><strong>Project Overview</strong> , synthesized from <code>.mdd/.startup.md</code> and <code>README.md</code></li>
+          <li><strong>Feature sections</strong> , one per feature doc, written in plain English. Each covers: what it does, how to use it, commands, API endpoints, configuration, and examples</li>
+          <li><strong>Operations chapter</strong> , runbooks from <code>.mdd/ops/</code> as step-by-step procedures</li>
+          <li><strong>Command Reference</strong> , aggregated table of all CLI commands across all features</li>
+          <li><strong>API Reference</strong> , aggregated endpoint table (omitted if none)</li>
+          <li><strong>Configuration</strong> , aggregated options table (omitted if none)</li>
         </ul>
 
         <h3>Hash-Based Incremental Updates</h3>
@@ -1559,10 +1559,10 @@ Proceed with import? [Y/n]</code></pre>
         </table>
 
         <h3>Designed for Publishing</h3>
-        <p>The output is clean markdown with no internal file paths, no unexplained jargon, active voice, and real usage examples. Export to PDF, paste into a blog post, or feed into a docs site generator. Planned features are clearly marked <em>(planned — not yet implemented)</em> so the manual is always accurate.</p>
+        <p>The output is clean markdown with no internal file paths, no unexplained jargon, active voice, and real usage examples. Export to PDF, paste into a blog post, or feed into a docs site generator. Planned features are clearly marked <em>(planned , not yet implemented)</em> so the manual is always accurate.</p>
 
         <div class="callout">
-          <p><strong>Section markers</strong> (<code>&lt;!-- mdd-section: id --&gt;</code> / <code>&lt;!-- /mdd-section: id --&gt;</code>) delimit generated content. Any preface or intro you write above the first marker is preserved across runs — MDD never touches it.</p>
+          <p><strong>Section markers</strong> (<code>&lt;!-- mdd-section: id --&gt;</code> / <code>&lt;!-- /mdd-section: id --&gt;</code>) delimit generated content. Any preface or intro you write above the first marker is preserved across runs , MDD never touches it.</p>
         </div>
       </section>
 
@@ -1571,18 +1571,18 @@ Proceed with import? [Y/n]</code></pre>
         <h2>Connections Map</h2>
 
         <p>
-          <code>.mdd/connections.md</code> is a committed, always-current pre-computed relationship map for your entire <code>.mdd/docs/</code> corpus. It gives Claude and the dashboard tools an instant, single-file view of how every feature relates to every other — without having to scan all frontmatter on every command invocation.
+          <code>.mdd/connections.md</code> is a committed, always-current pre-computed relationship map for your entire <code>.mdd/docs/</code> corpus. It gives Claude and the dashboard tools an instant, single-file view of how every feature relates to every other , without having to scan all frontmatter on every command invocation.
         </p>
 
         <div class="callout">
           <p>
-            <strong>Why committed to git?</strong> <code>connections.md</code> is never gitignored. It is part of your project's knowledge base — readable at any time without re-running a command. The <code>mdd-dashboard</code> reads it directly to power the dependency graph view, and Claude reads it at the start of sessions to orient itself without loading every feature doc.
+            <strong>Why committed to git?</strong> <code>connections.md</code> is never gitignored. It is part of your project's knowledge base , readable at any time without re-running a command. The <code>mdd-dashboard</code> reads it directly to power the dependency graph view, and Claude reads it at the start of sessions to orient itself without loading every feature doc.
           </p>
         </div>
 
         <h3><code>/mdd connect</code></h3>
         <p>
-          Triggers a manual full rebuild of <code>.mdd/connections.md</code>. Reads every doc in <code>.mdd/docs/*.md</code>, re-derives all relationships, and writes the file from scratch. Run this any time you want to force a fresh map — for example, after a batch of manual edits that bypassed the normal MDD workflow.
+          Triggers a manual full rebuild of <code>.mdd/connections.md</code>. Reads every doc in <code>.mdd/docs/*.md</code>, re-derives all relationships, and writes the file from scratch. Run this any time you want to force a fresh map , for example, after a batch of manual edits that bypassed the normal MDD workflow.
         </p>
 
         <pre><code class="language-bash">/mdd connect
@@ -1597,7 +1597,7 @@ Rebuilding connections map...
         <h3>Contents of <code>connections.md</code></h3>
         <p>The file has four sections, always rendered in this order:</p>
 
-        <h4>1 — Path Tree</h4>
+        <h4>1 , Path Tree</h4>
         <p>
           All feature docs grouped by their <code>path</code> field, sorted alphabetically within each level, and formatted with tree characters. Gives an instant product-hierarchy view of every documented feature.
         </p>
@@ -1620,7 +1620,7 @@ Notifications/
 Platform/
   └── Setup              (01-project-scaffolding)</code></pre>
 
-        <h4>2 — Dependency Graph</h4>
+        <h4>2 , Dependency Graph</h4>
         <p>
           A Mermaid diagram of all <code>depends_on</code> relationships across the full doc corpus. Nodes are colour-coded by <code>status</code> using <code>classDef</code> declarations so the graph is readable without opening individual docs.
         </p>
@@ -1649,9 +1649,9 @@ graph TD
           </p>
         </div>
 
-        <h4>3 — Source File Overlap</h4>
+        <h4>3 , Source File Overlap</h4>
         <p>
-          Lists every source file that is registered in the <code>source_files</code> field of two or more feature docs. Files that appear in multiple docs are co-change risk signals — a commit to that file likely touches multiple documented features and may require doc updates in all of them.
+          Lists every source file that is registered in the <code>source_files</code> field of two or more feature docs. Files that appear in multiple docs are co-change risk signals , a commit to that file likely touches multiple documented features and may require doc updates in all of them.
         </p>
         <pre><code class="language-bash">## Source File Overlap
 
@@ -1670,9 +1670,9 @@ Files referenced by 2 or more feature docs:
     → 03-database-layer
     → 07-cart-checkout</code></pre>
 
-        <h4>4 — Warnings</h4>
+        <h4>4 , Warnings</h4>
         <p>
-          Issues detected during the rebuild pass. Warnings are informational — they are written to the file and shown in the terminal but do not block the rebuild or fail the command.
+          Issues detected during the rebuild pass. Warnings are informational , they are written to the file and shown in the terminal but do not block the rebuild or fail the command.
         </p>
         <table class="scale-table">
           <thead>
@@ -1684,7 +1684,7 @@ Files referenced by 2 or more feature docs:
           <tbody>
             <tr><td>Broken <code>depends_on</code> ref</td><td>A doc lists a feature ID in <code>depends_on</code> that does not exist in <code>.mdd/docs/</code></td></tr>
             <tr><td>Circular dependency</td><td>Two or more docs form a dependency cycle (A depends on B, B depends on A)</td></tr>
-            <tr><td>Missing <code>path</code></td><td>A doc has no <code>path</code> field — it will not appear in the Path Tree section</td></tr>
+            <tr><td>Missing <code>path</code></td><td>A doc has no <code>path</code> field , it will not appear in the Path Tree section</td></tr>
           </tbody>
         </table>
 
@@ -1692,9 +1692,9 @@ Files referenced by 2 or more feature docs:
 
   ⚠️  Broken depends_on: 08-old-feature references 99-missing-doc (not found)
   ⚠️  Circular dependency: 04-content-builder ↔ 06-command-system
-  ⚠️  Missing path: 10-legacy-import (no path field — excluded from Path Tree)</code></pre>
+  ⚠️  Missing path: 10-legacy-import (no path field , excluded from Path Tree)</code></pre>
 
-        <h3>Ironclad Sync — Automatic Regeneration</h3>
+        <h3>Ironclad Sync , Automatic Regeneration</h3>
         <p>
           You rarely need to run <code>/mdd connect</code> manually. Every doc-mutating operation regenerates <code>connections.md</code> automatically as its final step:
         </p>
@@ -1706,12 +1706,12 @@ Files referenced by 2 or more feature docs:
             </tr>
           </thead>
           <tbody>
-            <tr><td><code>/mdd</code> (Build Mode)</td><td>Phase 7c — after the feature doc is stamped <code>complete</code></td></tr>
-            <tr><td><code>/mdd update &lt;id&gt;</code></td><td>Step U6 — after <code>last_synced</code> is updated</td></tr>
+            <tr><td><code>/mdd</code> (Build Mode)</td><td>Phase 7c , after the feature doc is stamped <code>complete</code></td></tr>
+            <tr><td><code>/mdd update &lt;id&gt;</code></td><td>Step U6 , after <code>last_synced</code> is updated</td></tr>
             <tr><td><code>/mdd deprecate &lt;id&gt;</code></td><td>After the doc is moved to <code>archive/</code></td></tr>
             <tr><td><code>/mdd rebuild-tags</code></td><td>After <code>.startup.md</code> is rebuilt</td></tr>
             <tr><td><code>/mdd upgrade</code></td><td>After all docs are patched</td></tr>
-            <tr><td><code>/mdd import-spec</code></td><td>Phase 5 — after <code>.startup.md</code> is rebuilt</td></tr>
+            <tr><td><code>/mdd import-spec</code></td><td>Phase 5 , after <code>.startup.md</code> is rebuilt</td></tr>
             <tr><td><code>/mdd plan-execute</code></td><td>After each feature in the wave completes</td></tr>
           </tbody>
         </table>
@@ -1722,19 +1722,19 @@ Files referenced by 2 or more feature docs:
         </p>
         <ul>
           <li>
-            <strong><code>/mdd status</code></strong> — checks for a missing or stale <code>connections.md</code> and includes it in the status output. A missing file is flagged as broken; a file whose modification timestamp is older than the most recently modified feature doc is flagged as drifted.
+            <strong><code>/mdd status</code></strong> , checks for a missing or stale <code>connections.md</code> and includes it in the status output. A missing file is flagged as broken; a file whose modification timestamp is older than the most recently modified feature doc is flagged as drifted.
           </li>
           <li>
-            <strong><code>/mdd scan</code></strong> — checks <code>connections.md</code> freshness as part of its drift detection pass. A missing file appears as a <code>broken</code> entry; a stale file appears as <code>drifted</code>. Both recommend <code>/mdd connect</code> to fix.
+            <strong><code>/mdd scan</code></strong> , checks <code>connections.md</code> freshness as part of its drift detection pass. A missing file appears as a <code>broken</code> entry; a stale file appears as <code>drifted</code>. Both recommend <code>/mdd connect</code> to fix.
           </li>
         </ul>
 
-        <pre><code class="language-bash">🔍 MDD Scan — Drift Report
+        <pre><code class="language-bash">🔍 MDD Scan , Drift Report
 
   ✅ 01-project-scaffolding   - in sync
   ✅ 02-user-auth             - in sync
   ⚠️  04-content-builder       - DRIFTED (3 commits since last_synced)
-  ❌  connections.md           - BROKEN (file missing — run /mdd connect)
+  ❌  connections.md           - BROKEN (file missing , run /mdd connect)
 
 Recommended actions:
   /mdd update 04   - re-sync content-builder doc with code
@@ -2089,7 +2089,7 @@ Project (.mdd/ops/):
             </tr>
             <tr>
               <td>path</td>
-              <td>Slash-delimited breadcrumb showing where the feature lives in the product hierarchy. Used by dashboards to group docs into a human-readable tree. Separate from <code>depends_on</code> — this is for navigation, not build order. Title Case, 1–3 levels using product vocabulary (not code paths). Siblings must spell the parent segment identically.</td>
+              <td>Slash-delimited breadcrumb showing where the feature lives in the product hierarchy. Used by dashboards to group docs into a human-readable tree. Separate from <code>depends_on</code> , this is for navigation, not build order. Title Case, 1–3 levels using product vocabulary (not code paths). Siblings must spell the parent segment identically.</td>
               <td><code>Auth/Login</code>, <code>E-commerce/Cart/Checkout</code></td>
             </tr>
           </tbody>
@@ -2141,7 +2141,7 @@ Project (.mdd/ops/):
           The <code>path</code> field is a slash-delimited breadcrumb that places each feature doc in a product-level hierarchy. It exists to answer the question: <em>where does this feature live in the product?</em>
         </p>
         <p>
-          It is completely separate from <code>depends_on</code>. <code>depends_on</code> describes build order and runtime requirements. <code>path</code> describes navigation — how a human would browse to this feature in a dashboard, a doc browser, or a tree view. A feature can share a path segment with another feature it has no dependency relationship with at all.
+          It is completely separate from <code>depends_on</code>. <code>depends_on</code> describes build order and runtime requirements. <code>path</code> describes navigation , how a human would browse to this feature in a dashboard, a doc browser, or a tree view. A feature can share a path segment with another feature it has no dependency relationship with at all.
         </p>
 
         <h4>Format Rules</h4>
@@ -2182,16 +2182,16 @@ Project (.mdd/ops/):
           When writing a new feature doc, Claude follows this sequence to assign <code>path</code>:
         </p>
         <ol>
-          <li><strong>Read existing paths</strong> — scans all <code>path:</code> fields in <code>.mdd/docs/*.md</code> to discover the established vocabulary (what segment names already exist).</li>
-          <li><strong>Infer from product mental model</strong> — uses the feature title, purpose, and tech stack context to map the feature into the existing tree. If an obvious parent segment already exists, it is reused.</li>
-          <li><strong>Ask only if ambiguous</strong> — if the feature could plausibly sit under two different parents, Claude presents the two options and asks before writing. It never silently coins a new root segment if an existing one fits.</li>
+          <li><strong>Read existing paths</strong> , scans all <code>path:</code> fields in <code>.mdd/docs/*.md</code> to discover the established vocabulary (what segment names already exist).</li>
+          <li><strong>Infer from product mental model</strong> , uses the feature title, purpose, and tech stack context to map the feature into the existing tree. If an obvious parent segment already exists, it is reused.</li>
+          <li><strong>Ask only if ambiguous</strong> , if the feature could plausibly sit under two different parents, Claude presents the two options and asks before writing. It never silently coins a new root segment if an existing one fits.</li>
         </ol>
 
         <h4>How <code>/mdd scan</code> Flags Missing <code>path</code></h4>
         <p>
           Docs without a <code>path</code> field appear in the scan report under a dedicated section:
         </p>
-        <pre><code class="language-bash">🔍 MDD Scan — Path Coverage
+        <pre><code class="language-bash">🔍 MDD Scan , Path Coverage
 
   ✅ 01-project-scaffolding   - path: Platform/Setup
   ✅ 02-user-auth             - path: Auth/Login
@@ -2284,7 +2284,7 @@ Platform/
 │       ├── agent-2-config.md
 │       └── agent-2-notes.md
 │
-├── settings.json                     # Stack config — auto-populated by discovery (committed)
+├── settings.json                     # Stack config , auto-populated by discovery (committed)
 ├── connections.md                    # Pre-computed relationship map (committed to git)
 └── .startup.md                       # Auto-generated session context</code></pre>
 
@@ -2348,7 +2348,7 @@ auth-system-overhaul - Wave 2: 1/2 features complete
           The section above <code>---</code> is fully rebuilt each time. The <code>## Notes</code> section below is append-only and preserved across rebuilds - it is only cleared by <code>/mdd note clear</code>.
         </p>
         <p>
-          The <code>[tags]</code> on each feature and ops line are populated from the <code>tags:</code> frontmatter field in each doc. They are what allow Claude to detect prompt overlap without loading full doc content — see <a href="#claude-guidance">Claude Automatically Suggests MDD</a> below.
+          The <code>[tags]</code> on each feature and ops line are populated from the <code>tags:</code> frontmatter field in each doc. They are what allow Claude to detect prompt overlap without loading full doc content , see <a href="#claude-guidance">Claude Automatically Suggests MDD</a> below.
         </p>
 
         <h3>Auto-Rebuild Behavior</h3>
@@ -2358,7 +2358,7 @@ auth-system-overhaul - Wave 2: 1/2 features complete
 
         <h3 id="claude-guidance">Claude Automatically Suggests MDD</h3>
         <p>
-          <code>mdd install</code> injects a small guidance block into <code>~/.claude/CLAUDE.md</code> (global install) or the project <code>CLAUDE.md</code> (<code>--install-local</code>). This block tells Claude to evaluate every implementation, modification, or infrastructure request before responding — as long as a <code>.mdd/</code> directory exists in the current project.
+          <code>mdd install</code> injects a small guidance block into <code>~/.claude/CLAUDE.md</code> (global install) or the project <code>CLAUDE.md</code> (<code>--install-local</code>). This block tells Claude to evaluate every implementation, modification, or infrastructure request before responding , as long as a <code>.mdd/</code> directory exists in the current project.
         </p>
         <p>
           Claude checks four things, in order:
@@ -2382,10 +2382,10 @@ auth-system-overhaul - Wave 2: 1/2 features complete
           </li>
         </ol>
         <p>
-          Claude always <strong>asks</strong> — it never auto-invokes <code>/mdd</code>. If you say no, it proceeds with direct implementation as normal. For bug reports, Claude suggests <code>/mdd bug &lt;description&gt;</code> to track and fix with doc integration. Typos, config tweaks, and one-off shell commands are never flagged.
+          Claude always <strong>asks</strong> , it never auto-invokes <code>/mdd</code>. If you say no, it proceeds with direct implementation as normal. For bug reports, Claude suggests <code>/mdd bug &lt;description&gt;</code> to track and fix with doc integration. Typos, config tweaks, and one-off shell commands are never flagged.
         </p>
         <p>
-          Overlap detection is lightweight: Claude scans the <code>[tags]</code> in <code>.startup.md</code> — a compact file already injected into every conversation — rather than loading full feature docs into context. No extra tokens, no performance penalty.
+          Overlap detection is lightweight: Claude scans the <code>[tags]</code> in <code>.startup.md</code> , a compact file already injected into every conversation , rather than loading full feature docs into context. No extra tokens, no performance penalty.
         </p>
         <p>
           The injection is <strong>idempotent</strong>: running <code>mdd install</code> or <code>mdd update</code> again never duplicates the guidance block. To populate missing tags on existing docs (so overlap detection works on older projects), run <code>/mdd rebuild-tags</code>.
@@ -2535,7 +2535,7 @@ Gaps found: 3
 
 New rules generated:
   mdd-rules-express.md  +2 rules
-    - [P2] Prototype pollution via req.query or req.body merge — use
+    - [P2] Prototype pollution via req.query or req.body merge , use
       structuredClone() or a safe merge utility.
       Reference: CVE-2024-29041
 
@@ -2543,7 +2543,7 @@ New rules generated:
       validation. Reference: CVE-2024-43796
 
   mdd-rules-jwt.md  +1 rule
-    - [P2] jwt.decode() used instead of jwt.verify() — decode skips
+    - [P2] jwt.decode() used instead of jwt.verify() , decode skips
       signature verification. Reference: CVE-2022-21449 (class)</code></pre>
 
         <h3>Rule Quality</h3>
@@ -2603,7 +2603,7 @@ New rules generated:
 
         <pre><code class="language-bash">$ mdd install
 
-MDD v1.3.0 — Claude Code workflow installer
+MDD v1.3.0 , Claude Code workflow installer
 Install directory: ~/.claude/commands
 
   ✓ mdd.md
@@ -2721,7 +2721,7 @@ mdd install</code></pre>
 
         <div class="callout">
           <p>
-            See the <a href="#dashboards">Dashboards section</a> below for mdd-tui and mdd-dashboard — two companion tools for exploring your <code>.mdd/</code> workspace visually.
+            See the <a href="#dashboards">Dashboards section</a> below for mdd-tui and mdd-dashboard , two companion tools for exploring your <code>.mdd/</code> workspace visually.
           </p>
         </div>
       </section>
@@ -2733,11 +2733,11 @@ mdd install</code></pre>
         <p>
           MDD ships with two companion dashboards for exploring your <code>.mdd/</code> workspace.
           Both are available as standalone packages today and <strong>will soon be merged directly
-          into the <code>mdd</code> package</strong> — launchable via the <code>mdd</code> command
+          into the <code>mdd</code> package</strong> , launchable via the <code>mdd</code> command
           without a separate install.
         </p>
 
-        <h3>mdd-tui — Terminal Dashboard</h3>
+        <h3>mdd-tui , Terminal Dashboard</h3>
 
         <p>
           A live terminal UI for navigating your MDD workspace without leaving the command line.
@@ -2766,24 +2766,24 @@ mdd-tui</code></pre>
 
         <h4>What it shows</h4>
         <ul>
-          <li><strong>Initiatives</strong> — collapsible tree with wave progress (e.g. <code>2/3</code> features complete)</li>
-          <li><strong>Feature docs</strong> — drift status icons: <code>✓</code> in sync, <code>⚠</code> drifted, <code>✗</code> broken reference</li>
-          <li><strong>Ops runbooks</strong> — last runop date and service health at a glance</li>
-          <li><strong>Audit reports</strong> — findings summary with severity counts</li>
+          <li><strong>Initiatives</strong> , collapsible tree with wave progress (e.g. <code>2/3</code> features complete)</li>
+          <li><strong>Feature docs</strong> , drift status icons: <code>✓</code> in sync, <code>⚠</code> drifted, <code>✗</code> broken reference</li>
+          <li><strong>Ops runbooks</strong> , last runop date and service health at a glance</li>
+          <li><strong>Audit reports</strong> , findings summary with severity counts</li>
         </ul>
 
         <p>
           <a href="https://www.npmjs.com/package/mdd-tui" target="_blank" rel="noopener">npm: mdd-tui</a>
-          &nbsp;&mdash;&nbsp;
+          , 
           <a href="https://github.com/TheDecipherist/mdd-tui" target="_blank" rel="noopener">GitHub: mdd-tui</a>
         </p>
 
-        <h3>mdd-dashboard — Browser Dashboard <em>(in active development)</em></h3>
+        <h3>mdd-dashboard , Browser Dashboard <em>(in active development)</em></h3>
 
         <div class="callout">
           <p>
             <strong>Status:</strong> mdd-dashboard is in active development and not yet fully
-            operational. Early adopters are welcome — expect rough edges while it catches up
+            operational. Early adopters are welcome , expect rough edges while it catches up
             to the full MDD feature set.
           </p>
         </div>
@@ -2803,12 +2803,12 @@ mdd-dashboard
 
         <h4>Dashboard features</h4>
         <ul>
-          <li><strong>Force / Tree layout toggle</strong> — switch between D3 force simulation (organic clustering) and strict hierarchy (initiative → wave → feature)</li>
-          <li><strong>Three-tier filter system</strong> — live search, type chips, status dropdown, 11 advanced field filters, and git-aware filters (author, modified-since, changed in last N commits)</li>
-          <li><strong>Live reload</strong> — SSE pushes graph updates the moment you save a <code>.mdd/</code> file, no page refresh needed</li>
-          <li><strong>Detail panel</strong> — click any node to see the full doc body, git history, source files, and depends-on chips that navigate the graph</li>
-          <li><strong>Mini-map</strong> — 160×120px overlay for large graphs (100+ docs)</li>
-          <li><strong>Three-tier loading</strong> — frontmatter parsed at startup (&lt;200ms), body fetched on demand, git history loaded async in background</li>
+          <li><strong>Force / Tree layout toggle</strong> , switch between D3 force simulation (organic clustering) and strict hierarchy (initiative → wave → feature)</li>
+          <li><strong>Three-tier filter system</strong> , live search, type chips, status dropdown, 11 advanced field filters, and git-aware filters (author, modified-since, changed in last N commits)</li>
+          <li><strong>Live reload</strong> , SSE pushes graph updates the moment you save a <code>.mdd/</code> file, no page refresh needed</li>
+          <li><strong>Detail panel</strong> , click any node to see the full doc body, git history, source files, and depends-on chips that navigate the graph</li>
+          <li><strong>Mini-map</strong> , 160×120px overlay for large graphs (100+ docs)</li>
+          <li><strong>Three-tier loading</strong> , frontmatter parsed at startup (&lt;200ms), body fetched on demand, git history loaded async in background</li>
         </ul>
 
         <h4>CLI flags</h4>
@@ -2823,14 +2823,14 @@ mdd-dashboard
 
         <p>
           <a href="https://www.npmjs.com/package/mdd-dashboard" target="_blank" rel="noopener">npm: mdd-dashboard</a>
-          &nbsp;&mdash;&nbsp;
+          , 
           <a href="https://github.com/TheDecipherist/mdd-dashboard" target="_blank" rel="noopener">GitHub: mdd-dashboard</a>
         </p>
 
         <div class="callout">
           <p>
             <strong>Coming soon:</strong> Both dashboards will be merged into the <code>mdd</code>
-            package — launch either directly from the <code>mdd</code> CLI, no separate install needed.
+            package , launch either directly from the <code>mdd</code> CLI, no separate install needed.
           </p>
         </div>
       </section>
@@ -2867,11 +2867,11 @@ mdd-dashboard
     </div>
     <p>
       Built by <a href="https://thedecipherist.com" target="_blank" rel="noopener">TheDecipherist</a>
-      &mdash;
+      ,
       <a href="https://github.com/TheDecipherist/mdd" target="_blank" rel="noopener">GitHub</a>
-      &mdash;
+      ,
       <a href="https://www.npmjs.com/package/@thedecipherist/mdd" target="_blank" rel="noopener">npm</a>
-      &mdash;
+      ,
       MIT License
     </p>
   </div>

@@ -429,24 +429,24 @@ mdd install</code></pre>
 
         <h3>Claude Automatically Suggests MDD</h3>
         <p>
-          <code>mdd install</code> injects a guidance block into <code>~/.claude/CLAUDE.md</code> that teaches Claude to recognise when you're in an MDD project and suggest the right workflow — even when you don't type <code>/mdd</code>.
+          <code>mdd install</code> injects a guidance block into <code>~/.claude/CLAUDE.md</code> that teaches Claude to recognise when you're in an MDD project and suggest the right workflow , even when you don't type <code>/mdd</code>.
         </p>
         <p>
           Whenever Claude detects a <code>.mdd/</code> directory in the current project it evaluates your request before responding:
         </p>
         <ul>
-          <li><strong>Existing feature match</strong> — scans <code>.startup.md</code> tags and flags overlap: <em>"This looks related to <code>02-user-auth</code>. Want to use <code>/mdd update 02</code>?"</em></li>
-          <li><strong>Ops / infrastructure</strong> — deploy, CI/CD, Docker, commit hooks, cron: <em>"Want to document this as a runbook with <code>/mdd ops</code>?"</em></li>
-          <li><strong>Initiative-scale</strong> — 3+ independent concerns: <em>"Want to plan this with <code>/mdd plan-initiative</code>?"</em></li>
-          <li><strong>Single feature</strong> — <em>"Want me to use <code>/mdd &lt;description&gt;</code> to build this with docs and tests first?"</em></li>
+          <li><strong>Existing feature match</strong> , scans <code>.startup.md</code> tags and flags overlap: <em>"This looks related to <code>02-user-auth</code>. Want to use <code>/mdd update 02</code>?"</em></li>
+          <li><strong>Ops / infrastructure</strong> , deploy, CI/CD, Docker, commit hooks, cron: <em>"Want to document this as a runbook with <code>/mdd ops</code>?"</em></li>
+          <li><strong>Initiative-scale</strong> , 3+ independent concerns: <em>"Want to plan this with <code>/mdd plan-initiative</code>?"</em></li>
+          <li><strong>Single feature</strong> , <em>"Want me to use <code>/mdd &lt;description&gt;</code> to build this with docs and tests first?"</em></li>
         </ul>
         <p>
-          Claude always asks — never auto-invokes. Tag-based detection means no full docs are loaded into context: just the compact tag list in <code>.startup.md</code>.
+          Claude always asks , never auto-invokes. Tag-based detection means no full docs are loaded into context: just the compact tag list in <code>.startup.md</code>.
         </p>
 
-        <h3>Branch Guard — Never Work on <code>main</code></h3>
+        <h3>Branch Guard , Never Work on <code>main</code></h3>
         <p>
-          <code>mdd install</code> also registers a <strong>Claude Code <code>PreToolUse</code> hook</strong> — a shell script that fires before every file write in any MDD project. If the current branch is <code>main</code> or <code>master</code>, the hook blocks the operation:
+          <code>mdd install</code> also registers a <strong>Claude Code <code>PreToolUse</code> hook</strong> , a shell script that fires before every file write in any MDD project. If the current branch is <code>main</code> or <code>master</code>, the hook blocks the operation:
         </p>
         <pre><code>⛔  MDD BRANCH GUARD
 
@@ -456,7 +456,7 @@ mdd install</code></pre>
     Create a feature branch, then re-run your /mdd command:
       git checkout -b feat/&lt;feature-name&gt;</code></pre>
         <p>
-          Unlike instruction-based checks, hooks fire at the OS level on every tool call — they cannot be compacted away or forgotten by Claude. MDD instructions and the hook work together: instructions guide Claude's decisions, the hook enforces the rule even if earlier context is lost.
+          Unlike instruction-based checks, hooks fire at the OS level on every tool call , they cannot be compacted away or forgotten by Claude. MDD instructions and the hook work together: instructions guide Claude's decisions, the hook enforces the rule even if earlier context is lost.
         </p>
         <table>
           <thead><tr><th>Mode</th><th>Auto-created branch</th></tr></thead>
@@ -594,7 +594,7 @@ mdd install</code></pre>
             <p class="command-desc">
               Generates a comprehensive, print-ready user manual at <code>.mdd/manual/manual.md</code>
               from all feature docs and ops runbooks. Uses content hashes so only changed sections
-              are regenerated — fast on repeat runs.
+              are regenerated , fast on repeat runs.
             </p>
             <ul>
               <li>Table of contents with anchor links</li>
@@ -639,14 +639,14 @@ mdd install</code></pre>
               <code>/mdd connect</code>
             </p>
             <p class="command-desc">
-              Pre-computed <code>.mdd/connections.md</code> committed to every project —
+              Pre-computed <code>.mdd/connections.md</code> committed to every project ,
               gives Claude and the dashboard instant access to the full relationship graph
               without reading every doc.
             </p>
             <ul>
-              <li>Path tree grouped by <code>path</code> field — dashboard renders directly</li>
+              <li>Path tree grouped by <code>path</code> field , dashboard renders directly</li>
               <li>Mermaid dependency graph with status-coded nodes</li>
-              <li>Source file overlap — co-change risk detection</li>
+              <li>Source file overlap , co-change risk detection</li>
               <li>Auto-regenerated by every doc-mutating MDD operation</li>
               <li><code>/mdd status</code> and <code>/mdd scan</code> detect staleness</li>
             </ul>
@@ -1002,7 +1002,7 @@ mdd install</code></pre>
         <p>
           MDD ships with two companion dashboards for exploring your <code>.mdd/</code> workspace.
           Both are available as standalone packages today and <strong>will soon be merged directly
-          into the <code>mdd</code> package</strong> — launchable via the <code>mdd</code> command
+          into the <code>mdd</code> package</strong> , launchable via the <code>mdd</code> command
           without a separate install.
         </p>
 
@@ -1026,7 +1026,7 @@ mdd-tui</code></pre>
             </p>
             <p>
               <a href="https://www.npmjs.com/package/mdd-tui" target="_blank" rel="noopener">npm: mdd-tui</a>
-              &nbsp;&mdash;&nbsp;
+              , 
               <a href="https://github.com/TheDecipherist/mdd-tui" target="_blank" rel="noopener">GitHub</a>
             </p>
           </div>
@@ -1041,7 +1041,7 @@ mdd-tui</code></pre>
             </p>
             <p>
               <strong>Status:</strong> mdd-dashboard is in active development and not yet fully
-              operational. Early adopters welcome — expect rough edges while it catches up to the
+              operational. Early adopters welcome , expect rough edges while it catches up to the
               full MDD feature set.
             </p>
             <p><strong>Install &amp; run:</strong></p>
@@ -1054,7 +1054,7 @@ mdd-dashboard
             </p>
             <p>
               <a href="https://www.npmjs.com/package/mdd-dashboard" target="_blank" rel="noopener">npm: mdd-dashboard</a>
-              &nbsp;&mdash;&nbsp;
+              , 
               <a href="https://github.com/TheDecipherist/mdd-dashboard" target="_blank" rel="noopener">GitHub</a>
             </p>
           </div>
@@ -1063,7 +1063,7 @@ mdd-dashboard
 
         <p style="margin-top:1.5rem;padding:1rem 1.25rem;border-left:3px solid var(--accent);background:rgba(0,229,204,0.06);border-radius:0 6px 6px 0;">
           <strong>Coming soon:</strong> Both dashboards will be merged into the <code>mdd</code>
-          package — launch either directly from the <code>mdd</code> CLI, no separate install needed.
+          package , launch either directly from the <code>mdd</code> CLI, no separate install needed.
         </p>
       </section>
 
@@ -1090,7 +1090,7 @@ mdd-dashboard
             </p>
             <p>
               <a href="https://www.npmjs.com/package/@thedecipherist/mdd-tui" target="_blank" rel="noopener">npm: @thedecipherist/mdd-tui</a>
-              &nbsp;&mdash;&nbsp;
+              , 
               <a href="https://github.com/TheDecipherist/mdd-tui" target="_blank" rel="noopener">GitHub</a>
             </p>
           </div>
@@ -1210,9 +1210,9 @@ mdd-dashboard
             <p><strong>Spec:</strong> 4-hour conversation &nbsp;|&nbsp; <strong>Build:</strong> 2 days</p>
             <p>
               <a href="specs/markdownai-spec-v1.0.md" target="_blank" rel="noopener">View original spec &rarr;</a>
-              &nbsp;&mdash;&nbsp;
+              , 
               <a href="https://github.com/TheDecipherist/markdownai" target="_blank" rel="noopener">GitHub</a>
-              &nbsp;&mdash;&nbsp;
+              , 
               <a href="https://github.com/TheDecipherist/markdownai/tree/main/.mdd" target="_blank" rel="noopener">.mdd/ folder</a>
             </p>
           </div>
@@ -1226,11 +1226,11 @@ mdd-dashboard
             <p><strong>Spec:</strong> 1,249-line architecture document</p>
             <p>
               <a href="specs/strictdb-complete-plan.md" target="_blank" rel="noopener">View original spec &rarr;</a>
-              &nbsp;&mdash;&nbsp;
+              , 
               <a href="https://www.npmjs.com/package/strictdb" target="_blank" rel="noopener">npm: strictdb</a>
-              &nbsp;&mdash;&nbsp;
+              , 
               <a href="https://github.com/TheDecipherist/strictdb" target="_blank" rel="noopener">GitHub</a>
-              &nbsp;&mdash;&nbsp;
+              , 
               <a href="https://github.com/TheDecipherist/strictdb/tree/main/.mdd" target="_blank" rel="noopener">.mdd/ folder</a>
             </p>
           </div>
@@ -1243,9 +1243,9 @@ mdd-dashboard
             </p>
             <p>
               <a href="https://www.npmjs.com/package/classmcp" target="_blank" rel="noopener">npm: classmcp</a>
-              &nbsp;&mdash;&nbsp;
+              , 
               <a href="https://github.com/TheDecipherist/classmcp" target="_blank" rel="noopener">GitHub</a>
-              &nbsp;&mdash;&nbsp;
+              , 
               <a href="https://github.com/TheDecipherist/classmcp/tree/main/.mdd" target="_blank" rel="noopener">.mdd/ folder</a>
             </p>
           </div>
@@ -1258,9 +1258,9 @@ mdd-dashboard
             </p>
             <p>
               <a href="https://www.npmjs.com/package/classpresso" target="_blank" rel="noopener">npm: classpresso</a>
-              &nbsp;&mdash;&nbsp;
+              , 
               <a href="https://github.com/TheDecipherist/classpresso" target="_blank" rel="noopener">GitHub</a>
-              &nbsp;&mdash;&nbsp;
+              , 
               <a href="https://github.com/TheDecipherist/classpresso/tree/main/.mdd" target="_blank" rel="noopener">.mdd/ folder</a>
             </p>
           </div>
@@ -1273,7 +1273,7 @@ mdd-dashboard
             </p>
             <p>
               <a href="https://github.com/TheDecipherist/mdd-tui" target="_blank" rel="noopener">GitHub</a>
-              &nbsp;&mdash;&nbsp;
+              , 
               <a href="https://github.com/TheDecipherist/mdd-tui/tree/main/.mdd" target="_blank" rel="noopener">.mdd/ folder</a>
             </p>
           </div>
@@ -1286,7 +1286,7 @@ mdd-dashboard
             </p>
             <p>
               <a href="https://github.com/TheDecipherist/mdd-dashboard" target="_blank" rel="noopener">GitHub</a>
-              &nbsp;&mdash;&nbsp;
+              , 
               <a href="https://github.com/TheDecipherist/mdd-dashboard/tree/main/.mdd" target="_blank" rel="noopener">.mdd/ folder</a>
             </p>
           </div>
@@ -1299,7 +1299,7 @@ mdd-dashboard
             </p>
             <p>
               <a href="https://github.com/TheDecipherist/dockerdoctor" target="_blank" rel="noopener">GitHub</a>
-              &nbsp;&mdash;&nbsp;
+              , 
               <a href="https://github.com/TheDecipherist/dockerdoctor/tree/main/.mdd" target="_blank" rel="noopener">.mdd/ folder</a>
             </p>
           </div>
@@ -1312,7 +1312,7 @@ mdd-dashboard
             </p>
             <p>
               <a href="https://github.com/TheDecipherist/tersejson" target="_blank" rel="noopener">GitHub</a>
-              &nbsp;&mdash;&nbsp;
+              , 
               <a href="https://github.com/TheDecipherist/tersejson/tree/main/.mdd" target="_blank" rel="noopener">.mdd/ folder</a>
             </p>
           </div>
@@ -1325,7 +1325,7 @@ mdd-dashboard
             </p>
             <p>
               <a href="https://github.com/TheDecipherist/compressmcp" target="_blank" rel="noopener">GitHub</a>
-              &nbsp;&mdash;&nbsp;
+              , 
               <a href="https://github.com/TheDecipherist/compressmcp/tree/main/.mdd" target="_blank" rel="noopener">.mdd/ folder</a>
             </p>
           </div>
@@ -1338,7 +1338,7 @@ mdd-dashboard
             </p>
             <p>
               <a href="https://github.com/TheDecipherist/pipestage" target="_blank" rel="noopener">GitHub</a>
-              &nbsp;&mdash;&nbsp;
+              , 
               <a href="https://github.com/TheDecipherist/pipestage/tree/main/.mdd" target="_blank" rel="noopener">.mdd/ folder</a>
             </p>
           </div>
@@ -1351,7 +1351,7 @@ mdd-dashboard
             </p>
             <p>
               <a href="https://github.com/TheDecipherist/peelX" target="_blank" rel="noopener">GitHub</a>
-              &nbsp;&mdash;&nbsp;
+              , 
               <a href="https://github.com/TheDecipherist/peelX/tree/main/.mdd" target="_blank" rel="noopener">.mdd/ folder</a>
             </p>
           </div>
