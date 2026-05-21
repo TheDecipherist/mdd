@@ -132,6 +132,12 @@
                 <span class="dropdown-item-desc">Full project scaffolding</span>
               </span>
             </a>
+            <a href="#built-with-mdd" role="menuitem">
+              <span class="dropdown-item-text">
+                <span class="dropdown-item-title">Built with MDD</span>
+                <span class="dropdown-item-desc">Real projects built with this workflow</span>
+              </span>
+            </a>
           </div>
         </li>
       </ul>
@@ -157,6 +163,7 @@
       <a href="#history">From Starter Kit to Standalone</a>
       <a href="#dashboards">Dashboards</a>
       <a href="#tools">Companion Tools</a>
+      <a href="#built-with-mdd">Built with MDD</a>
     </div>
     <div class="mobile-projects">
       <p class="toc-header">Projects</p>
@@ -214,6 +221,7 @@
         <a href="#history">From Starter Kit to Standalone</a>
         <a href="#dashboards">Dashboards</a>
         <a href="#tools">Companion Tools</a>
+        <a href="#built-with-mdd">Built with MDD</a>
       </nav>
     </aside>
 
@@ -1114,6 +1122,246 @@ mdd-dashboard
           </div>
 
         </div>
+      </section>
+
+      <!-- ======================== -->
+      <!-- Section: Built with MDD  -->
+      <!-- ======================== -->
+      <section id="built-with-mdd">
+        <h2>Projects Built with MDD</h2>
+
+        <p>
+          Every project listed here was built start to finish using this exact workflow - not "used MDD for some features," but spec first, feature docs second, code third. The same seven phases, the same gates, every time.
+        </p>
+
+        <h3>How It Gets Built</h3>
+
+        <p>
+          These projects all came out of the same process. The spec-import path - spending a few hours thinking through the design in Claude Desktop before writing a line of code - is the one I keep coming back to. Here's exactly how it works:
+        </p>
+
+        <div class="step">
+          <div class="step-number">1</div>
+          <div class="step-content">
+            <h3>Brainstorm in Claude Desktop (Opus mode)</h3>
+            <p>
+              When an idea clicks, I open Claude Desktop and start a conversation. We build a markdown spec together - what the system does, how it works, the constraints, the edge cases. This takes a couple of hours, sometimes up to ten for complex systems. The goal is precision: a spec vague enough to leave room for surprises is a spec that will cause problems later.
+            </p>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="step-number">2</div>
+          <div class="step-content">
+            <h3>Import the spec (one-time conversion)</h3>
+            <p>
+              Once the spec feels complete, I create a new project folder and drop the spec into a gitignored <code>MDs/</code> folder. Then:
+            </p>
+            <pre><code class="language-bash">/mdd import-spec ./MDs/spec-name.md</code></pre>
+            <p>
+              MDD initializes the folder structure, asks a few questions, and if the spec is large enough, breaks it into initiatives and waves. This is the last time the spec document is used. From here on, the feature docs MDD generates are the source of truth.
+            </p>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="step-number">3</div>
+          <div class="step-content">
+            <h3>Execute waves sequentially</h3>
+            <p>
+              MDD structures the waves so the foundation goes first - authentication before dashboards, database layer before API layer. When you start a wave, MDD generates feature docs for every capability in that wave. You run all waves until the initiative is fully documented.
+            </p>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="step-number">4</div>
+          <div class="step-content">
+            <h3>Build features one at a time</h3>
+            <p>
+              Each feature doc drives one build cycle through the seven phases: understand, data flow, documentation, test skeletons, plan, implement, verify. Tests must fail before implementation starts. Tests must pass before anything ships. The feature is not done until it works in a real environment - not a mock, not a local dev shortcut.
+            </p>
+            <pre><code class="language-bash">/mdd feature-doc-name</code></pre>
+          </div>
+        </div>
+
+        <p style="margin-top:1.5rem;padding:1rem 1.25rem;border-left:3px solid var(--accent);background:rgba(0,229,204,0.06);border-radius:0 6px 6px 0;">
+          <strong>Why this works:</strong> The spec conversation is where the hard thinking happens - not while writing code. Feature docs are the source of truth because code drifts and docs don't; if something changes, you update the doc and rebuild from it. The gates (Red Gate, Green Gate, Integration Gate) enforce correctness at every step - there's no "I'll test it later" path through the workflow.
+        </p>
+
+        <p style="margin-top:1rem;padding:1rem 1.25rem;border-left:3px solid var(--accent-amber, #f59e0b);background:rgba(245,158,11,0.06);border-radius:0 6px 6px 0;">
+          <strong>This is not "one prompt and done."</strong> If you skip the spec work, skip the feature docs, or shortcut the gates, you'll get roughly what you'd get from any AI coding tool - something that looks right but breaks in ways you don't discover until production. The workflow is what makes the difference.
+        </p>
+
+        <h3>The Projects</h3>
+
+        <p>
+          Here's everything built with this workflow since March 2026:
+        </p>
+
+        <div class="feature-grid">
+
+          <div class="feature-card">
+            <div class="feature-icon feature-icon-cyan">&#128196;</div>
+            <h3>MarkdownAI</h3>
+            <p>
+              Live documents powered by directives - markdown files that can query databases, call APIs, execute shell commands, and render dynamically. Six npm packages, eighty feature docs.
+            </p>
+            <p><strong>Spec:</strong> 4-hour conversation &nbsp;|&nbsp; <strong>Build:</strong> 2 days</p>
+            <p>
+              <a href="specs/markdownai-spec-v1.0.md" target="_blank" rel="noopener">View original spec &rarr;</a>
+              &nbsp;&mdash;&nbsp;
+              <a href="https://github.com/TheDecipherist/markdownai" target="_blank" rel="noopener">GitHub</a>
+              &nbsp;&mdash;&nbsp;
+              <a href="https://github.com/TheDecipherist/markdownai/tree/main/.mdd" target="_blank" rel="noopener">.mdd/ folder</a>
+            </p>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon feature-icon-purple">&#128451;&#65039;</div>
+            <h3>StrictDB</h3>
+            <p>
+              Unified database driver with MongoDB-style syntax across PostgreSQL, MySQL, MSSQL, SQLite, and Elasticsearch. Single shared connection layer that enforces best practices automatically - one connection pool, one configuration, one source of truth.
+            </p>
+            <p><strong>Spec:</strong> 1,249-line architecture document</p>
+            <p>
+              <a href="specs/strictdb-complete-plan.md" target="_blank" rel="noopener">View original spec &rarr;</a>
+              &nbsp;&mdash;&nbsp;
+              <a href="https://www.npmjs.com/package/strictdb" target="_blank" rel="noopener">npm: strictdb</a>
+              &nbsp;&mdash;&nbsp;
+              <a href="https://github.com/TheDecipherist/strictdb" target="_blank" rel="noopener">GitHub</a>
+              &nbsp;&mdash;&nbsp;
+              <a href="https://github.com/TheDecipherist/strictdb/tree/main/.mdd" target="_blank" rel="noopener">.mdd/ folder</a>
+            </p>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon feature-icon-green">&#127912;</div>
+            <h3>ClassMCP</h3>
+            <p>
+              MCP server for AI-assisted CSS development. Uses semantic class patterns to cut token usage by around 77% compared to inline Tailwind. Works with Tailwind, Bootstrap, UnoCSS, and Tachyons.
+            </p>
+            <p>
+              <a href="https://www.npmjs.com/package/classmcp" target="_blank" rel="noopener">npm: classmcp</a>
+              &nbsp;&mdash;&nbsp;
+              <a href="https://github.com/TheDecipherist/classmcp" target="_blank" rel="noopener">GitHub</a>
+              &nbsp;&mdash;&nbsp;
+              <a href="https://github.com/TheDecipherist/classmcp/tree/main/.mdd" target="_blank" rel="noopener">.mdd/ folder</a>
+            </p>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon feature-icon-blue">&#9889;</div>
+            <h3>Classpresso</h3>
+            <p>
+              Build-time CSS class consolidation for AI-generated code. Eliminates redundant utility classes to cut style recalculation time in half and improve First Paint. Pairs well with ClassMCP.
+            </p>
+            <p>
+              <a href="https://www.npmjs.com/package/classpresso" target="_blank" rel="noopener">npm: classpresso</a>
+              &nbsp;&mdash;&nbsp;
+              <a href="https://github.com/TheDecipherist/classpresso" target="_blank" rel="noopener">GitHub</a>
+              &nbsp;&mdash;&nbsp;
+              <a href="https://github.com/TheDecipherist/classpresso/tree/main/.mdd" target="_blank" rel="noopener">.mdd/ folder</a>
+            </p>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon feature-icon-cyan">&#128187;</div>
+            <h3>mdd-tui</h3>
+            <p>
+              Terminal dashboard for MDD projects. Browse feature docs, audit reports, initiative progress, and ops runbooks without leaving the command line. Split-pane view, keyboard-driven navigation.
+            </p>
+            <p>
+              <a href="https://github.com/TheDecipherist/mdd-tui" target="_blank" rel="noopener">GitHub</a>
+              &nbsp;&mdash;&nbsp;
+              <a href="https://github.com/TheDecipherist/mdd-tui/tree/main/.mdd" target="_blank" rel="noopener">.mdd/ folder</a>
+            </p>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon feature-icon-purple">&#127760;</div>
+            <h3>mdd-dashboard</h3>
+            <p>
+              Browser-based visual dashboard for MDD projects. Interactive D3 dependency graphs with live reload, git-aware filtering, and full doc detail on click.
+            </p>
+            <p>
+              <a href="https://github.com/TheDecipherist/mdd-dashboard" target="_blank" rel="noopener">GitHub</a>
+              &nbsp;&mdash;&nbsp;
+              <a href="https://github.com/TheDecipherist/mdd-dashboard/tree/main/.mdd" target="_blank" rel="noopener">.mdd/ folder</a>
+            </p>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon feature-icon-amber">&#128300;</div>
+            <h3>DockerDoctor</h3>
+            <p>
+              Docker container health monitoring and diagnostics. Automated health checks, log analysis, resource monitoring, and recovery suggestions for containerized applications.
+            </p>
+            <p>
+              <a href="https://github.com/TheDecipherist/dockerdoctor" target="_blank" rel="noopener">GitHub</a>
+              &nbsp;&mdash;&nbsp;
+              <a href="https://github.com/TheDecipherist/dockerdoctor/tree/main/.mdd" target="_blank" rel="noopener">.mdd/ folder</a>
+            </p>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon feature-icon-green">&#128246;</div>
+            <h3>TerseJSON</h3>
+            <p>
+              Transparent JSON key compression using lazy-loading proxies. Reduces memory usage and network bandwidth by 30-80% with no changes to consuming code.
+            </p>
+            <p>
+              <a href="https://github.com/TheDecipherist/tersejson" target="_blank" rel="noopener">GitHub</a>
+              &nbsp;&mdash;&nbsp;
+              <a href="https://github.com/TheDecipherist/tersejson/tree/main/.mdd" target="_blank" rel="noopener">.mdd/ folder</a>
+            </p>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon feature-icon-blue">&#128284;</div>
+            <h3>CompressMCP</h3>
+            <p>
+              Lossless dictionary-based JSON key compression for MCP tool responses. Compresses tool call responses via pre/post hooks, cutting token usage without losing any data.
+            </p>
+            <p>
+              <a href="https://github.com/TheDecipherist/compressmcp" target="_blank" rel="noopener">GitHub</a>
+              &nbsp;&mdash;&nbsp;
+              <a href="https://github.com/TheDecipherist/compressmcp/tree/main/.mdd" target="_blank" rel="noopener">.mdd/ folder</a>
+            </p>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon feature-icon-pink">&#128279;</div>
+            <h3>PipeStage</h3>
+            <p>
+              Type-safe pipeline composition for Node.js. Compose complex data transformation pipelines with built-in error handling, validation, and parallel execution support.
+            </p>
+            <p>
+              <a href="https://github.com/TheDecipherist/pipestage" target="_blank" rel="noopener">GitHub</a>
+              &nbsp;&mdash;&nbsp;
+              <a href="https://github.com/TheDecipherist/pipestage/tree/main/.mdd" target="_blank" rel="noopener">.mdd/ folder</a>
+            </p>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon feature-icon-amber">&#128194;</div>
+            <h3>PeelX</h3>
+            <p>
+              Recursive nested archive extraction CLI tool. Automatically extracts nested archives (zip in tar in gz) in one command. Python-based, distributed via PyPI and GitHub Releases.
+            </p>
+            <p>
+              <a href="https://github.com/TheDecipherist/peelX" target="_blank" rel="noopener">GitHub</a>
+              &nbsp;&mdash;&nbsp;
+              <a href="https://github.com/TheDecipherist/peelX/tree/main/.mdd" target="_blank" rel="noopener">.mdd/ folder</a>
+            </p>
+          </div>
+
+        </div>
+
+        <p style="margin-top:1.5rem;padding:1rem 1.25rem;border-left:3px solid var(--accent);background:rgba(0,229,204,0.06);border-radius:0 6px 6px 0;">
+          Many more in the pipeline, including MDDv2 - a full rewrite built on MarkdownAI that in early tests runs significantly faster than the current version. MDDv2 will ship as its own package when it's ready.
+        </p>
+
       </section>
 
     </main>
