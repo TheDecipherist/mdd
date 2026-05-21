@@ -1,6 +1,6 @@
 {
   "name": "@thedecipherist/mdd",
-  "version": "1.8.4",
+  "version": "1.8.5",
   "description": "MDD — Manual-Driven Development workflow for Claude Code",
   "type": "module",
   "bin": {
