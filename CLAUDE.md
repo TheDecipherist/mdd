@@ -8,14 +8,7 @@ After completing any change that adds, removes, or modifies a CLI flag, command,
 
 > "Do you want to update the documentation? This change may affect `README.md`, `docs/index.html`, and/or `docs/user-guide.html`."
 
-If yes, update whichever of these three files are affected before staging the commit:
-- `README.md` — installation instructions, command reference table, mode descriptions - AND publish the updated NPM package
-- `docs/index.html` — the GitHub Pages landing page
-- `docs/user-guide.html` — the full command and mode reference
-
-Ask for all doc updates in a single question, not one file at a time.
-
-**If any changes to `README.md` mdd npm package must be published**
+Update whichever files are affected before staging the commit. Ask once, not per file. The release runbook (`.mdd/ops/release.md`) has a pre-flight gate that checks all three — keep them in sync as you go rather than saving it all for release time.
 
 ## What This Repo Is
 
