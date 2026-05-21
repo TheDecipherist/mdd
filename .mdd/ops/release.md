@@ -58,6 +58,16 @@ No values here - credentials must already be configured before running.
 
 ## Deployment Procedure
 
+Step 0 (Confirm docs are up to date):
+  Action:  Ask the user: "Does this release include any changes to CLI flags, commands, modes, or user-facing behaviour?"
+           If yes - verify all three doc files are updated before proceeding:
+             - `README.md` - command reference table, mode descriptions, installation instructions
+             - `docs/index.html` - GitHub Pages landing page
+             - `docs/user-guide.html` - full command and mode reference
+           If any are missing updates, stop and update them first, then re-run `/mdd runop release`.
+           If no user-facing changes (e.g. internal fix, doc-only patch) - proceed.
+  Verify:  User confirms docs are current, or confirms no user-facing changes.
+
 Step 1 (Confirm on main, clean tree):
   Action:  `git checkout main && git pull origin main && git status --porcelain`
   Verify:  Output of `git status --porcelain` must be empty. If dirty, stop and resolve uncommitted changes first.
