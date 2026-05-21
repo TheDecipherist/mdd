@@ -38,9 +38,22 @@ node dist/cli.js install --dir /tmp/test   # install to an arbitrary path
 ```
 
 Publishing workflow:
-1. Bump `version` in `package.json`
-2. `npm publish --access public` — `prepublishOnly` runs `pnpm build` automatically
-3. Commit the version bump and push
+
+**Always use the release runbook — never run these steps ad-hoc:**
+
+```bash
+/mdd runop release
+```
+
+The runbook handles the full sequence atomically: checkout main → bump version → commit on main → push → publish → global install → mdd update. Running steps manually risks committing the version bump on the wrong branch (the session branch instead of main).
+
+Manual steps for reference only:
+1. `git checkout main` — must be on main before any edits
+2. Bump `version` in `package.json`
+3. `git add package.json && git commit -m "chore: bump version to X.Y.Z"` — verify `git branch --show-current` returns `main`
+4. `git push origin main`
+5. `npm publish --access public` — `prepublishOnly` runs `pnpm build` automatically
+6. `npm install -g @thedecipherist/mdd && mdd update`
 
 ## Architecture
 
