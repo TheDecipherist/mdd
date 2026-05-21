@@ -57,6 +57,7 @@ Then in Claude Code:
 - [History: From Starter Kit to Standalone Package](#history-from-starter-kit-to-standalone-package)
 - [Dashboards](#dashboards)
 - [Companion Tools](#companion-tools)
+- [Projects Built with MDD](#projects-built-with-mdd)
 - [License](#license)
 
 ---
@@ -1188,6 +1189,26 @@ mdd-dashboard
 - **[mdd-tui](https://github.com/TheDecipherist/mdd-tui)** - Terminal dashboard for browsing your `.mdd/` workspace (docs, audits, graph, ops runbooks) in a live TUI. `npm install -g mdd-tui`
 - **[Claude Code Mastery Starter Kit](https://github.com/TheDecipherist/claude-code-mastery-project-starter-kit)** - Full project scaffolding: hooks, CLAUDE.md templates, TypeScript rules, agents, skills, StrictDB. MDD originated here.
 - **[strictdb](https://www.npmjs.com/package/strictdb)** - Database wrapper with guardrails used across starter kit projects
+
+---
+
+## Projects Built with MDD
+
+Every project below was built start to finish with this workflow - spec first in Claude Desktop, feature docs second, then code through the seven-phase pipeline. Each `.mdd/` link shows the full paper trail.
+
+| Project | What it does |
+|---------|-------------|
+| [MarkdownAI](https://github.com/TheDecipherist/markdownai) | Live documents powered by directives. Markdown files that query databases, call APIs, and render dynamically. Six npm packages, 80 feature docs. - [.mdd/](https://github.com/TheDecipherist/markdownai/tree/main/.mdd) |
+| [StrictDB](https://github.com/TheDecipherist/strictdb) | Unified database driver with MongoDB-style syntax across PostgreSQL, MySQL, MSSQL, SQLite, and Elasticsearch. Single shared connection layer. - [npm](https://www.npmjs.com/package/strictdb) · [.mdd/](https://github.com/TheDecipherist/strictdb/tree/main/.mdd) |
+| [ClassMCP](https://github.com/TheDecipherist/classmcp) | MCP server for AI-assisted CSS. Semantic class patterns that cut token usage by ~77% compared to inline Tailwind. Works with Tailwind, Bootstrap, UnoCSS, Tachyons. - [npm](https://www.npmjs.com/package/classmcp) · [.mdd/](https://github.com/TheDecipherist/classmcp/tree/main/.mdd) |
+| [Classpresso](https://github.com/TheDecipherist/classpresso) | Build-time CSS class consolidation for AI-generated code. Eliminates redundant utility classes at build time. - [npm](https://www.npmjs.com/package/classpresso) · [.mdd/](https://github.com/TheDecipherist/classpresso/tree/main/.mdd) |
+| [mdd-tui](https://github.com/TheDecipherist/mdd-tui) | Terminal dashboard for MDD projects. Split-pane view of docs, audit reports, initiative progress, and ops runbooks. - [.mdd/](https://github.com/TheDecipherist/mdd-tui/tree/main/.mdd) |
+| [mdd-dashboard](https://github.com/TheDecipherist/mdd-dashboard) | Browser-based visual dashboard. Interactive D3 dependency graphs with live reload and git-aware filtering. - [.mdd/](https://github.com/TheDecipherist/mdd-dashboard/tree/main/.mdd) |
+| [DockerDoctor](https://github.com/TheDecipherist/dockerdoctor) | Docker container health monitoring and diagnostics. Automated health checks, log analysis, and recovery suggestions. - [.mdd/](https://github.com/TheDecipherist/dockerdoctor/tree/main/.mdd) |
+| [TerseJSON](https://github.com/TheDecipherist/tersejson) | Transparent JSON key compression using lazy-loading proxies. 30-80% bandwidth reduction with no changes to consuming code. - [.mdd/](https://github.com/TheDecipherist/tersejson/tree/main/.mdd) |
+| [CompressMCP](https://github.com/TheDecipherist/compressmcp) | Lossless dictionary-based JSON key compression for MCP tool responses via pre/post hooks. - [.mdd/](https://github.com/TheDecipherist/compressmcp/tree/main/.mdd) |
+| [PipeStage](https://github.com/TheDecipherist/pipestage) | Type-safe pipeline composition for Node.js with built-in error handling, validation, and parallel execution. - [.mdd/](https://github.com/TheDecipherist/pipestage/tree/main/.mdd) |
+| [PeelX](https://github.com/TheDecipherist/peelX) | Recursive nested archive extraction CLI. Automatically unpacks zip-in-tar-in-gz in one command. Python, distributed via PyPI. - [.mdd/](https://github.com/TheDecipherist/peelX/tree/main/.mdd) |
 
 ---
 

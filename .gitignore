@@ -15,3 +15,6 @@ dist/
 .env
 
 ./MDs
+
+# Temporary AI research files
+_ai_temp/
