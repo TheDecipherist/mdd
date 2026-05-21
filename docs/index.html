@@ -1137,15 +1137,57 @@ mdd-dashboard
         <h3>How It Gets Built</h3>
 
         <p>
-          These projects all came out of the same process. The spec-import path - spending a few hours thinking through the design in Claude Desktop before writing a line of code - is the one I keep coming back to. Here's exactly how it works:
+          These projects all came out of the same process. The spec-import path - spending a few hours filling out a spec template with Claude Desktop before writing a line of code - is the one I keep coming back to. Here's exactly how it works:
         </p>
+
+        <div style="margin:1.5rem 0 2rem;padding:1.5rem 1.75rem;background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:12px;">
+          <h4 style="margin:0 0 1rem;font-size:1rem;font-weight:600;color:var(--text-primary);">Getting Started with This Template</h4>
+
+          <p style="font-size:0.9rem;color:var(--text-secondary);margin:0 0 0.75rem;">
+            <a href="mdd-spec-template.md" download style="color:var(--accent);font-weight:600;">Download the MDD spec template</a>
+            , then follow these steps:
+          </p>
+
+          <ol style="font-size:0.9rem;color:var(--text-secondary);margin:0 0 1rem;padding-left:1.25rem;line-height:1.7;">
+            <li>Save the file as <code>[project-name]-spec.md</code> in a folder on your computer</li>
+            <li>Open Claude Desktop (Opus mode for best results)</li>
+            <li>Upload the spec file</li>
+            <li>Copy and paste this prompt:</li>
+          </ol>
+
+          <blockquote style="margin:0 0 1rem;padding:0.75rem 1rem;background:rgba(0,0,0,0.2);border-left:3px solid var(--accent);border-radius:0 6px 6px 0;font-size:0.85rem;color:var(--text-secondary);font-style:normal;line-height:1.6;">
+            I've attached the MDD spec template. I want to create [describe your project in 1-2 sentences]. Let's go through every section of this template together and fill it out completely. Ask me questions about anything unclear. By the end, I should have a fully detailed specification ready to import into MDD.
+          </blockquote>
+
+          <p style="font-size:0.85rem;color:var(--text-secondary);margin:0 0 1rem;">
+            <strong>What happens next:</strong> Claude will guide you through each section, asking questions to understand your project deeply. This usually takes 4-10 hours depending on complexity. Take your time. The better the spec, the better MDD can structure and build your project.
+          </p>
+
+          <hr style="border:none;border-top:1px solid var(--border-color);margin:1rem 0;" />
+
+          <p style="font-size:0.85rem;color:var(--text-secondary);margin:0 0 0.5rem;">
+            <strong>How MDD uses this spec:</strong> When you run <code>/mdd import-spec ./MDs/[filename].md</code>, MDD will:
+          </p>
+          <ol style="font-size:0.85rem;color:var(--text-secondary);margin:0;padding-left:1.25rem;line-height:1.7;">
+            <li>Read and analyze the entire document</li>
+            <li>Extract all features, systems, and capabilities</li>
+            <li>Classify them as COMPONENT (code to write) or SPEC (behavior to implement)</li>
+            <li>Detect your project type (Language/Toolchain, Web API, Frontend, Library, Plugin)</li>
+            <li>Order features in the sequence a developer would actually build them</li>
+            <li>Automatically suggest breaking into Initiatives and Waves if the project is large enough</li>
+            <li>Show you a dry-run preview before writing any files</li>
+          </ol>
+          <p style="font-size:0.85rem;color:var(--text-secondary);margin:0.75rem 0 0;">
+            <strong>You don't need to structure this document in any special way.</strong> Just write a complete, detailed specification of what you're building. MDD is smart enough to understand it.
+          </p>
+        </div>
 
         <div class="step">
           <div class="step-number">1</div>
           <div class="step-content">
-            <h3>Brainstorm in Claude Desktop (Opus mode)</h3>
+            <h3>Fill out the template with Claude Desktop (Opus mode)</h3>
             <p>
-              When an idea clicks, I open Claude Desktop and start a conversation. We build a markdown spec together - what the system does, how it works, the constraints, the edge cases. This takes a couple of hours, sometimes up to ten for complex systems. The goal is precision: a spec vague enough to leave room for surprises is a spec that will cause problems later.
+              Upload the template and describe your project idea. Claude walks through every section with you - what the system does, how it works, the constraints, the edge cases. This takes a couple of hours, sometimes up to ten for complex systems. The goal is precision: a spec vague enough to leave room for surprises is a spec that will cause problems later.
             </p>
           </div>
         </div>
