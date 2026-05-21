@@ -89,17 +89,33 @@ Step 4 (Push main to GitHub):
   Action:  `git push origin main`
   Verify:  Push exits 0. `git log --oneline origin/main -1` matches local HEAD.
 
-Step 5 (Publish to npm):
+Step 5 (Deploy docs site if docs/ changed):
+  Action:  Check whether docs/ changed in this release:
+             `git diff HEAD~1 --name-only | grep "^docs/"`
+           If no output - skip to Step 6.
+           If docs/ files changed:
+             1. Load env vars: `source .env`
+             2. Build image: `docker build -t $DOCKER_HUB_IMAGE .`
+             3. Run locally: `docker run -d -p 8080:80 --name mdd-test $DOCKER_HUB_IMAGE`
+             4. Wait for startup: `sleep 5`
+             5. Verify: `curl -sf http://localhost:8080 > /dev/null`
+             6. Cleanup: `docker stop mdd-test && docker rm mdd-test`
+             7. Push: `docker push $DOCKER_HUB_IMAGE`
+             8. Trigger deploy: `curl -X POST $DOKPLOY_WEBHOOK_URL`
+  Verify:  `docker push` exits 0. Webhook returns 2xx status.
+           If curl test in step 5 fails - STOP. Fix the container issue before pushing.
+
+Step 6 (Publish to npm):
   Action:  `npm publish --access public`
            (prepublishOnly hook runs `pnpm build` automatically)
   Verify:  Command output ends with `+ @thedecipherist/mdd@<NEW_VERSION>`.
            `npm view @thedecipherist/mdd version` returns the new version (allow up to 30s for registry propagation).
 
-Step 6 (Update global install):
+Step 7 (Update global install):
   Action:  `npm install -g @thedecipherist/mdd`
   Verify:  `mdd --version` or `npm list -g @thedecipherist/mdd` shows the new version.
 
-Step 7 (Sync command files):
+Step 8 (Sync command files):
   Action:  `mdd update`
   Verify:  Output lists all command files as installed/updated with no errors.
 
@@ -113,6 +129,10 @@ If npm publish succeeded but something is wrong with the release:
    `git revert HEAD --no-edit && git push origin main`
 3. Reinstall the previous version globally:
    `npm install -g @thedecipherist/mdd@<PREV_VERSION> && mdd update`
+
+If docs site deploy failed (Step 5):
+- Fix the container issue, then re-run Step 5 manually.
+- The npm release can proceed independently - the site and package are decoupled.
 
 If publish failed (build error, auth error):
 - Fix the issue on a feature branch, merge to main, then re-run `/mdd runop release`.
