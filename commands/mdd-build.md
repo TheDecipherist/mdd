@@ -212,9 +212,13 @@ bash ~/.claude/hooks/mdd-log-phase.sh "mdd-build" "Phase 2" end "$FEATURE_SLUG"
 bash ~/.claude/hooks/mdd-log-phase.sh "mdd-build" "Phase 3" start "$FEATURE_SLUG"
 ```
 
+**Before writing any frontmatter:** If `.mdd/docs/00-frontmatter-spec.md` exists, read it now.
+Use its field definitions as the authoritative schema. The template below is the fallback
+if the spec file is absent.
+
 Create the feature documentation file at `.mdd/docs/<NN>-<feature-name>.md`.
 
-**Auto-number:** Read `.mdd/docs/` directory, find the highest existing number, increment by 1.
+**Auto-number:** Read `.mdd/docs/` directory (excluding `archive/`), find the highest existing number, increment by 1.
 
 The doc MUST follow this exact structure:
 
