@@ -247,6 +247,7 @@ integration_contracts: []
 satisfies_contracts: []
 known_issues: []
 security_read_sites: []   # optional: list file:line entries where user-supplied paths are read; Phase A1 cross-checks each against path-confinement calls
+sister_projects: []       # optional: paths or URLs of companion/sister projects (not build deps)
 ---
 
 # <NN> — <Feature Title>
