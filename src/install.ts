@@ -14,6 +14,7 @@ interface InstallOptions {
   claudeMdPath?: string;
   settingsPath?: string;
   selfImprovement?: boolean;
+  log?: (msg: string) => void;
 }
 
 interface FileResult {
@@ -25,6 +26,7 @@ interface FileResult {
 }
 
 export function install(options: InstallOptions): void {
+  const log = options.log ?? console.log;
   const destDir = resolve(options.dir.replace('~', homedir()));
   const modesDestDir = options.modesDir ? resolve(options.modesDir.replace('~', homedir())) : destDir;
   const srcDir = join(__dirname, '../commands');
@@ -38,7 +40,7 @@ export function install(options: InstallOptions): void {
   for (const f of leftovers) {
     const legacy = join(destDir, f);
     if (existsSync(legacy)) {
-      try { unlinkSync(legacy); } catch { /* ignore */ }
+      try { unlinkSync(legacy); } catch (err) { log(`  ⚠ Could not remove legacy file ${f}: ${String(err)}`); }
     }
   }
 
@@ -62,7 +64,7 @@ export function install(options: InstallOptions): void {
     if (isModeFile && modesDestDir !== destDir) {
       const legacyDest = join(destDir, file);
       if (existsSync(legacyDest)) {
-        try { unlinkSync(legacyDest); } catch { /* ignore */ }
+        try { unlinkSync(legacyDest); } catch (err) { log(`  ⚠ Could not remove legacy file ${file} from commands dir: ${String(err)}`); }
       }
     }
 
@@ -105,39 +107,39 @@ export function install(options: InstallOptions): void {
     }
   }
 
-  console.log(`\nMDD v${version} — Claude Code workflow installer`);
-  console.log(`Install directory: ${destDir}\n`);
+  log(`\nMDD v${version} — Claude Code workflow installer`);
+  log(`Install directory: ${destDir}\n`);
 
   for (const r of results) {
     const icon = r.status === 'error' ? '✗' : r.status === 'skipped' ? '·' : '✓';
     const detail = r.status === 'updated' && r.fromVersion !== undefined
       ? ` (v${r.fromVersion} → v${r.toVersion})`
       : r.reason ? ` — ${r.reason}` : '';
-    console.log(`  ${icon} ${r.file}${detail}`);
+    log(`  ${icon} ${r.file}${detail}`);
   }
 
   const installed = results.filter(r => r.status === 'installed' || r.status === 'updated').length;
   const skipped = results.filter(r => r.status === 'skipped').length;
   const errors = results.filter(r => r.status === 'error').length;
 
-  console.log('');
+  log('');
   if (errors > 0) {
-    console.log(`  ${errors} error(s) — check the output above`);
+    log(`  ${errors} error(s) — check the output above`);
   } else if (installed === 0) {
-    console.log('  Already up to date.');
+    log('  Already up to date.');
   } else {
-    console.log(`  ${installed} file(s) installed/updated${skipped > 0 ? `, ${skipped} skipped` : ''}`);
+    log(`  ${installed} file(s) installed/updated${skipped > 0 ? `, ${skipped} skipped` : ''}`);
   }
 
   if (options.local) {
-    console.log('  Tip: add .claude/commands/ to your .gitignore to keep these files out of git.\n');
+    log('  Tip: add .claude/commands/ to your .gitignore to keep these files out of git.\n');
   }
 
   if (options.claudeMdPath) {
     const claudeResult = injectClaudeGuidance(resolve(options.claudeMdPath.replace('~', homedir())), options.local, options.force);
     const icon = claudeResult.status === 'error' ? '✗' : claudeResult.status === 'skipped' ? '·' : '✓';
-    console.log(`  ${icon} CLAUDE.md — ${claudeResult.message}`);
-    console.log('');
+    log(`  ${icon} CLAUDE.md — ${claudeResult.message}`);
+    log('');
   }
 
   if (options.settingsPath) {
@@ -151,28 +153,28 @@ export function install(options: InstallOptions): void {
       local: options.local ?? false,
     });
     const icon = hookResult.status === 'error' ? '✗' : hookResult.status === 'skipped' ? '·' : '✓';
-    console.log(`  ${icon} Branch Guard hook — ${hookResult.message}`);
+    log(`  ${icon} Branch Guard hook — ${hookResult.message}`);
 
     // Install phase logger — no settings.json entry needed, just copy the script
     try {
       mkdirSync(hooksDir, { recursive: true });
       copyFileSync(join(srcDir, 'mdd-log-phase.sh'), join(hooksDir, 'mdd-log-phase.sh'));
       chmodSync(join(hooksDir, 'mdd-log-phase.sh'), 0o755);
-      console.log(`  ✓ Phase logger — installed to ${hooksDir}`);
+      log(`  ✓ Phase logger — installed to ${hooksDir}`);
     } catch (err) {
-      console.log(`  ✗ Phase logger — ${String(err)}`);
+      log(`  ✗ Phase logger — ${String(err)}`);
     }
 
     if (options.selfImprovement !== undefined) {
       const siResult = writeSelfImprovementPref(resolvedSettingsPath, options.selfImprovement);
       const siIcon = siResult.status === 'error' ? '✗' : siResult.status === 'skipped' ? '·' : '✓';
-      console.log(`  ${siIcon} Self-improvement — ${siResult.message}`);
+      log(`  ${siIcon} Self-improvement — ${siResult.message}`);
     }
 
-    console.log('');
+    log('');
   }
 
-  console.log('Open Claude Code and run /mdd to get started.\n');
+  log('Open Claude Code and run /mdd to get started.\n');
 }
 
 function stampDescription(content: string, scope: 'global' | 'local', version: string): string {
@@ -189,8 +191,8 @@ function getMddVersion(content: string): number {
 
 function getPackageVersion(): string {
   try {
-    const pkg = JSON.parse(readFileSync(join(__dirname, '../package.json'), 'utf-8')) as { version: string };
-    return pkg.version;
+    const raw = JSON.parse(readFileSync(join(__dirname, '../package.json'), 'utf-8')) as { version?: string };
+    return typeof raw.version === 'string' ? raw.version : 'unknown';
   } catch {
     return 'unknown';
   }

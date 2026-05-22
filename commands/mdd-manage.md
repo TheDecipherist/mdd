@@ -39,7 +39,7 @@ Initiatives:      <N> total (<N> active, <N> planned, <N> complete, <N> cancelle
 
 MDD version:      v<N> (current)
   v<N>: <N> files — up to date
-  v<N-1>: <N> files — run /install-mdd to update the command, then /mdd audit to refresh docs
+  v<N-1>: <N> files — run `mdd update` to update the command, then /mdd audit to refresh docs
   v0 (unversioned): <N> files — created before versioning was introduced
 
 Drift check:

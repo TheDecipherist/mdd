@@ -319,7 +319,7 @@ DIRTY=$(git status --porcelain)
        [R] Resume — continue from where it left off
        [D] Discard — delete job and start wave from scratch
      ```
-   - **Resume:** skip PE2, skip to PE3 starting from the first `[ ]` or `[~]` entry. Features marked `[x]` are already complete — do not re-run them.
+   - **Resume:** read `# Mode:` from the existing MANIFEST to restore the interaction mode (no need to re-ask), then skip to PE3 starting from the first `[ ]` or `[~]` entry. Features marked `[x]` are already complete — do not re-run them.
    - **Discard:** delete the `wave-<wave-slug>/` folder, proceed to PE2 normally.
    - If no stale job exists: proceed to PE2 normally.
 

@@ -1,6 +1,6 @@
 import { readFileSync, existsSync } from 'fs';
 import { join } from 'path';
-import { execSync } from 'child_process';
+import { spawnSync } from 'child_process';
 import { cwd } from 'process';
 
 interface PackageJson {
@@ -19,6 +19,10 @@ interface UpdateResult {
   to: string;
 }
 
+export interface UpdateEcommerceOptions {
+  log?: (msg: string) => void;
+}
+
 function detectPackageManager(dir: string): string {
   if (existsSync(join(dir, 'pnpm-lock.yaml'))) return 'pnpm';
   if (existsSync(join(dir, 'yarn.lock'))) return 'yarn';
@@ -32,11 +36,11 @@ function readEcommercePackages(dir: string): PackageVersions {
     return {};
   }
 
-  const pkg = JSON.parse(readFileSync(pkgPath, 'utf-8')) as PackageJson;
+  const raw = JSON.parse(readFileSync(pkgPath, 'utf-8')) as PackageJson;
   const all: Record<string, string> = {
-    ...(pkg.dependencies ?? {}),
-    ...(pkg.devDependencies ?? {}),
-    ...(pkg.peerDependencies ?? {}),
+    ...(raw.dependencies ?? {}),
+    ...(raw.devDependencies ?? {}),
+    ...(raw.peerDependencies ?? {}),
   };
 
   const result: PackageVersions = {};
@@ -69,35 +73,30 @@ function hasDocsDirectory(packageName: string, dir: string): boolean {
   return existsSync(docsPath);
 }
 
-export function updateEcommerce(): void {
+export function updateEcommerce(options?: UpdateEcommerceOptions): void {
+  const log = options?.log ?? console.log;
   const dir = cwd();
   const pkgPath = join(dir, 'package.json');
 
   if (!existsSync(pkgPath)) {
-    console.log('No package.json found in current directory.');
-    process.exit(1);
+    throw new Error('No package.json found in current directory.');
   }
 
   const before = readEcommercePackages(dir);
 
   if (Object.keys(before).length === 0) {
-    console.log('No @thedecipherist/mdd-ecommerce-* packages found in package.json.');
+    log('No @thedecipherist/mdd-ecommerce-* packages found in package.json.');
     return;
   }
 
   const pm = detectPackageManager(dir);
   const packageNames = Object.keys(before);
 
-  console.log(`\nUpdating ${packageNames.length} @thedecipherist/mdd-ecommerce-* package(s) with ${pm}...\n`);
+  log(`\nUpdating ${packageNames.length} @thedecipherist/mdd-ecommerce-* package(s) with ${pm}...\n`);
 
-  const updateArgs = packageNames.join(' ');
-  const updateCmd = `${pm} update ${updateArgs}`;
-
-  try {
-    execSync(updateCmd, { cwd: dir, stdio: 'inherit' });
-  } catch (err) {
-    console.log(`\nUpdate command failed: ${String(err)}`);
-    process.exit(1);
+  const result = spawnSync(pm, ['update', ...packageNames], { cwd: dir, stdio: 'inherit', shell: false });
+  if (result.status !== 0) {
+    throw new Error(`${pm} update exited with code ${result.status ?? 'unknown'}`);
   }
 
   const after = readEcommercePackages(dir);
@@ -111,39 +110,39 @@ export function updateEcommerce(): void {
     }
   }
 
-  console.log('\n--- Update Summary ---\n');
+  log('\n--- Update Summary ---\n');
 
   if (changed.length === 0) {
-    console.log('  All packages already up to date. No changes applied.');
-    console.log('');
+    log('  All packages already up to date. No changes applied.');
+    log('');
     return;
   }
 
   const breakingChanges: UpdateResult[] = [];
 
-  for (const result of changed) {
-    console.log(`  ✓ ${result.name}  ${result.from} -> ${result.to}`);
+  for (const updateResult of changed) {
+    log(`  ✓ ${updateResult.name}  ${updateResult.from} -> ${updateResult.to}`);
 
-    if (isMajorBump(result.from, result.to)) {
-      breakingChanges.push(result);
+    if (isMajorBump(updateResult.from, updateResult.to)) {
+      breakingChanges.push(updateResult);
     }
   }
 
-  console.log('');
+  log('');
 
   if (breakingChanges.length > 0) {
-    console.log('  Warnings:');
-    for (const result of breakingChanges) {
-      const hasDocs = hasDocsDirectory(result.name, dir);
-      console.log(`  ! Breaking change possible - check site.config.ts slot wiring for ${result.name}`);
+    log('  Warnings:');
+    for (const updateResult of breakingChanges) {
+      const hasDocs = hasDocsDirectory(updateResult.name, dir);
+      log(`  ! Breaking change possible - check site.config.ts slot wiring for ${updateResult.name}`);
       if (hasDocs) {
-        const docsPath = join('node_modules', result.name, '.mdd', 'docs');
-        console.log(`    Docs available: ${docsPath}`);
+        const docsPath = join('node_modules', updateResult.name, '.mdd', 'docs');
+        log(`    Docs available: ${docsPath}`);
       }
     }
-    console.log('');
+    log('');
   } else {
-    console.log('  All updates applied. No breaking changes detected.');
-    console.log('');
+    log('  All updates applied. No breaking changes detected.');
+    log('');
   }
 }

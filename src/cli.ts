@@ -11,7 +11,21 @@ import { homedir } from 'os';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-const pkg = JSON.parse(readFileSync(join(__dirname, '../package.json'), 'utf-8')) as { version: string };
+process.on('unhandledRejection', (reason) => {
+  console.error('Unhandled rejection:', reason);
+  process.exit(1);
+});
+
+process.on('uncaughtException', (error) => {
+  console.error('Uncaught exception:', error);
+  process.exit(1);
+});
+
+const rawPkg = JSON.parse(readFileSync(join(__dirname, '../package.json'), 'utf-8')) as { version?: string };
+if (typeof rawPkg.version !== 'string') {
+  throw new Error('package.json is missing a version field');
+}
+const pkg = rawPkg as { version: string };
 
 async function promptSelfImprovement(settingsPath: string | undefined): Promise<boolean | undefined> {
   if (!settingsPath) return undefined;
@@ -86,7 +100,19 @@ program
   .description('Update @thedecipherist/mdd-ecommerce-* packages and report breaking changes')
   .action(async () => {
     const { updateEcommerce } = await import('./update-ecommerce.js');
-    updateEcommerce();
+    try {
+      updateEcommerce({ log: console.log });
+    } catch (err) {
+      console.error(err instanceof Error ? err.message : String(err));
+      process.exit(1);
+    }
   });
 
-program.parseAsync();
+async function main(): Promise<void> {
+  await program.parseAsync();
+}
+
+main().catch((err: unknown) => {
+  console.error(err instanceof Error ? err.message : String(err));
+  process.exit(1);
+});

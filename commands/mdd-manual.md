@@ -445,7 +445,7 @@ Check whether `.mdd/manual/` is in `.gitignore`. If not, suggest:
 When generating each section, the goal is a document a non-technical user or executive
 can read and understand. Rules for section writers:
 
-- **No em dashes** - never use `-` anywhere in generated content; use a plain hyphen `-` instead
+- **No em dashes** - never use em dashes (—) anywhere in generated content; use a plain hyphen (-) instead
 - **No internal file paths** in body text (they belong in the feature doc, not the manual)
 - **No jargon without definition** - if a term needs explanation, add it
 - **Active voice** - "The auth system validates your token" not "Tokens are validated"

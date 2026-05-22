@@ -78,6 +78,10 @@ git ls-files --others --exclude-standard   # untracked new files
 If no audit commit is recorded, fall back to files modified after `audits/MANIFEST-<date>.md` mtime.
 Store the current HEAD commit in the job folder (`job-commit.txt`) so future incremental audits have an exact reference point. Files modified and then reverted will NOT appear in the diff — correct behaviour.
 
+```bash
+git rev-parse HEAD > .mdd/jobs/audit-<date>/job-commit.txt
+```
+
 **Agent scaling:**
 
 | Files in scope | Agents |

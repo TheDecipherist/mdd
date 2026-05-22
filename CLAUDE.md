@@ -12,7 +12,7 @@ Update whichever files are affected before staging the commit. Ask once, not per
 
 ## What This Repo Is
 
-`@thedecipherist/mdd` is an npm package that installs 7 Claude command (`.md`) files into `~/.claude/commands/` (or a local `.claude/commands/`) so the `/mdd` slash command is available in Claude Code sessions. The TypeScript source is a thin CLI wrapper; the real product is the Markdown files in `commands/`.
+`@thedecipherist/mdd` is an npm package that installs `mdd.md` (the router, which becomes the `/mdd` slash command) into `~/.claude/commands/` and the 6 mode files (`mdd-build.md`, `mdd-audit.md`, etc.) into `~/.claude/mdd/`. The TypeScript source is a thin CLI wrapper; the real product is the Markdown files in `commands/`.
 
 ## Commands
 
