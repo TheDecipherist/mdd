@@ -371,7 +371,7 @@ Choose:
   (c) Abort       — handle git manually, then re-run /mdd
 ```
 
-- **(a) Commit:** `git add -A`, generate a short conventional commit message from the changed files, commit, then proceed to Scenario B.
+- **(a) Commit:** Stage tracked files only (`git add --update`), verify no `.env` or secrets files are staged, generate a short conventional commit message from the changed files, commit, then proceed to Scenario B.
 - **(b) Stash:** `git stash`, then proceed to Scenario B.
 - **(c) Abort:** stop entirely — do not create any files.
 

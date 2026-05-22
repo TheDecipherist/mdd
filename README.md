@@ -42,7 +42,7 @@ Then in Claude Code:
 - [How It Works](#how-it-works)
 - [Installation](#installation)
 - [Quick Start](#quick-start)
-- [All 26 Modes at a Glance](#all-26-modes-at-a-glance)
+- [All 27 Modes at a Glance](#all-27-modes-at-a-glance)
 - [Build Mode - Feature Development](#build-mode--feature-development)
 - [Audit Mode - Code Review](#audit-mode--code-review)
 - [Status & Notes](#status--notes)

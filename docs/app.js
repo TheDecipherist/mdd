@@ -87,8 +87,9 @@
 
   // Handle hash navigation on load
   function handleHash() {
-    if (window.location.hash) {
-      var target = document.querySelector(window.location.hash);
+    var hash = window.location.hash;
+    if (hash && /^#[a-zA-Z][\w-]*$/.test(hash)) {
+      var target = document.querySelector(hash);
       if (target) {
         setTimeout(function () { target.scrollIntoView(); }, 150);
       }
