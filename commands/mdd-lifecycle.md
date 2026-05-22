@@ -77,6 +77,9 @@ bash ~/.claude/hooks/mdd-log-phase.sh "mdd-lifecycle" "Phase R2" end "$ARGUMENTS
 bash ~/.claude/hooks/mdd-log-phase.sh "mdd-lifecycle" "Phase R3" start "$ARGUMENTS"
 ```
 
+**Before writing any frontmatter:** If `.mdd/docs/00-frontmatter-spec.md` exists, read it now.
+Use its field definitions as the authoritative schema for the doc being created.
+
 Draft a complete feature doc following the Phase 3 template. Set:
 - `last_synced: <today>`
 - `status: draft` (since business intent may be incomplete)

@@ -392,6 +392,10 @@ bash ~/.claude/hooks/mdd-log-phase.sh "mdd-import-spec" "Phase IS3" end "$ARGUME
 bash ~/.claude/hooks/mdd-log-phase.sh "mdd-import-spec" "Phase IS4" start "$ARGUMENTS"
 ```
 
+**Before writing any feature doc frontmatter:** If `.mdd/docs/00-frontmatter-spec.md` exists,
+read it now. Use its field definitions as the authoritative schema for every feature doc written
+in this phase. The embedded templates below are the fallback if the spec file is absent.
+
 **First — ensure the MDD directory structure exists.** Run these before writing any file:
 
 ```bash
