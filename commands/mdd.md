@@ -101,6 +101,7 @@ integration_contracts: []
 satisfies_contracts: []
 security_read_sites: []
 known_issues: []
+sister_projects: []         # paths or URLs of companion/sister projects (not build deps)
 ---
 
 # Frontmatter Schema Reference

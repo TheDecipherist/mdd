@@ -59,8 +59,21 @@ integration_contracts: []   # contracts this feature exposes to dependents
 satisfies_contracts: []     # contracts this feature owes to its dependencies (see below)
 security_read_sites: []     # file:line entries where user-supplied paths are read
 known_issues: []            # populated by /mdd audit; one string per issue
+sister_projects: []         # paths or URLs of companion/sister projects (not build deps)
 ---
 ```
+
+### sister_projects field
+
+Lists companion projects that are closely related but live in separate repos. Values can
+be local paths (`~/projects/mdd-tui`) or remote URLs. These are not prerequisites - the
+feature works without them. Use `sister_projects` when:
+- A companion tool reads or renders this feature's output
+- Changes here commonly require awareness of what the sister project does
+- You want the audit or a future dashboard to surface the relationship
+
+Distinct from `relates` (which links other feature docs in the same project) and
+`depends_on` (which is a build prerequisite).
 
 ### satisfies_contracts entry format
 

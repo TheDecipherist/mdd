@@ -19,6 +19,9 @@ integration_contracts: []
 satisfies_contracts: []
 security_read_sites: []
 known_issues: []
+sister_projects:
+  - ~/projects/mdd-tui
+  - ~/projects/mdd-dashboard
 ---
 
 # 20 - Companion Dashboards - mdd-tui and mdd-dashboard
