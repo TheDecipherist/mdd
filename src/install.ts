@@ -141,18 +141,27 @@ export function install(options: InstallOptions): void {
   }
 
   if (options.settingsPath) {
-    const hookScriptSrc = join(srcDir, 'mdd-branch-guard.sh');
     const hooksDir = join(resolve(options.settingsPath.replace('~', homedir()), '..'), 'hooks');
-    const hookScriptDest = join(hooksDir, 'mdd-branch-guard.sh');
     const resolvedSettingsPath = resolve(options.settingsPath.replace('~', homedir()));
+
     const hookResult = installHook({
-      hookScriptSrc,
-      hookScriptDest,
+      hookScriptSrc: join(srcDir, 'mdd-branch-guard.sh'),
+      hookScriptDest: join(hooksDir, 'mdd-branch-guard.sh'),
       settingsPath: resolvedSettingsPath,
       local: options.local ?? false,
     });
     const icon = hookResult.status === 'error' ? '✗' : hookResult.status === 'skipped' ? '·' : '✓';
     console.log(`  ${icon} Branch Guard hook — ${hookResult.message}`);
+
+    // Install phase logger — no settings.json entry needed, just copy the script
+    try {
+      mkdirSync(hooksDir, { recursive: true });
+      copyFileSync(join(srcDir, 'mdd-log-phase.sh'), join(hooksDir, 'mdd-log-phase.sh'));
+      chmodSync(join(hooksDir, 'mdd-log-phase.sh'), 0o755);
+      console.log(`  ✓ Phase logger — installed to ${hooksDir}`);
+    } catch (err) {
+      console.log(`  ✗ Phase logger — ${String(err)}`);
+    }
 
     if (options.selfImprovement !== undefined) {
       const siResult = writeSelfImprovementPref(resolvedSettingsPath, options.selfImprovement);
