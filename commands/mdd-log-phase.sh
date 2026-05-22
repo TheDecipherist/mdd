@@ -5,7 +5,6 @@ COMMAND="${1:-mdd}"
 PHASE="${2:-unknown}"
 EVENT="${3:-start}"
 CONTEXT="${4:--}"
-CONTEXT="${CONTEXT//|/\\|}"
 LOG="$HOME/.claude/mdd/log.md"
 DATE=$(date '+%Y-%m-%d')
 TIME=$(date '+%H:%M:%S')
