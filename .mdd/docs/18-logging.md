@@ -4,7 +4,8 @@ title: Phase Logger - mdd-log-phase.sh Command Log
 edition: MDD
 depends_on: [01-mdd]
 relates: [03-audit]
-source_files: []
+source_files:
+  - commands/mdd-log-phase.sh
 routes: []
 models: []
 test_files: []
@@ -105,12 +106,8 @@ argument comes from command file constants, not user input.
 
 ## Known Issues
 
-- `mdd-log-phase.sh` is NOT included in the npm package and is NOT installed by
-  `mdd install`. The command files call `bash ~/.claude/hooks/mdd-log-phase.sh`
-  but there is nothing in the current release that puts it there. New installs will
-  silently fail all phase log calls (the guard pattern `[ ... ] || bash ...` means
-  the failure is suppressed, not surfaced). This is a P2 gap: the logging feature is
-  broken for any fresh install.
+- (fixed) `mdd-log-phase.sh` was not previously included in the npm package. Added to
+  `commands/` and wired into `install.ts` alongside `mdd-branch-guard.sh`.
 - The CONTEXT argument is appended directly as a table cell without sanitisation.
   If a CONTEXT value contains a pipe character (`|`), it will break the markdown
   table row. All current callers use safe values, but this is a latent bug if
