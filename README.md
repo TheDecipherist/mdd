@@ -4,7 +4,7 @@
 
 # MDD - Manual-Driven Development for Claude Code
 
-> **One command. Twenty-five modes. Complete feature lifecycle from documentation to verified deployment.**
+> **One command. Twenty-seven modes. Complete feature lifecycle from documentation to verified deployment.**
 
 <p align="center">
   <a href="https://mddai.dev">
